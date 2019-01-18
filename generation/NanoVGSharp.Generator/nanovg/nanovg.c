@@ -472,7 +472,10 @@ NVGcolor nvgLerpRGBA(NVGcolor c0, NVGcolor c1, float u)
 	oneminu = 1.0f - u;
 	for( i = 0; i <4; i++ )
 	{
-		cint.rgba[i] = c0.rgba[i] * oneminu + c1.rgba[i] * u;
+		cint.r = c0.r * oneminu + c1.r * u;
+		cint.g = c0.g * oneminu + c1.g * u;
+		cint.b = c0.b * oneminu + c1.b * u;
+		cint.a = c0.a * oneminu + c1.a * u;
 	}
 
 	return cint;

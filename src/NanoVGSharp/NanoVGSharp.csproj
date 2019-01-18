@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Authors>NanoVGSharpTeam</Authors>
     <Product>NanoVGSharp</Product>
-    <Description>Library extending functionality of the SpriteFont.</Description>
+    <Description>C# port of https://github.com/memononen/nanovg</Description>
     <PackageLicense>https://github.com/rds1983/NanoVGSharp#license</PackageLicense>
     <PackageProjectUrl>https://github.com/rds1983/NanoVGSharp</PackageProjectUrl>
     <NoWarn>NU1701</NoWarn>
