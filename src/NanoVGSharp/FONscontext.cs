@@ -552,9 +552,9 @@ namespace NanoVGSharp
 			return (float)(0.0);
 		}
 
-		public float fonsDrawText(float x, float y, string str)
+		public float fonsDrawText(float x, float y, StringLocation str)
 		{
-			if (string.IsNullOrEmpty(str))
+			if (str.IsNullOrEmpty)
 			{
 				return 0.0f;
 			}
@@ -590,7 +590,7 @@ namespace NanoVGSharp
 			}
 
 			y += (float)(fons__getVertAlign(font, (int)(state.align), (short)(isize)));
-			for (var i = 0; i < str.Length; ++i)
+			for (var i = 0; i < str.Remaining; ++i)
 			{
 				var codepoint = str[i];
 				glyph = fons__getGlyph(font, (uint)(codepoint), (short)(isize), (short)(iblur), (int)(FONS_GLYPH_BITMAP_REQUIRED));
@@ -612,7 +612,7 @@ namespace NanoVGSharp
 			return (float)(x);
 		}
 
-		public int fonsTextIterInit(FONStextIter iter, float x, float y, string str, int bitmapOption)
+		public int fonsTextIterInit(FONStextIter iter, float x, float y, StringLocation str, int bitmapOption)
 		{
 			FONSstate state = fons__getState();
 			float width = 0;
@@ -643,37 +643,33 @@ namespace NanoVGSharp
 			iter.x = (float)(iter.nextx = (float)(x));
 			iter.y = (float)(iter.nexty = (float)(y));
 			iter.spacing = (float)(state.spacing);
-			iter.str = str;
-			iter.next = str;
+			iter.str = iter.next = str;
 			iter.codepoint = (uint)(0);
 			iter.prevGlyphIndex = (int)(-1);
 			iter.bitmapOption = (int)(bitmapOption);
 			return (int)(1);
 		}
 
-		public int fonsTextIterNext(FONStextIter iter, FONSquad* quad)
+		public bool fonsTextIterNext(FONStextIter iter, FONSquad* quad)
 		{
-			FONSglyph* glyph = null;
-			string str = iter.next;
 			iter.str = iter.next;
 
-			if (string.IsNullOrEmpty(str))
+			if (iter.str.IsNullOrEmpty)
 			{
-				return 0;
+				return false;
 			}
-			for (var i = 0; i < str.Length; ++i)
-			{
-				iter.codepoint = str[i];
-				iter.x = (float)(iter.nextx);
-				iter.y = (float)(iter.nexty);
-				glyph = fons__getGlyph(iter.font, (uint)(iter.codepoint), (short)(iter.isize), (short)(iter.iblur), (int)(iter.bitmapOption));
-				if (glyph != null)
-					fons__getQuad(iter.font, (int)(iter.prevGlyphIndex), glyph, (float)(iter.scale), (float)(iter.spacing), ref iter.nextx, ref iter.nexty, quad);
-				iter.prevGlyphIndex = (int)(glyph != null ? glyph->index : -1);
-				break;
-			}
-			iter.next = str;
-			return (int)(1);
+
+			iter.codepoint = iter.str[0];
+			iter.x = (float)(iter.nextx);
+			iter.y = (float)(iter.nexty);
+			var glyph = fons__getGlyph(iter.font, (uint)(iter.codepoint), (short)(iter.isize), (short)(iter.iblur), (int)(iter.bitmapOption));
+			if (glyph != null)
+				fons__getQuad(iter.font, (int)(iter.prevGlyphIndex), glyph, (float)(iter.scale), (float)(iter.spacing), ref iter.nextx, ref iter.nexty, quad);
+			iter.prevGlyphIndex = (int)(glyph != null ? glyph->index : -1);
+
+			++iter.next;
+
+			return true;
 		}
 
 		public void fonsDrawDebug(float x, float y)
@@ -712,7 +708,7 @@ namespace NanoVGSharp
 			fons__flush();
 		}
 
-		public float fonsTextBounds(float x, float y, string str, float* bounds)
+		public float fonsTextBounds(float x, float y, StringLocation str, float* bounds)
 		{
 			FONSstate state = fons__getState();
 			FONSquad q = new FONSquad();
@@ -738,7 +734,7 @@ namespace NanoVGSharp
 			minx = (float)(maxx = (float)(x));
 			miny = (float)(maxy = (float)(y));
 			startx = (float)(x);
-			for (var i = 0; i < str.Length; ++i)
+			for (var i = 0; i < str.Remaining; ++i)
 			{
 				var codepoint = str[i];
 				glyph = fons__getGlyph(font, (uint)(codepoint), (short)(isize), (short)(iblur), (int)(FONS_GLYPH_BITMAP_OPTIONAL));

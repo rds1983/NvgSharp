@@ -17,9 +17,7 @@ namespace NanoVGSharp
 		public short iblur;
 		public FONSfont font;
 		public int prevGlyphIndex;
-		public string str;
-		public string next;
-		public uint utf8state;
+		public StringLocation str, next;
 		public int bitmapOption;
 	}
 }

@@ -65,6 +65,8 @@ namespace NanoVGSharp
 		public const int NVG_CHAR = 2;
 		public const int NVG_CJK_CHAR = 3;
 
+		public const int MaxTextRows = 10;
+
 		public NVGparams _params_ = new NVGparams();
 		public float* commands;
 		public int ccommands;
@@ -85,6 +87,7 @@ namespace NanoVGSharp
 		public int fillTriCount;
 		public int strokeTriCount;
 		public int textTriCount;
+		private NVGtextRow[] rows = new NVGtextRow[MaxTextRows];
 
 		public NVGcontext(NVGparams p)
 		{
@@ -1790,7 +1793,7 @@ namespace NanoVGSharp
 			textTriCount += (int)(nverts / 3);
 		}
 
-		public float nvgText(float x, float y, string _string_)
+		public float nvgText(float x, float y, StringLocation _string_)
 		{
 			NVGstate state = nvg__getState();
 			FONStextIter iter = new FONStextIter();
@@ -1808,13 +1811,13 @@ namespace NanoVGSharp
 			fs.fonsSetBlur((float)(state.fontBlur * scale));
 			fs.fonsSetAlign((int)(state.textAlign));
 			fs.fonsSetFont((int)(state.fontId));
-			cverts = (int)(nvg__maxi((int)(2), (int)(_string_.Length)) * 6);
+			cverts = (int)(nvg__maxi((int)(2), (int)(_string_.Remaining)) * 6);
 			verts = nvg__allocTempVerts((int)(cverts));
 			if ((verts) == null)
 				return (float)(x);
 			fs.fonsTextIterInit(iter, (float)(x * scale), (float)(y * scale), _string_, (int)(FONScontext.FONS_GLYPH_BITMAP_REQUIRED));
 			prevIter = (FONStextIter)(iter);
-			while ((fs.fonsTextIterNext(iter, &q)) != 0)
+			while (!fs.fonsTextIterNext(iter, &q))
 			{
 				float* c = stackalloc float[4 * 2];
 				if ((iter.prevGlyphIndex) == (-1))
@@ -1857,11 +1860,9 @@ namespace NanoVGSharp
 			return (float)(iter.nextx / scale);
 		}
 
-		public void nvgTextBox(float x, float y, float breakRowWidth, string _string_)
+		public void nvgTextBox(float x, float y, float breakRowWidth, StringLocation _string_)
 		{
 			NVGstate state = nvg__getState();
-			NVGtextRow* rows = stackalloc NVGtextRow[2];
-			int nrows = (int)(0);
 			int i = 0;
 			int oldAlign = (int)(state.textAlign);
 			int haling = (int)(state.textAlign & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT));
@@ -1871,25 +1872,32 @@ namespace NanoVGSharp
 				return;
 			nvgTextMetrics(null, null, &lineh);
 			state.textAlign = (int)(NVG_ALIGN_LEFT | valign);
-			while ((nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth), rows, (int)(2)))))
+			while (true)
 			{
+				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth)));
+
+				if (nrows <= 0)
+				{
+					break;
+				}
 				for (i = (int)(0); (i) < (nrows); i++)
 				{
-					NVGtextRow* row = &rows[i];
+					var row = rows[i];
 					if ((haling & NVG_ALIGN_LEFT) != 0)
-						nvgText((float)(x), (float)(y), row->start, row->end);
+						nvgText((float)(x), (float)(y), row.start);
 					else if ((haling & NVG_ALIGN_CENTER) != 0)
-						nvgText((float)(x + breakRowWidth * 0.5f - row->width * 0.5f), (float)(y), row->start, row->end);
+						nvgText((float)(x + breakRowWidth * 0.5f - row.width * 0.5f), (float)(y), row.start);
 					else if ((haling & NVG_ALIGN_RIGHT) != 0)
-						nvgText((float)(x + breakRowWidth - row->width), (float)(y), row->start, row->end);
+						nvgText((float)(x + breakRowWidth - row.width), (float)(y), row.start);
 					y += (float)(lineh * state.lineHeight);
 				}
+
 				_string_ = rows[nrows - 1].next;
 			}
 			state.textAlign = (int)(oldAlign);
 		}
 
-		public int nvgTextGlyphPositions(float x, float y, string _string_, NVGglyphPosition* positions, int maxPositions)
+		public int nvgTextGlyphPositions(float x, float y, StringLocation _string_, NVGglyphPosition[] positions)
 		{
 			NVGstate state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
@@ -1901,7 +1909,7 @@ namespace NanoVGSharp
 			if ((state.fontId) == (-1))
 				return (int)(0);
 
-			if (string.IsNullOrEmpty(_string_))
+			if (_string_.IsNullOrEmpty)
 			{
 				return 0;
 			}
@@ -1913,7 +1921,7 @@ namespace NanoVGSharp
 			fs.fonsSetFont((int)(state.fontId));
 			fs.fonsTextIterInit(iter, (float)(x * scale), (float)(y * scale), _string_, (int)(FONScontext.FONS_GLYPH_BITMAP_OPTIONAL));
 			prevIter = (FONStextIter)(iter);
-			while ((fs.fonsTextIterNext(iter, &q)) != 0)
+			while (fs.fonsTextIterNext(iter, &q))
 			{
 				if (((iter.prevGlyphIndex) < (0)) && ((nvg__allocTextAtlas()) != 0))
 				{
@@ -1926,13 +1934,13 @@ namespace NanoVGSharp
 				positions[npos].minx = (float)(nvg__minf((float)(iter.x), (float)(q.x0)) * invscale);
 				positions[npos].maxx = (float)(nvg__maxf((float)(iter.nextx), (float)(q.x1)) * invscale);
 				npos++;
-				if ((npos) >= (maxPositions))
+				if ((npos) >= (positions.Length))
 					break;
 			}
 			return (int)(npos);
 		}
 
-		public int nvgTextBreakLines(string _string_, float breakRowWidth, NVGtextRow* rows, int maxRows)
+		public int nvgTextBreakLines(StringLocation _string_, float breakRowWidth)
 		{
 			NVGstate state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
@@ -1945,23 +1953,22 @@ namespace NanoVGSharp
 			float rowWidth = (float)(0);
 			float rowMinX = (float)(0);
 			float rowMaxX = (float)(0);
-			string rowStart = null;
-			string rowEnd = null;
-			string wordStart = null;
+			StringLocation rowStart = new StringLocation();
+			StringLocation rowEnd = new StringLocation();
+			StringLocation wordStart = new StringLocation();
 			float wordStartX = (float)(0);
 			float wordMinX = (float)(0);
-			string breakEnd = null;
+			StringLocation breakEnd = new StringLocation();
 			float breakWidth = (float)(0);
 			float breakMaxX = (float)(0);
 			int type = (int)(NVG_SPACE);
 			int ptype = (int)(NVG_SPACE);
 			uint pcodepoint = (uint)(0);
-			if ((maxRows) == (0))
-				return (int)(0);
+
 			if ((state.fontId) == (-1))
 				return (int)(0);
 
-			if (string.IsNullOrEmpty(_string_))
+			if (_string_.IsNullOrEmpty)
 			{
 				return 0;
 			}
@@ -1973,7 +1980,7 @@ namespace NanoVGSharp
 			breakRowWidth *= (float)(scale);
 			fs.fonsTextIterInit(iter, (float)(0), (float)(0), _string_, (int)(FONScontext.FONS_GLYPH_BITMAP_OPTIONAL));
 			prevIter = (FONStextIter)(iter);
-			while ((fs.fonsTextIterNext(iter, &q)) != 0)
+			while ((fs.fonsTextIterNext(iter, &q)))
 			{
 				if (((iter.prevGlyphIndex) < (0)) && ((nvg__allocTextAtlas()) != 0))
 				{
@@ -2008,14 +2015,14 @@ namespace NanoVGSharp
 				}
 				if ((type) == (NVG_NEWLINE))
 				{
-					rows[nrows].start = rowStart != null ? rowStart : iter.str;
-					rows[nrows].end = rowEnd != null ? rowEnd : iter.str;
+					rows[nrows].start = rowStart.IsNullOrEmpty ? iter.str : rowStart;
+					rows[nrows].end = rowEnd.IsNullOrEmpty ? iter.str : rowEnd;
 					rows[nrows].width = (float)(rowWidth * invscale);
 					rows[nrows].minx = (float)(rowMinX * invscale);
 					rows[nrows].maxx = (float)(rowMaxX * invscale);
 					rows[nrows].next = iter.next;
 					nrows++;
-					if ((nrows) >= (maxRows))
+					if ((nrows) >= (rows.Length))
 						return (int)(nrows);
 					breakEnd = rowStart;
 					breakWidth = (float)(0.0);
@@ -2027,7 +2034,7 @@ namespace NanoVGSharp
 				}
 				else
 				{
-					if ((rowStart) == null)
+					if (rowStart.IsNullOrEmpty)
 					{
 						if (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR)))
 						{
@@ -2077,7 +2084,7 @@ namespace NanoVGSharp
 								rows[nrows].maxx = (float)(rowMaxX * invscale);
 								rows[nrows].next = iter.str;
 								nrows++;
-								if ((nrows) >= (maxRows))
+								if ((nrows) >= (rows.Length))
 									return (int)(nrows);
 								rowStartX = (float)(iter.x);
 								rowStart = iter.str;
@@ -2098,7 +2105,7 @@ namespace NanoVGSharp
 								rows[nrows].maxx = (float)(breakMaxX * invscale);
 								rows[nrows].next = wordStart;
 								nrows++;
-								if ((nrows) >= (maxRows))
+								if ((nrows) >= rows.Length)
 									return (int)(nrows);
 								rowStartX = (float)(wordStartX);
 								rowStart = wordStart;
@@ -2123,7 +2130,7 @@ namespace NanoVGSharp
 				rows[nrows].width = (float)(rowWidth * invscale);
 				rows[nrows].minx = (float)(rowMinX * invscale);
 				rows[nrows].maxx = (float)(rowMaxX * invscale);
-				rows[nrows].next = end;
+				rows[nrows].next = null;
 				nrows++;
 			}
 
@@ -2156,13 +2163,11 @@ namespace NanoVGSharp
 			return (float)(width * invscale);
 		}
 
-		public void nvgTextBoxBounds(float x, float y, float breakRowWidth, string _string_, float* bounds)
+		public void nvgTextBoxBounds(float x, float y, float breakRowWidth, StringLocation _string_, float* bounds)
 		{
 			NVGstate state = nvg__getState();
-			NVGtextRow* rows = stackalloc NVGtextRow[2];
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
 			float invscale = (float)(1.0f / scale);
-			int nrows = (int)(0);
 			int i = 0;
 			int oldAlign = (int)(state.textAlign);
 			int haling = (int)(state.textAlign & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT));
@@ -2193,22 +2198,27 @@ namespace NanoVGSharp
 			fs.fonsLineBounds((float)(0), &rminy, &rmaxy);
 			rminy *= (float)(invscale);
 			rmaxy *= (float)(invscale);
-			while ((nrows = (int)(nvgTextBreakLines(_string_, end, (float)(breakRowWidth), rows, (int)(2)))))
+			while (true)
 			{
+				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth)));
+				if (nrows <= 0)
+				{
+					break;
+				}
 				for (i = (int)(0); (i) < (nrows); i++)
 				{
-					NVGtextRow* row = &rows[i];
+					NVGtextRow row = rows[i];
 					float rminx = 0;
 					float rmaxx = 0;
 					float dx = (float)(0);
 					if ((haling & NVG_ALIGN_LEFT) != 0)
 						dx = (float)(0);
 					else if ((haling & NVG_ALIGN_CENTER) != 0)
-						dx = (float)(breakRowWidth * 0.5f - row->width * 0.5f);
+						dx = (float)(breakRowWidth * 0.5f - row.width * 0.5f);
 					else if ((haling & NVG_ALIGN_RIGHT) != 0)
-						dx = (float)(breakRowWidth - row->width);
-					rminx = (float)(x + row->minx + dx);
-					rmaxx = (float)(x + row->maxx + dx);
+						dx = (float)(breakRowWidth - row.width);
+					rminx = (float)(x + row.minx + dx);
+					rmaxx = (float)(x + row.maxx + dx);
 					minx = (float)(nvg__minf((float)(minx), (float)(rminx)));
 					maxx = (float)(nvg__maxf((float)(maxx), (float)(rmaxx)));
 					miny = (float)(nvg__minf((float)(miny), (float)(y + rminy)));
