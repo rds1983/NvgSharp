@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using StbSharp;
+using System;
 
 namespace NanoVGSharp
 {
@@ -80,313 +81,6 @@ namespace NanoVGSharp
 		public const int NVG_CHAR = 2;
 		public const int NVG_CJK_CHAR = 3;
 
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGcolor
-		{
-			public float r;
-			public float g;
-			public float b;
-			public float a;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGpaint
-		{
-			public fixed float xform[6];
-			public fixed float extent[2];
-			public float radius;
-			public float feather;
-			public NVGcolor innerColor;
-			public NVGcolor outerColor;
-			public int image;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGcompositeOperationState
-		{
-			public int srcRGB;
-			public int dstRGB;
-			public int srcAlpha;
-			public int dstAlpha;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGglyphPosition
-		{
-			public sbyte* str;
-			public float x;
-			public float minx;
-			public float maxx;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGtextRow
-		{
-			public sbyte* start;
-			public sbyte* end;
-			public sbyte* next;
-			public float width;
-			public float minx;
-			public float maxx;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGscissor
-		{
-			public fixed float xform[6];
-			public fixed float extent[2];
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGvertex
-		{
-			public float x;
-			public float y;
-			public float u;
-			public float v;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGpath
-		{
-			public int first;
-			public int count;
-			public byte closed;
-			public int nbevel;
-			public NVGvertex* fill;
-			public int nfill;
-			public NVGvertex* stroke;
-			public int nstroke;
-			public int winding;
-			public int convex;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct FONSquad
-		{
-			public float x0;
-			public float y0;
-			public float s0;
-			public float t0;
-			public float x1;
-			public float y1;
-			public float s1;
-			public float t1;
-		}
-
-		public class FONStextIter
-		{
-			public float x;
-			public float y;
-			public float nextx;
-			public float nexty;
-			public float scale;
-			public float spacing;
-			public uint codepoint;
-			public short isize;
-			public short iblur;
-			public FONSfont font;
-			public int prevGlyphIndex;
-			public sbyte* str;
-			public sbyte* next;
-			public sbyte* end;
-			public uint utf8state;
-			public int bitmapOption;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct FONSttFontImpl
-		{
-			public StbTrueType.stbtt_fontinfo font;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct FONSglyph
-		{
-			public uint codepoint;
-			public int index;
-			public int next;
-			public short size;
-			public short blur;
-			public short x0;
-			public short y0;
-			public short x1;
-			public short y1;
-			public short xadv;
-			public short xoff;
-			public short yoff;
-		}
-
-		public class FONSfont
-		{
-			public FONSttFontImpl font = new FONSttFontImpl();
-			public sbyte[] name = new sbyte[64];
-			public byte* data;
-			public int dataSize;
-			public byte freeData;
-			public float ascender;
-			public float descender;
-			public float lineh;
-			public FONSglyph* glyphs;
-			public int cglyphs;
-			public int nglyphs;
-			public int[] lut = new int[256];
-			public int[] fallbacks = new int[20];
-			public int nfallbacks;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct FONSstate
-		{
-			public int font;
-			public int align;
-			public float size;
-			public uint color;
-			public float blur;
-			public float spacing;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct FONSatlasNode
-		{
-			public short x;
-			public short y;
-			public short width;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct FONSatlas
-		{
-			public int width;
-			public int height;
-			public FONSatlasNode* nodes;
-			public int nnodes;
-			public int cnodes;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGstate
-		{
-			public NVGcompositeOperationState compositeOperation;
-			public int shapeAntiAlias;
-			public NVGpaint fill;
-			public NVGpaint stroke;
-			public float strokeWidth;
-			public float miterLimit;
-			public int lineJoin;
-			public int lineCap;
-			public float alpha;
-			public fixed float xform[6];
-			public NVGscissor scissor;
-			public float fontSize;
-			public float letterSpacing;
-			public float lineHeight;
-			public float fontBlur;
-			public int textAlign;
-			public int fontId;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NVGpoint
-		{
-			public float x;
-			public float y;
-			public float dx;
-			public float dy;
-			public float len;
-			public float dmx;
-			public float dmy;
-			public byte flags;
-		}
-
-		public class NVGpathCache
-		{
-			public NVGpoint* points;
-			public int npoints;
-			public int cpoints;
-			public NVGpath* paths;
-			public int npaths;
-			public int cpaths;
-			public NVGvertex* verts;
-			public int nverts;
-			public int cverts;
-			public float[] bounds = new float[4];
-		}
-
-		public class NVGcontext
-		{
-			public NVGparams _params_ = new NVGparams();
-			public float* commands;
-			public int ccommands;
-			public int ncommands;
-			public float commandx;
-			public float commandy;
-			public NVGstate[] states = new NVGstate[32];
-			public int nstates;
-			public NVGpathCache cache;
-			public float tessTol;
-			public float distTol;
-			public float fringeWidth;
-			public float devicePxRatio;
-			public FONScontext fs;
-			public int[] fontImages = new int[4];
-			public int fontImageIdx;
-			public int drawCallCount;
-			public int fillTriCount;
-			public int strokeTriCount;
-			public int textTriCount;
-		}
-
-		public static int fons__tt_init(FONScontext context)
-		{
-			return (int)(1);
-		}
-
-		public static int fons__tt_done(FONScontext context)
-		{
-			return (int)(1);
-		}
-
-		public static int fons__tt_loadFont(FONScontext context, FONSttFontImpl* font, byte* data, int dataSize)
-		{
-			int stbError = 0;
-			font->font.userdata = context;
-			stbError = (int)(StbTrueType.stbtt_InitFont(&font->font, data, (int)(0)));
-			return (int)(stbError);
-		}
-
-		public static void fons__tt_getFontVMetrics(FONSttFontImpl* font, int* ascent, int* descent, int* lineGap)
-		{
-			StbTrueType.stbtt_GetFontVMetrics(&font->font, ascent, descent, lineGap);
-		}
-
-		public static float fons__tt_getPixelHeightScale(FONSttFontImpl* font, float size)
-		{
-			return (float)(StbTrueType.stbtt_ScaleForPixelHeight(&font->font, (float)(size)));
-		}
-
-		public static int fons__tt_getGlyphIndex(FONSttFontImpl* font, int codepoint)
-		{
-			return (int)(StbTrueType.stbtt_FindGlyphIndex(&font->font, (int)(codepoint)));
-		}
-
-		public static int fons__tt_buildGlyphBitmap(FONSttFontImpl* font, int glyph, float size, float scale, int* advance, int* lsb, int* x0, int* y0, int* x1, int* y1)
-		{
-			StbTrueType.stbtt_GetGlyphHMetrics(&font->font, (int)(glyph), advance, lsb);
-			StbTrueType.stbtt_GetGlyphBitmapBox(&font->font, (int)(glyph), (float)(scale), (float)(scale), x0, y0, x1, y1);
-			return (int)(1);
-		}
-
-		public static void fons__tt_renderGlyphBitmap(FONSttFontImpl* font, byte* output, int outWidth, int outHeight, int outStride, float scaleX, float scaleY, int glyph)
-		{
-			StbTrueType.stbtt_MakeGlyphBitmap(&font->font, output, (int)(outWidth), (int)(outHeight), (int)(outStride), (float)(scaleX), (float)(scaleY), (int)(glyph));
-		}
-
-		public static int fons__tt_getGlyphKernAdvance(FONSttFontImpl* font, int glyph1, int glyph2)
-		{
-			return (int)(StbTrueType.stbtt_GetGlyphKernAdvance(&font->font, (int)(glyph1), (int)(glyph2)));
-		}
-
 		public static uint fons__hashint(uint a)
 		{
 			a += (uint)(~(a << 15));
@@ -408,1194 +102,44 @@ namespace NanoVGSharp
 			return (int)((a) > (b) ? a : b);
 		}
 
-		public static void* fons__tmpalloc(ulong size, void* up)
+		public static float sqrtf(float a)
 		{
-			byte* ptr;
-			FONScontext stash = (FONScontext)(up);
-			size = (ulong)((size + 0xf) & ~0xf);
-			if ((stash.nscratch + (int)(size)) > (96000)) {
-				if ((stash.handleError) != null) stash.handleError(stash.errorUptr, (int)(FONS_SCRATCH_FULL), (int)(stash.nscratch + (int)(size))); return null; }
-
-			ptr = stash.scratch + stash.nscratch;
-			stash.nscratch += ((int)(size));
-			return ptr;
+			return (float)(Math.Sqrt((float)(a)));
 		}
 
-		public static void fons__tmpfree(void* ptr, void* up)
+		public static float sinf(float a)
 		{
+			return (float)(Math.Sin((float)(a)));
 		}
 
-		public static uint fons__decutf8(uint* state, uint* codep, uint byte)
+		public static float tanf(float a)
 		{
-			byte* utf8d = stackalloc byte[364];
-			utf8d[0] = (byte)(0);
-			utf8d[1] = (byte)(0);
-			utf8d[2] = (byte)(0);
-			utf8d[3] = (byte)(0);
-			utf8d[4] = (byte)(0);
-			utf8d[5] = (byte)(0);
-			utf8d[6] = (byte)(0);
-			utf8d[7] = (byte)(0);
-			utf8d[8] = (byte)(0);
-			utf8d[9] = (byte)(0);
-			utf8d[10] = (byte)(0);
-			utf8d[11] = (byte)(0);
-			utf8d[12] = (byte)(0);
-			utf8d[13] = (byte)(0);
-			utf8d[14] = (byte)(0);
-			utf8d[15] = (byte)(0);
-			utf8d[16] = (byte)(0);
-			utf8d[17] = (byte)(0);
-			utf8d[18] = (byte)(0);
-			utf8d[19] = (byte)(0);
-			utf8d[20] = (byte)(0);
-			utf8d[21] = (byte)(0);
-			utf8d[22] = (byte)(0);
-			utf8d[23] = (byte)(0);
-			utf8d[24] = (byte)(0);
-			utf8d[25] = (byte)(0);
-			utf8d[26] = (byte)(0);
-			utf8d[27] = (byte)(0);
-			utf8d[28] = (byte)(0);
-			utf8d[29] = (byte)(0);
-			utf8d[30] = (byte)(0);
-			utf8d[31] = (byte)(0);
-			utf8d[32] = (byte)(0);
-			utf8d[33] = (byte)(0);
-			utf8d[34] = (byte)(0);
-			utf8d[35] = (byte)(0);
-			utf8d[36] = (byte)(0);
-			utf8d[37] = (byte)(0);
-			utf8d[38] = (byte)(0);
-			utf8d[39] = (byte)(0);
-			utf8d[40] = (byte)(0);
-			utf8d[41] = (byte)(0);
-			utf8d[42] = (byte)(0);
-			utf8d[43] = (byte)(0);
-			utf8d[44] = (byte)(0);
-			utf8d[45] = (byte)(0);
-			utf8d[46] = (byte)(0);
-			utf8d[47] = (byte)(0);
-			utf8d[48] = (byte)(0);
-			utf8d[49] = (byte)(0);
-			utf8d[50] = (byte)(0);
-			utf8d[51] = (byte)(0);
-			utf8d[52] = (byte)(0);
-			utf8d[53] = (byte)(0);
-			utf8d[54] = (byte)(0);
-			utf8d[55] = (byte)(0);
-			utf8d[56] = (byte)(0);
-			utf8d[57] = (byte)(0);
-			utf8d[58] = (byte)(0);
-			utf8d[59] = (byte)(0);
-			utf8d[60] = (byte)(0);
-			utf8d[61] = (byte)(0);
-			utf8d[62] = (byte)(0);
-			utf8d[63] = (byte)(0);
-			utf8d[64] = (byte)(0);
-			utf8d[65] = (byte)(0);
-			utf8d[66] = (byte)(0);
-			utf8d[67] = (byte)(0);
-			utf8d[68] = (byte)(0);
-			utf8d[69] = (byte)(0);
-			utf8d[70] = (byte)(0);
-			utf8d[71] = (byte)(0);
-			utf8d[72] = (byte)(0);
-			utf8d[73] = (byte)(0);
-			utf8d[74] = (byte)(0);
-			utf8d[75] = (byte)(0);
-			utf8d[76] = (byte)(0);
-			utf8d[77] = (byte)(0);
-			utf8d[78] = (byte)(0);
-			utf8d[79] = (byte)(0);
-			utf8d[80] = (byte)(0);
-			utf8d[81] = (byte)(0);
-			utf8d[82] = (byte)(0);
-			utf8d[83] = (byte)(0);
-			utf8d[84] = (byte)(0);
-			utf8d[85] = (byte)(0);
-			utf8d[86] = (byte)(0);
-			utf8d[87] = (byte)(0);
-			utf8d[88] = (byte)(0);
-			utf8d[89] = (byte)(0);
-			utf8d[90] = (byte)(0);
-			utf8d[91] = (byte)(0);
-			utf8d[92] = (byte)(0);
-			utf8d[93] = (byte)(0);
-			utf8d[94] = (byte)(0);
-			utf8d[95] = (byte)(0);
-			utf8d[96] = (byte)(0);
-			utf8d[97] = (byte)(0);
-			utf8d[98] = (byte)(0);
-			utf8d[99] = (byte)(0);
-			utf8d[100] = (byte)(0);
-			utf8d[101] = (byte)(0);
-			utf8d[102] = (byte)(0);
-			utf8d[103] = (byte)(0);
-			utf8d[104] = (byte)(0);
-			utf8d[105] = (byte)(0);
-			utf8d[106] = (byte)(0);
-			utf8d[107] = (byte)(0);
-			utf8d[108] = (byte)(0);
-			utf8d[109] = (byte)(0);
-			utf8d[110] = (byte)(0);
-			utf8d[111] = (byte)(0);
-			utf8d[112] = (byte)(0);
-			utf8d[113] = (byte)(0);
-			utf8d[114] = (byte)(0);
-			utf8d[115] = (byte)(0);
-			utf8d[116] = (byte)(0);
-			utf8d[117] = (byte)(0);
-			utf8d[118] = (byte)(0);
-			utf8d[119] = (byte)(0);
-			utf8d[120] = (byte)(0);
-			utf8d[121] = (byte)(0);
-			utf8d[122] = (byte)(0);
-			utf8d[123] = (byte)(0);
-			utf8d[124] = (byte)(0);
-			utf8d[125] = (byte)(0);
-			utf8d[126] = (byte)(0);
-			utf8d[127] = (byte)(0);
-			utf8d[128] = (byte)(1);
-			utf8d[129] = (byte)(1);
-			utf8d[130] = (byte)(1);
-			utf8d[131] = (byte)(1);
-			utf8d[132] = (byte)(1);
-			utf8d[133] = (byte)(1);
-			utf8d[134] = (byte)(1);
-			utf8d[135] = (byte)(1);
-			utf8d[136] = (byte)(1);
-			utf8d[137] = (byte)(1);
-			utf8d[138] = (byte)(1);
-			utf8d[139] = (byte)(1);
-			utf8d[140] = (byte)(1);
-			utf8d[141] = (byte)(1);
-			utf8d[142] = (byte)(1);
-			utf8d[143] = (byte)(1);
-			utf8d[144] = (byte)(9);
-			utf8d[145] = (byte)(9);
-			utf8d[146] = (byte)(9);
-			utf8d[147] = (byte)(9);
-			utf8d[148] = (byte)(9);
-			utf8d[149] = (byte)(9);
-			utf8d[150] = (byte)(9);
-			utf8d[151] = (byte)(9);
-			utf8d[152] = (byte)(9);
-			utf8d[153] = (byte)(9);
-			utf8d[154] = (byte)(9);
-			utf8d[155] = (byte)(9);
-			utf8d[156] = (byte)(9);
-			utf8d[157] = (byte)(9);
-			utf8d[158] = (byte)(9);
-			utf8d[159] = (byte)(9);
-			utf8d[160] = (byte)(7);
-			utf8d[161] = (byte)(7);
-			utf8d[162] = (byte)(7);
-			utf8d[163] = (byte)(7);
-			utf8d[164] = (byte)(7);
-			utf8d[165] = (byte)(7);
-			utf8d[166] = (byte)(7);
-			utf8d[167] = (byte)(7);
-			utf8d[168] = (byte)(7);
-			utf8d[169] = (byte)(7);
-			utf8d[170] = (byte)(7);
-			utf8d[171] = (byte)(7);
-			utf8d[172] = (byte)(7);
-			utf8d[173] = (byte)(7);
-			utf8d[174] = (byte)(7);
-			utf8d[175] = (byte)(7);
-			utf8d[176] = (byte)(7);
-			utf8d[177] = (byte)(7);
-			utf8d[178] = (byte)(7);
-			utf8d[179] = (byte)(7);
-			utf8d[180] = (byte)(7);
-			utf8d[181] = (byte)(7);
-			utf8d[182] = (byte)(7);
-			utf8d[183] = (byte)(7);
-			utf8d[184] = (byte)(7);
-			utf8d[185] = (byte)(7);
-			utf8d[186] = (byte)(7);
-			utf8d[187] = (byte)(7);
-			utf8d[188] = (byte)(7);
-			utf8d[189] = (byte)(7);
-			utf8d[190] = (byte)(7);
-			utf8d[191] = (byte)(7);
-			utf8d[192] = (byte)(8);
-			utf8d[193] = (byte)(8);
-			utf8d[194] = (byte)(2);
-			utf8d[195] = (byte)(2);
-			utf8d[196] = (byte)(2);
-			utf8d[197] = (byte)(2);
-			utf8d[198] = (byte)(2);
-			utf8d[199] = (byte)(2);
-			utf8d[200] = (byte)(2);
-			utf8d[201] = (byte)(2);
-			utf8d[202] = (byte)(2);
-			utf8d[203] = (byte)(2);
-			utf8d[204] = (byte)(2);
-			utf8d[205] = (byte)(2);
-			utf8d[206] = (byte)(2);
-			utf8d[207] = (byte)(2);
-			utf8d[208] = (byte)(2);
-			utf8d[209] = (byte)(2);
-			utf8d[210] = (byte)(2);
-			utf8d[211] = (byte)(2);
-			utf8d[212] = (byte)(2);
-			utf8d[213] = (byte)(2);
-			utf8d[214] = (byte)(2);
-			utf8d[215] = (byte)(2);
-			utf8d[216] = (byte)(2);
-			utf8d[217] = (byte)(2);
-			utf8d[218] = (byte)(2);
-			utf8d[219] = (byte)(2);
-			utf8d[220] = (byte)(2);
-			utf8d[221] = (byte)(2);
-			utf8d[222] = (byte)(2);
-			utf8d[223] = (byte)(2);
-			utf8d[224] = (byte)(10);
-			utf8d[225] = (byte)(3);
-			utf8d[226] = (byte)(3);
-			utf8d[227] = (byte)(3);
-			utf8d[228] = (byte)(3);
-			utf8d[229] = (byte)(3);
-			utf8d[230] = (byte)(3);
-			utf8d[231] = (byte)(3);
-			utf8d[232] = (byte)(3);
-			utf8d[233] = (byte)(3);
-			utf8d[234] = (byte)(3);
-			utf8d[235] = (byte)(3);
-			utf8d[236] = (byte)(3);
-			utf8d[237] = (byte)(4);
-			utf8d[238] = (byte)(3);
-			utf8d[239] = (byte)(3);
-			utf8d[240] = (byte)(11);
-			utf8d[241] = (byte)(6);
-			utf8d[242] = (byte)(6);
-			utf8d[243] = (byte)(6);
-			utf8d[244] = (byte)(5);
-			utf8d[245] = (byte)(8);
-			utf8d[246] = (byte)(8);
-			utf8d[247] = (byte)(8);
-			utf8d[248] = (byte)(8);
-			utf8d[249] = (byte)(8);
-			utf8d[250] = (byte)(8);
-			utf8d[251] = (byte)(8);
-			utf8d[252] = (byte)(8);
-			utf8d[253] = (byte)(8);
-			utf8d[254] = (byte)(8);
-			utf8d[255] = (byte)(8);
-			utf8d[256] = (byte)(0);
-			utf8d[257] = (byte)(12);
-			utf8d[258] = (byte)(24);
-			utf8d[259] = (byte)(36);
-			utf8d[260] = (byte)(60);
-			utf8d[261] = (byte)(96);
-			utf8d[262] = (byte)(84);
-			utf8d[263] = (byte)(12);
-			utf8d[264] = (byte)(12);
-			utf8d[265] = (byte)(12);
-			utf8d[266] = (byte)(48);
-			utf8d[267] = (byte)(72);
-			utf8d[268] = (byte)(12);
-			utf8d[269] = (byte)(12);
-			utf8d[270] = (byte)(12);
-			utf8d[271] = (byte)(12);
-			utf8d[272] = (byte)(12);
-			utf8d[273] = (byte)(12);
-			utf8d[274] = (byte)(12);
-			utf8d[275] = (byte)(12);
-			utf8d[276] = (byte)(12);
-			utf8d[277] = (byte)(12);
-			utf8d[278] = (byte)(12);
-			utf8d[279] = (byte)(12);
-			utf8d[280] = (byte)(12);
-			utf8d[281] = (byte)(0);
-			utf8d[282] = (byte)(12);
-			utf8d[283] = (byte)(12);
-			utf8d[284] = (byte)(12);
-			utf8d[285] = (byte)(12);
-			utf8d[286] = (byte)(12);
-			utf8d[287] = (byte)(0);
-			utf8d[288] = (byte)(12);
-			utf8d[289] = (byte)(0);
-			utf8d[290] = (byte)(12);
-			utf8d[291] = (byte)(12);
-			utf8d[292] = (byte)(12);
-			utf8d[293] = (byte)(24);
-			utf8d[294] = (byte)(12);
-			utf8d[295] = (byte)(12);
-			utf8d[296] = (byte)(12);
-			utf8d[297] = (byte)(12);
-			utf8d[298] = (byte)(12);
-			utf8d[299] = (byte)(24);
-			utf8d[300] = (byte)(12);
-			utf8d[301] = (byte)(24);
-			utf8d[302] = (byte)(12);
-			utf8d[303] = (byte)(12);
-			utf8d[304] = (byte)(12);
-			utf8d[305] = (byte)(12);
-			utf8d[306] = (byte)(12);
-			utf8d[307] = (byte)(12);
-			utf8d[308] = (byte)(12);
-			utf8d[309] = (byte)(12);
-			utf8d[310] = (byte)(12);
-			utf8d[311] = (byte)(24);
-			utf8d[312] = (byte)(12);
-			utf8d[313] = (byte)(12);
-			utf8d[314] = (byte)(12);
-			utf8d[315] = (byte)(12);
-			utf8d[316] = (byte)(12);
-			utf8d[317] = (byte)(24);
-			utf8d[318] = (byte)(12);
-			utf8d[319] = (byte)(12);
-			utf8d[320] = (byte)(12);
-			utf8d[321] = (byte)(12);
-			utf8d[322] = (byte)(12);
-			utf8d[323] = (byte)(12);
-			utf8d[324] = (byte)(12);
-			utf8d[325] = (byte)(24);
-			utf8d[326] = (byte)(12);
-			utf8d[327] = (byte)(12);
-			utf8d[328] = (byte)(12);
-			utf8d[329] = (byte)(12);
-			utf8d[330] = (byte)(12);
-			utf8d[331] = (byte)(12);
-			utf8d[332] = (byte)(12);
-			utf8d[333] = (byte)(12);
-			utf8d[334] = (byte)(12);
-			utf8d[335] = (byte)(36);
-			utf8d[336] = (byte)(12);
-			utf8d[337] = (byte)(36);
-			utf8d[338] = (byte)(12);
-			utf8d[339] = (byte)(12);
-			utf8d[340] = (byte)(12);
-			utf8d[341] = (byte)(36);
-			utf8d[342] = (byte)(12);
-			utf8d[343] = (byte)(12);
-			utf8d[344] = (byte)(12);
-			utf8d[345] = (byte)(12);
-			utf8d[346] = (byte)(12);
-			utf8d[347] = (byte)(36);
-			utf8d[348] = (byte)(12);
-			utf8d[349] = (byte)(36);
-			utf8d[350] = (byte)(12);
-			utf8d[351] = (byte)(12);
-			utf8d[352] = (byte)(12);
-			utf8d[353] = (byte)(36);
-			utf8d[354] = (byte)(12);
-			utf8d[355] = (byte)(12);
-			utf8d[356] = (byte)(12);
-			utf8d[357] = (byte)(12);
-			utf8d[358] = (byte)(12);
-			utf8d[359] = (byte)(12);
-			utf8d[360] = (byte)(12);
-			utf8d[361] = (byte)(12);
-			utf8d[362] = (byte)(12);
-			utf8d[363] = (byte)(12);
-
-			uint type = (uint)(utf8d[byte]);
-			*codep = (uint)((*state != 0) ? (byte & 0x3fu) | (*codep << 6) : (0xff >> type) & (byte));
-			*state = (uint)(utf8d[256 + *state + type]);
-			return (uint)(*state);
+			return (float)(Math.Tan((float)(a)));
 		}
 
-		public static void fons__deleteAtlas(FONSatlas* atlas)
+		public static float atan2f(float a, float b)
 		{
-			if ((atlas) == null) return;
-			if (atlas->nodes != null) CRuntime.free(atlas->nodes);
-			CRuntime.free(atlas);
+			return  (float)(Math.Atan2(a, b));
 		}
 
-		public static FONSatlas* fons__allocAtlas(int w, int h, int nnodes)
+		public static float cosf(float a)
 		{
-			FONSatlas* atlas = null;
-			atlas = (FONSatlas*)(CRuntime.malloc((ulong)(sizeof(FONSatlas))));
-			if ((atlas) == null) goto error;
-			CRuntime.memset(atlas, (int)(0), (ulong)(sizeof(FONSatlas)));
-			atlas->width = (int)(w);
-			atlas->height = (int)(h);
-			atlas->nodes = (FONSatlasNode*)(CRuntime.malloc((ulong)(sizeof(FONSatlasNode) * nnodes)));
-			if ((atlas->nodes) == null) goto error;
-			CRuntime.memset(atlas->nodes, (int)(0), (ulong)(sizeof(FONSatlasNode) * nnodes));
-			atlas->nnodes = (int)(0);
-			atlas->cnodes = (int)(nnodes);
-			atlas->nodes[0].x = (short)(0);
-			atlas->nodes[0].y = (short)(0);
-			atlas->nodes[0].width = ((short)(w));
-			atlas->nnodes++;
-			return atlas;
-		error:;
-			if ((atlas) != null) fons__deleteAtlas(atlas);
-			return null;
+			return (float)(Math.Cos((float)(a)));
 		}
 
-		public static int fons__atlasInsertNode(FONSatlas* atlas, int idx, int x, int y, int w)
+		public static float acosf(float a)
 		{
-			int i = 0;
-			if ((atlas->nnodes + 1) > (atlas->cnodes)) {
-				atlas->cnodes = (int)((atlas->cnodes) == (0) ? 8 : atlas->cnodes * 2); atlas->nodes = (FONSatlasNode*)(CRuntime.realloc(atlas->nodes, (ulong)(sizeof(FONSatlasNode) * atlas->cnodes))); if ((atlas->nodes) == null) return (int)(0); }
-
-			for (i = (int)(atlas->nnodes); (i) > (idx); i--) { atlas->nodes[i] = (FONSatlasNode)(atlas->nodes[i - 1]); }
-			atlas->nodes[idx].x = ((short)(x));
-			atlas->nodes[idx].y = ((short)(y));
-			atlas->nodes[idx].width = ((short)(w));
-			atlas->nnodes++;
-			return (int)(1);
+			return (float)(Math.Acos((float)(a)));
 		}
 
-		public static void fons__atlasRemoveNode(FONSatlas* atlas, int idx)
+		public static float ceilf(float a)
 		{
-			int i = 0;
-			if ((atlas->nnodes) == (0)) return;
-			for (i = (int)(idx); (i) < (atlas->nnodes - 1); i++) { atlas->nodes[i] = (FONSatlasNode)(atlas->nodes[i + 1]); }
-			atlas->nnodes--;
-		}
-
-		public static void fons__atlasExpand(FONSatlas* atlas, int w, int h)
-		{
-			if ((w) > (atlas->width)) fons__atlasInsertNode(atlas, (int)(atlas->nnodes), (int)(atlas->width), (int)(0), (int)(w - atlas->width));
-			atlas->width = (int)(w);
-			atlas->height = (int)(h);
-		}
-
-		public static void fons__atlasReset(FONSatlas* atlas, int w, int h)
-		{
-			atlas->width = (int)(w);
-			atlas->height = (int)(h);
-			atlas->nnodes = (int)(0);
-			atlas->nodes[0].x = (short)(0);
-			atlas->nodes[0].y = (short)(0);
-			atlas->nodes[0].width = ((short)(w));
-			atlas->nnodes++;
-		}
-
-		public static int fons__atlasAddSkylineLevel(FONSatlas* atlas, int idx, int x, int y, int w, int h)
-		{
-			int i = 0;
-			if ((fons__atlasInsertNode(atlas, (int)(idx), (int)(x), (int)(y + h), (int)(w))) == (0)) return (int)(0);
-			for (i = (int)(idx + 1); (i) < (atlas->nnodes); i++) {
-				if ((atlas->nodes[i].x) < (atlas->nodes[i - 1].x + atlas->nodes[i - 1].width)) {
-					int shrink = (int)(atlas->nodes[i - 1].x + atlas->nodes[i - 1].width - atlas->nodes[i].x); atlas->nodes[i].x += ((short)(shrink)); atlas->nodes[i].width -= ((short)(shrink)); if (atlas->nodes[i].width <= 0) {
-						fons__atlasRemoveNode(atlas, (int)(i)); i--; }
-					else {
-						break; }
-				}
-				else {
-					break; }
-			}
-			for (i = (int)(0); (i) < (atlas->nnodes - 1); i++) {
-				if ((atlas->nodes[i].y) == (atlas->nodes[i + 1].y)) {
-					atlas->nodes[i].width += (short)(atlas->nodes[i + 1].width); fons__atlasRemoveNode(atlas, (int)(i + 1)); i--; }
-			}
-			return (int)(1);
-		}
-
-		public static int fons__atlasRectFits(FONSatlas* atlas, int i, int w, int h)
-		{
-			int x = (int)(atlas->nodes[i].x);
-			int y = (int)(atlas->nodes[i].y);
-			int spaceLeft = 0;
-			if ((x + w) > (atlas->width)) return (int)(-1);
-			spaceLeft = (int)(w);
-			while ((spaceLeft) > (0)) {
-				if ((i) == (atlas->nnodes)) return (int)(-1); y = (int)(fons__maxi((int)(y), (int)(atlas->nodes[i].y))); if ((y + h) > (atlas->height)) return (int)(-1); spaceLeft -= (int)(atlas->nodes[i].width); ++i; }
-			return (int)(y);
-		}
-
-		public static int fons__atlasAddRect(FONSatlas* atlas, int rw, int rh, int* rx, int* ry)
-		{
-			int besth = (int)(atlas->height); int bestw = (int)(atlas->width); int besti = (int)(-1);
-			int bestx = (int)(-1); int besty = (int)(-1); int i = 0;
-			for (i = (int)(0); (i) < (atlas->nnodes); i++) {
-				int y = (int)(fons__atlasRectFits(atlas, (int)(i), (int)(rw), (int)(rh))); if (y != -1) {
-					if (((y + rh) < (besth)) || (((y + rh) == (besth)) && ((atlas->nodes[i].width) < (bestw)))) {
-						besti = (int)(i); bestw = (int)(atlas->nodes[i].width); besth = (int)(y + rh); bestx = (int)(atlas->nodes[i].x); besty = (int)(y); }
-				}
-			}
-			if ((besti) == (-1)) return (int)(0);
-			if ((fons__atlasAddSkylineLevel(atlas, (int)(besti), (int)(bestx), (int)(besty), (int)(rw), (int)(rh))) == (0)) return (int)(0);
-			*rx = (int)(bestx);
-			*ry = (int)(besty);
-			return (int)(1);
-		}
-
-		public static void fons__addWhiteRect(FONScontext stash, int w, int h)
-		{
-			int x = 0; int y = 0; int gx = 0; int gy = 0;
-			byte* dst;
-			if ((fons__atlasAddRect(stash.atlas, (int)(w), (int)(h), &gx, &gy)) == (0)) return;
-			dst = &stash.texData[gx + gy * stash._params_.width];
-			for (y = (int)(0); (y) < (h); y++) {
-				for (x = (int)(0); (x) < (w); x++) { dst[x] = (byte)(0xff); } dst += stash._params_.width; }
-			stash.dirtyRect[0] = (int)(fons__mini((int)(stash.dirtyRect[0]), (int)(gx)));
-			stash.dirtyRect[1] = (int)(fons__mini((int)(stash.dirtyRect[1]), (int)(gy)));
-			stash.dirtyRect[2] = (int)(fons__maxi((int)(stash.dirtyRect[2]), (int)(gx + w)));
-			stash.dirtyRect[3] = (int)(fons__maxi((int)(stash.dirtyRect[3]), (int)(gy + h)));
-		}
-
-		public static FONScontext fonsCreateInternal(FONSparams _params_)
-		{
-			FONScontext stash = new FONScontext();
-			stash._params_ = (FONSparams)(_params_);
-			stash.scratch = (byte*)(CRuntime.malloc((ulong)(96000)));
-			if ((stash.scratch) == null) goto error;
-			if (fons__tt_init(stash) == 0) goto error;
-			if (stash._params_.renderCreate != null) {
-				if ((stash._params_.renderCreate(stash._params_.userPtr, (int)(stash._params_.width), (int)(stash._params_.height))) == (0)) goto error; }
-
-			stash.atlas = fons__allocAtlas((int)(stash._params_.width), (int)(stash._params_.height), (int)(256));
-			if ((stash.atlas) == null) goto error;
-			stash.fonts = new FONSfont[4];
-			if ((stash.fonts) == null) goto error;
-			stash.cfonts = (int)(4);
-			stash.nfonts = (int)(0);
-			stash.itw = (float)(1.0f / stash._params_.width);
-			stash.ith = (float)(1.0f / stash._params_.height);
-			stash.texData = (byte*)(CRuntime.malloc((ulong)(stash._params_.width * stash._params_.height)));
-			if ((stash.texData) == null) goto error;
-			CRuntime.memset(stash.texData, (int)(0), (ulong)(stash._params_.width * stash._params_.height));
-			stash.dirtyRect[0] = (int)(stash._params_.width);
-			stash.dirtyRect[1] = (int)(stash._params_.height);
-			stash.dirtyRect[2] = (int)(0);
-			stash.dirtyRect[3] = (int)(0);
-			fons__addWhiteRect(stash, (int)(2), (int)(2));
-			fonsPushState(stash);
-			fonsClearState(stash);
-			return stash;
-		error:;
-			fonsDeleteInternal(stash);
-			return null;
-		}
-
-		public static FONSstate* fons__getState(FONScontext stash)
-		{
-			return &stash.states[stash.nstates - 1];
-		}
-
-		public static int fonsAddFallbackFont(FONScontext stash, int _base_, int fallback)
-		{
-			FONSfont baseFont = stash.fonts[_base_];
-			if ((baseFont.nfallbacks) < (20)) {
-				baseFont.fallbacks[baseFont.nfallbacks++] = (int)(fallback); return (int)(1); }
-
-			return (int)(0);
-		}
-
-		public static void fonsSetSize(FONScontext stash, float size)
-		{
-			fons__getState(stash)->size = (float)(size);
-		}
-
-		public static void fonsSetColor(FONScontext stash, uint color)
-		{
-			fons__getState(stash)->color = (uint)(color);
-		}
-
-		public static void fonsSetSpacing(FONScontext stash, float spacing)
-		{
-			fons__getState(stash)->spacing = (float)(spacing);
-		}
-
-		public static void fonsSetBlur(FONScontext stash, float blur)
-		{
-			fons__getState(stash)->blur = (float)(blur);
-		}
-
-		public static void fonsSetAlign(FONScontext stash, int align)
-		{
-			fons__getState(stash)->align = (int)(align);
-		}
-
-		public static void fonsSetFont(FONScontext stash, int font)
-		{
-			fons__getState(stash)->font = (int)(font);
-		}
-
-		public static void fonsPushState(FONScontext stash)
-		{
-			if ((stash.nstates) >= (20)) {
-				if ((stash.handleError) != null) stash.handleError(stash.errorUptr, (int)(FONS_STATES_OVERFLOW), (int)(0)); return; }
-
-			if ((stash.nstates) > (0)) CRuntime.memcpy(&stash.states[stash.nstates], &stash.states[stash.nstates - 1], (ulong)(sizeof(FONSstate)));
-			stash.nstates++;
-		}
-
-		public static void fonsPopState(FONScontext stash)
-		{
-			if (stash.nstates <= 1) {
-				if ((stash.handleError) != null) stash.handleError(stash.errorUptr, (int)(FONS_STATES_UNDERFLOW), (int)(0)); return; }
-
-			stash.nstates--;
-		}
-
-		public static void fonsClearState(FONScontext stash)
-		{
-			FONSstate* state = fons__getState(stash);
-			state->size = (float)(12.0f);
-			state->color = (uint)(0xffffffff);
-			state->font = (int)(0);
-			state->blur = (float)(0);
-			state->spacing = (float)(0);
-			state->align = (int)(FONS_ALIGN_LEFT | FONS_ALIGN_BASELINE);
-		}
-
-		public static void fons__freeFont(FONSfont font)
-		{
-			if ((font) == null) return;
-			if ((font.glyphs) != null) CRuntime.free(font.glyphs);
-			if (((font.freeData) != 0) && ((font.data) != null)) CRuntime.free(font.data);
-		}
-
-		public static int fons__allocFont(FONScontext stash)
-		{
-			FONSfont font = null;
-			if ((stash.nfonts + 1) > (stash.cfonts)) {
-				stash.cfonts = (int)((stash.cfonts) == (0) ? 8 : stash.cfonts * 2); stash.fonts = (FONSfont)(CRuntime.realloc(stash.fonts, (ulong)(sizeof(FONSfont) * stash.cfonts))); if ((stash.fonts) == null) return (int)(-1); }
-
-			font = new FONSfont();
-			if ((font) == null) goto error;
-			font.glyphs = (FONSglyph*)(CRuntime.malloc((ulong)(sizeof(FONSglyph) * 256)));
-			if ((font.glyphs) == null) goto error;
-			font.cglyphs = (int)(256);
-			font.nglyphs = (int)(0);
-			stash.fonts[stash.nfonts++] = font;
-			return (int)(stash.nfonts - 1);
-		error:;
-			fons__freeFont(font);
-			return (int)(-1);
-		}
-
-		public static int fonsAddFontMem(FONScontext stash, sbyte* name, byte* data, int dataSize, int freeData)
-		{
-			int i = 0; int ascent = 0; int descent = 0; int fh = 0; int lineGap = 0;
-			FONSfont font;
-			int idx = (int)(fons__allocFont(stash));
-			if ((idx) == (-1)) return (int)(-1);
-			font = stash.fonts[idx];
-			strncpy(font.name, name, (ulong)(sizeof((font.name))));
-			font.name[sizeof((font.name)) - 1] = (sbyte)('');
-			for (i = (int)(0); (i) < (256); ++i) { font.lut[i] = (int)(-1); }
-			font.dataSize = (int)(dataSize);
-			font.data = data;
-			font.freeData = ((byte)(freeData));
-			stash.nscratch = (int)(0);
-			if (fons__tt_loadFont(stash, &font.font, data, (int)(dataSize)) == 0) goto error;
-			fons__tt_getFontVMetrics(&font.font, &ascent, &descent, &lineGap);
-			fh = (int)(ascent - descent);
-			font.ascender = (float)((float)(ascent) / (float)(fh));
-			font.descender = (float)((float)(descent) / (float)(fh));
-			font.lineh = (float)((float)(fh + lineGap) / (float)(fh));
-			return (int)(idx);
-		error:;
-			fons__freeFont(font);
-			stash.nfonts--;
-			return (int)(-1);
-		}
-
-		public static int fonsGetFontByName(FONScontext s, sbyte* name)
-		{
-			int i = 0;
-			for (i = (int)(0); (i) < (s.nfonts); i++) {
-				if ((strcmp(s.fonts[i].name, name)) == (0)) return (int)(i); }
-			return (int)(-1);
-		}
-
-		public static FONSglyph* fons__allocGlyph(FONSfont font)
-		{
-			if ((font.nglyphs + 1) > (font.cglyphs)) {
-				font.cglyphs = (int)((font.cglyphs) == (0) ? 8 : font.cglyphs * 2); font.glyphs = (FONSglyph*)(CRuntime.realloc(font.glyphs, (ulong)(sizeof(FONSglyph) * font.cglyphs))); if ((font.glyphs) == null) return null; }
-
-			font.nglyphs++;
-			return &font.glyphs[font.nglyphs - 1];
-		}
-
-		public static void fons__blurCols(byte* dst, int w, int h, int dstStride, int alpha)
-		{
-			int x = 0; int y = 0;
-			for (y = (int)(0); (y) < (h); y++) {
-				int z = (int)(0); for (x = (int)(1); (x) < (w); x++) {
-					z += (int)((alpha * (((int)(dst[x]) << 7) - z)) >> 16); dst[x] = ((byte)(z >> 7)); } dst[w - 1] = (byte)(0); z = (int)(0); for (x = (int)(w - 2); (x) >= (0); x--) {
-					z += (int)((alpha * (((int)(dst[x]) << 7) - z)) >> 16); dst[x] = ((byte)(z >> 7)); } dst[0] = (byte)(0); dst += dstStride; }
-		}
-
-		public static void fons__blurRows(byte* dst, int w, int h, int dstStride, int alpha)
-		{
-			int x = 0; int y = 0;
-			for (x = (int)(0); (x) < (w); x++) {
-				int z = (int)(0); for (y = (int)(dstStride); (y) < (h * dstStride); y += (int)(dstStride)) {
-					z += (int)((alpha * (((int)(dst[y]) << 7) - z)) >> 16); dst[y] = ((byte)(z >> 7)); } dst[(h - 1) * dstStride] = (byte)(0); z = (int)(0); for (y = (int)((h - 2) * dstStride); (y) >= (0); y -= (int)(dstStride)) {
-					z += (int)((alpha * (((int)(dst[y]) << 7) - z)) >> 16); dst[y] = ((byte)(z >> 7)); } dst[0] = (byte)(0); dst++; }
-		}
-
-		public static void fons__blur(FONScontext stash, byte* dst, int w, int h, int dstStride, int blur)
-		{
-			int alpha = 0;
-			float sigma = 0;
-			if ((blur) < (1)) return;
-			sigma = (float)((float)(blur) * 0.57735f);
-			alpha = ((int)((1 << 16) * (1.0f - expf((float)(-2.3f / (sigma + 1.0f))))));
-			fons__blurRows(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
-			fons__blurCols(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
-			fons__blurRows(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
-			fons__blurCols(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
-		}
-
-		public static FONSglyph* fons__getGlyph(FONScontext stash, FONSfont font, uint codepoint, short isize, short iblur, int bitmapOption)
-		{
-			int i = 0; int g = 0; int advance = 0; int lsb = 0; int x0 = 0; int y0 = 0; int x1 = 0; int y1 = 0; int gw = 0; int gh = 0; int gx = 0; int gy = 0; int x = 0; int y = 0;
-			float scale = 0;
-			FONSglyph* glyph = null;
-			uint h = 0;
-			float size = (float)(isize / 10.0f);
-			int pad = 0; int added = 0;
-			byte* bdst;
-			byte* dst;
-			FONSfont renderFont = font;
-			if ((isize) < (2)) return null;
-			if ((iblur) > (20)) iblur = (short)(20);
-			pad = (int)(iblur + 2);
-			stash.nscratch = (int)(0);
-			h = (uint)(fons__hashint((uint)(codepoint)) & (256 - 1));
-			i = (int)(font.lut[h]);
-			while (i != -1) {
-				if ((((font.glyphs[i].codepoint) == (codepoint)) && ((font.glyphs[i].size) == (isize))) && ((font.glyphs[i].blur) == (iblur))) {
-					glyph = &font.glyphs[i]; if (((bitmapOption) == (FONS_GLYPH_BITMAP_OPTIONAL)) || (((glyph->x0) >= (0)) && ((glyph->y0) >= (0)))) {
-						return glyph; }
-					break; }
-				i = (int)(font.glyphs[i].next); }
-			g = (int)(fons__tt_getGlyphIndex(&font.font, (int)(codepoint)));
-			if ((g) == (0)) {
-				for (i = (int)(0); (i) < (font.nfallbacks); ++i) {
-					FONSfont fallbackFont = stash.fonts[font.fallbacks[i]]; int fallbackIndex = (int)(fons__tt_getGlyphIndex(&fallbackFont.font, (int)(codepoint))); if (fallbackIndex != 0) {
-						g = (int)(fallbackIndex); renderFont = fallbackFont; break; }
-				} }
-
-			scale = (float)(fons__tt_getPixelHeightScale(&renderFont.font, (float)(size)));
-			fons__tt_buildGlyphBitmap(&renderFont.font, (int)(g), (float)(size), (float)(scale), &advance, &lsb, &x0, &y0, &x1, &y1);
-			gw = (int)(x1 - x0 + pad * 2);
-			gh = (int)(y1 - y0 + pad * 2);
-			if ((bitmapOption) == (FONS_GLYPH_BITMAP_REQUIRED)) {
-				added = (int)(fons__atlasAddRect(stash.atlas, (int)(gw), (int)(gh), &gx, &gy)); if (((added) == (0)) && (stash.handleError != null)) {
-					stash.handleError(stash.errorUptr, (int)(FONS_ATLAS_FULL), (int)(0)); added = (int)(fons__atlasAddRect(stash.atlas, (int)(gw), (int)(gh), &gx, &gy)); }
-				if ((added) == (0)) return null; }
-			else {
-				gx = (int)(-1); gy = (int)(-1); }
-
-			if ((glyph) == null) {
-				glyph = fons__allocGlyph(font); glyph->codepoint = (uint)(codepoint); glyph->size = (short)(isize); glyph->blur = (short)(iblur); glyph->next = (int)(0); glyph->next = (int)(font.lut[h]); font.lut[h] = (int)(font.nglyphs - 1); }
-
-			glyph->index = (int)(g);
-			glyph->x0 = ((short)(gx));
-			glyph->y0 = ((short)(gy));
-			glyph->x1 = ((short)(glyph->x0 + gw));
-			glyph->y1 = ((short)(glyph->y0 + gh));
-			glyph->xadv = ((short)(scale * advance * 10.0f));
-			glyph->xoff = ((short)(x0 - pad));
-			glyph->yoff = ((short)(y0 - pad));
-			if ((bitmapOption) == (FONS_GLYPH_BITMAP_OPTIONAL)) {
-				return glyph; }
-
-			dst = &stash.texData[(glyph->x0 + pad) + (glyph->y0 + pad) * stash._params_.width];
-			fons__tt_renderGlyphBitmap(&renderFont.font, dst, (int)(gw - pad * 2), (int)(gh - pad * 2), (int)(stash._params_.width), (float)(scale), (float)(scale), (int)(g));
-			dst = &stash.texData[glyph->x0 + glyph->y0 * stash._params_.width];
-			for (y = (int)(0); (y) < (gh); y++) {
-				dst[y * stash._params_.width] = (byte)(0); dst[gw - 1 + y * stash._params_.width] = (byte)(0); }
-			for (x = (int)(0); (x) < (gw); x++) {
-				dst[x] = (byte)(0); dst[x + (gh - 1) * stash._params_.width] = (byte)(0); }
-			if ((iblur) > (0)) {
-				stash.nscratch = (int)(0); bdst = &stash.texData[glyph->x0 + glyph->y0 * stash._params_.width]; fons__blur(stash, bdst, (int)(gw), (int)(gh), (int)(stash._params_.width), (int)(iblur)); }
-
-			stash.dirtyRect[0] = (int)(fons__mini((int)(stash.dirtyRect[0]), (int)(glyph->x0)));
-			stash.dirtyRect[1] = (int)(fons__mini((int)(stash.dirtyRect[1]), (int)(glyph->y0)));
-			stash.dirtyRect[2] = (int)(fons__maxi((int)(stash.dirtyRect[2]), (int)(glyph->x1)));
-			stash.dirtyRect[3] = (int)(fons__maxi((int)(stash.dirtyRect[3]), (int)(glyph->y1)));
-			return glyph;
-		}
-
-		public static void fons__getQuad(FONScontext stash, FONSfont font, int prevGlyphIndex, FONSglyph* glyph, float scale, float spacing, float* x, float* y, FONSquad* q)
-		{
-			float rx = 0; float ry = 0; float xoff = 0; float yoff = 0; float x0 = 0; float y0 = 0; float x1 = 0; float y1 = 0;
-			if (prevGlyphIndex != -1) {
-				float adv = (float)(fons__tt_getGlyphKernAdvance(&font.font, (int)(prevGlyphIndex), (int)(glyph->index)) * scale); *x += (float)((int)(adv + spacing + 0.5f)); }
-
-			xoff = (float)((short)(glyph->xoff + 1));
-			yoff = (float)((short)(glyph->yoff + 1));
-			x0 = ((float)(glyph->x0 + 1));
-			y0 = ((float)(glyph->y0 + 1));
-			x1 = ((float)(glyph->x1 - 1));
-			y1 = ((float)(glyph->y1 - 1));
-			if ((stash._params_.flags & FONS_ZERO_TOPLEFT) != 0) {
-				rx = ((float)((int)(*x + xoff))); ry = ((float)((int)(*y + yoff))); q->x0 = (float)(rx); q->y0 = (float)(ry); q->x1 = (float)(rx + x1 - x0); q->y1 = (float)(ry + y1 - y0); q->s0 = (float)(x0 * stash.itw); q->t0 = (float)(y0 * stash.ith); q->s1 = (float)(x1 * stash.itw); q->t1 = (float)(y1 * stash.ith); }
-			else {
-				rx = ((float)((int)(*x + xoff))); ry = ((float)((int)(*y - yoff))); q->x0 = (float)(rx); q->y0 = (float)(ry); q->x1 = (float)(rx + x1 - x0); q->y1 = (float)(ry - y1 + y0); q->s0 = (float)(x0 * stash.itw); q->t0 = (float)(y0 * stash.ith); q->s1 = (float)(x1 * stash.itw); q->t1 = (float)(y1 * stash.ith); }
-
-			*x += (float)((int)(glyph->xadv / 10.0f + 0.5f));
-		}
-
-		public static void fons__flush(FONScontext stash)
-		{
-			if (((stash.dirtyRect[0]) < (stash.dirtyRect[2])) && ((stash.dirtyRect[1]) < (stash.dirtyRect[3]))) {
-				if (stash._params_.renderUpdate != null) stash._params_.renderUpdate(stash._params_.userPtr, stash.dirtyRect, stash.texData); stash.dirtyRect[0] = (int)(stash._params_.width); stash.dirtyRect[1] = (int)(stash._params_.height); stash.dirtyRect[2] = (int)(0); stash.dirtyRect[3] = (int)(0); }
-
-			if ((stash.nverts) > (0)) {
-				if (stash._params_.renderDraw != null) stash._params_.renderDraw(stash._params_.userPtr, stash.verts, stash.tcoords, stash.colors, (int)(stash.nverts)); stash.nverts = (int)(0); }
-
-		}
-
-		public static void fons__vertex(FONScontext stash, float x, float y, float s, float t, uint c)
-		{
-			stash.verts[stash.nverts * 2 + 0] = (float)(x);
-			stash.verts[stash.nverts * 2 + 1] = (float)(y);
-			stash.tcoords[stash.nverts * 2 + 0] = (float)(s);
-			stash.tcoords[stash.nverts * 2 + 1] = (float)(t);
-			stash.colors[stash.nverts] = (uint)(c);
-			stash.nverts++;
-		}
-
-		public static float fons__getVertAlign(FONScontext stash, FONSfont font, int align, short isize)
-		{
-			if ((stash._params_.flags & FONS_ZERO_TOPLEFT) != 0) {
-				if ((align & FONS_ALIGN_TOP) != 0) {
-					return (float)(font.ascender * (float)(isize) / 10.0f); }
-				else if ((align & FONS_ALIGN_MIDDLE) != 0) {
-					return (float)((font.ascender + font.descender) / 2.0f * (float)(isize) / 10.0f); }
-				else if ((align & FONS_ALIGN_BASELINE) != 0) {
-					return (float)(0.0f); }
-				else if ((align & FONS_ALIGN_BOTTOM) != 0) {
-					return (float)(font.descender * (float)(isize) / 10.0f); }
-			}
-			else {
-				if ((align & FONS_ALIGN_TOP) != 0) {
-					return (float)(-font.ascender * (float)(isize) / 10.0f); }
-				else if ((align & FONS_ALIGN_MIDDLE) != 0) {
-					return (float)(-(font.ascender + font.descender) / 2.0f * (float)(isize) / 10.0f); }
-				else if ((align & FONS_ALIGN_BASELINE) != 0) {
-					return (float)(0.0f); }
-				else if ((align & FONS_ALIGN_BOTTOM) != 0) {
-					return (float)(-font.descender * (float)(isize) / 10.0f); }
-			}
-
-			return (float)(0.0);
-		}
-
-		public static float fonsDrawText(FONScontext stash, float x, float y, sbyte* str, sbyte* end)
-		{
-			FONSstate* state = fons__getState(stash);
-			uint codepoint = 0;
-			uint utf8state = (uint)(0);
-			FONSglyph* glyph = null;
-			FONSquad q = new FONSquad();
-			int prevGlyphIndex = (int)(-1);
-			short isize = (short)(state->size * 10.0f);
-			short iblur = (short)(state->blur);
-			float scale = 0;
-			FONSfont font;
-			float width = 0;
-			if ((stash) == null) return (float)(x);
-			if (((state->font) < (0)) || ((state->font) >= (stash.nfonts))) return (float)(x);
-			font = stash.fonts[state->font];
-			if ((font.data) == null) return (float)(x);
-			scale = (float)(fons__tt_getPixelHeightScale(&font.font, (float)((float)(isize) / 10.0f)));
-			if ((end) == null) end = str + CRuntime.strlen(str);
-			if ((state->align & FONS_ALIGN_LEFT) != 0) {
-			}
-			else if ((state->align & FONS_ALIGN_RIGHT) != 0) {
-				width = (float)(fonsTextBounds(stash, (float)(x), (float)(y), str, end, null)); x -= (float)(width); }
-			else if ((state->align & FONS_ALIGN_CENTER) != 0) {
-				width = (float)(fonsTextBounds(stash, (float)(x), (float)(y), str, end, null)); x -= (float)(width * 0.5f); }
-
-			y += (float)(fons__getVertAlign(stash, font, (int)(state->align), (short)(isize)));
-			for (; str != end; ++str) {
-				if ((fons__decutf8(&utf8state, &codepoint, (uint)(*(byte*)(str)))) != 0) continue; glyph = fons__getGlyph(stash, font, (uint)(codepoint), (short)(isize), (short)(iblur), (int)(FONS_GLYPH_BITMAP_REQUIRED)); if (glyph != null) {
-					fons__getQuad(stash, font, (int)(prevGlyphIndex), glyph, (float)(scale), (float)(state->spacing), &x, &y, &q); if ((stash.nverts + 6) > (1024)) fons__flush(stash); fons__vertex(stash, (float)(q.x0), (float)(q.y0), (float)(q.s0), (float)(q.t0), (uint)(state->color)); fons__vertex(stash, (float)(q.x1), (float)(q.y1), (float)(q.s1), (float)(q.t1), (uint)(state->color)); fons__vertex(stash, (float)(q.x1), (float)(q.y0), (float)(q.s1), (float)(q.t0), (uint)(state->color)); fons__vertex(stash, (float)(q.x0), (float)(q.y0), (float)(q.s0), (float)(q.t0), (uint)(state->color)); fons__vertex(stash, (float)(q.x0), (float)(q.y1), (float)(q.s0), (float)(q.t1), (uint)(state->color)); fons__vertex(stash, (float)(q.x1), (float)(q.y1), (float)(q.s1), (float)(q.t1), (uint)(state->color)); }
-				prevGlyphIndex = (int)(glyph != null ? glyph->index : -1); }
-			fons__flush(stash);
-			return (float)(x);
-		}
-
-		public static int fonsTextIterInit(FONScontext stash, FONStextIter iter, float x, float y, sbyte* str, sbyte* end, int bitmapOption)
-		{
-			FONSstate* state = fons__getState(stash);
-			float width = 0;
-			CRuntime.memset(iter, (int)(0), (ulong)(sizeof((iter))));
-			if ((stash) == null) return (int)(0);
-			if (((state->font) < (0)) || ((state->font) >= (stash.nfonts))) return (int)(0);
-			iter.font = stash.fonts[state->font];
-			if ((iter.font.data) == null) return (int)(0);
-			iter.isize = ((short)(state->size * 10.0f));
-			iter.iblur = ((short)(state->blur));
-			iter.scale = (float)(fons__tt_getPixelHeightScale(&iter.font.font, (float)((float)(iter.isize) / 10.0f)));
-			if ((state->align & FONS_ALIGN_LEFT) != 0) {
-			}
-			else if ((state->align & FONS_ALIGN_RIGHT) != 0) {
-				width = (float)(fonsTextBounds(stash, (float)(x), (float)(y), str, end, null)); x -= (float)(width); }
-			else if ((state->align & FONS_ALIGN_CENTER) != 0) {
-				width = (float)(fonsTextBounds(stash, (float)(x), (float)(y), str, end, null)); x -= (float)(width * 0.5f); }
-
-			y += (float)(fons__getVertAlign(stash, iter.font, (int)(state->align), (short)(iter.isize)));
-			if ((end) == null) end = str + CRuntime.strlen(str);
-			iter.x = (float)(iter.nextx = (float)(x));
-			iter.y = (float)(iter.nexty = (float)(y));
-			iter.spacing = (float)(state->spacing);
-			iter.str = str;
-			iter.next = str;
-			iter.end = end;
-			iter.codepoint = (uint)(0);
-			iter.prevGlyphIndex = (int)(-1);
-			iter.bitmapOption = (int)(bitmapOption);
-			return (int)(1);
-		}
-
-		public static int fonsTextIterNext(FONScontext stash, FONStextIter iter, FONSquad* quad)
-		{
-			FONSglyph* glyph = null;
-			sbyte* str = iter.next;
-			iter.str = iter.next;
-			if ((str) == (iter.end)) return (int)(0);
-			for (; str != iter.end; str++) {
-				if ((fons__decutf8(&iter.utf8state, &iter.codepoint, (uint)(*(byte*)(str)))) != 0) continue; str++; iter.x = (float)(iter.nextx); iter.y = (float)(iter.nexty); glyph = fons__getGlyph(stash, iter.font, (uint)(iter.codepoint), (short)(iter.isize), (short)(iter.iblur), (int)(iter.bitmapOption)); if (glyph != null) fons__getQuad(stash, iter.font, (int)(iter.prevGlyphIndex), glyph, (float)(iter.scale), (float)(iter.spacing), &iter.nextx, &iter.nexty, quad); iter.prevGlyphIndex = (int)(glyph != null ? glyph->index : -1); break; }
-			iter.next = str;
-			return (int)(1);
-		}
-
-		public static void fonsDrawDebug(FONScontext stash, float x, float y)
-		{
-			int i = 0;
-			int w = (int)(stash._params_.width);
-			int h = (int)(stash._params_.height);
-			float u = (float)((w) == (0) ? 0 : (1.0f / w));
-			float v = (float)((h) == (0) ? 0 : (1.0f / h));
-			if ((stash.nverts + 6 + 6) > (1024)) fons__flush(stash);
-			fons__vertex(stash, (float)(x + 0), (float)(y + 0), (float)(u), (float)(v), (uint)(0x0fffffff));
-			fons__vertex(stash, (float)(x + w), (float)(y + h), (float)(u), (float)(v), (uint)(0x0fffffff));
-			fons__vertex(stash, (float)(x + w), (float)(y + 0), (float)(u), (float)(v), (uint)(0x0fffffff));
-			fons__vertex(stash, (float)(x + 0), (float)(y + 0), (float)(u), (float)(v), (uint)(0x0fffffff));
-			fons__vertex(stash, (float)(x + 0), (float)(y + h), (float)(u), (float)(v), (uint)(0x0fffffff));
-			fons__vertex(stash, (float)(x + w), (float)(y + h), (float)(u), (float)(v), (uint)(0x0fffffff));
-			fons__vertex(stash, (float)(x + 0), (float)(y + 0), (float)(0), (float)(0), (uint)(0xffffffff));
-			fons__vertex(stash, (float)(x + w), (float)(y + h), (float)(1), (float)(1), (uint)(0xffffffff));
-			fons__vertex(stash, (float)(x + w), (float)(y + 0), (float)(1), (float)(0), (uint)(0xffffffff));
-			fons__vertex(stash, (float)(x + 0), (float)(y + 0), (float)(0), (float)(0), (uint)(0xffffffff));
-			fons__vertex(stash, (float)(x + 0), (float)(y + h), (float)(0), (float)(1), (uint)(0xffffffff));
-			fons__vertex(stash, (float)(x + w), (float)(y + h), (float)(1), (float)(1), (uint)(0xffffffff));
-			for (i = (int)(0); (i) < (stash.atlas->nnodes); i++) {
-				FONSatlasNode* n = &stash.atlas->nodes[i]; if ((stash.nverts + 6) > (1024)) fons__flush(stash); fons__vertex(stash, (float)(x + n->x + 0), (float)(y + n->y + 0), (float)(u), (float)(v), (uint)(0xc00000ff)); fons__vertex(stash, (float)(x + n->x + n->width), (float)(y + n->y + 1), (float)(u), (float)(v), (uint)(0xc00000ff)); fons__vertex(stash, (float)(x + n->x + n->width), (float)(y + n->y + 0), (float)(u), (float)(v), (uint)(0xc00000ff)); fons__vertex(stash, (float)(x + n->x + 0), (float)(y + n->y + 0), (float)(u), (float)(v), (uint)(0xc00000ff)); fons__vertex(stash, (float)(x + n->x + 0), (float)(y + n->y + 1), (float)(u), (float)(v), (uint)(0xc00000ff)); fons__vertex(stash, (float)(x + n->x + n->width), (float)(y + n->y + 1), (float)(u), (float)(v), (uint)(0xc00000ff)); }
-			fons__flush(stash);
-		}
-
-		public static float fonsTextBounds(FONScontext stash, float x, float y, sbyte* str, sbyte* end, float* bounds)
-		{
-			FONSstate* state = fons__getState(stash);
-			uint codepoint = 0;
-			uint utf8state = (uint)(0);
-			FONSquad q = new FONSquad();
-			FONSglyph* glyph = null;
-			int prevGlyphIndex = (int)(-1);
-			short isize = (short)(state->size * 10.0f);
-			short iblur = (short)(state->blur);
-			float scale = 0;
-			FONSfont font;
-			float startx = 0; float advance = 0;
-			float minx = 0; float miny = 0; float maxx = 0; float maxy = 0;
-			if ((stash) == null) return (float)(0);
-			if (((state->font) < (0)) || ((state->font) >= (stash.nfonts))) return (float)(0);
-			font = stash.fonts[state->font];
-			if ((font.data) == null) return (float)(0);
-			scale = (float)(fons__tt_getPixelHeightScale(&font.font, (float)((float)(isize) / 10.0f)));
-			y += (float)(fons__getVertAlign(stash, font, (int)(state->align), (short)(isize)));
-			minx = (float)(maxx = (float)(x));
-			miny = (float)(maxy = (float)(y));
-			startx = (float)(x);
-			if ((end) == null) end = str + CRuntime.strlen(str);
-			for (; str != end; ++str) {
-				if ((fons__decutf8(&utf8state, &codepoint, (uint)(*(byte*)(str)))) != 0) continue; glyph = fons__getGlyph(stash, font, (uint)(codepoint), (short)(isize), (short)(iblur), (int)(FONS_GLYPH_BITMAP_OPTIONAL)); if (glyph != null) {
-					fons__getQuad(stash, font, (int)(prevGlyphIndex), glyph, (float)(scale), (float)(state->spacing), &x, &y, &q); if ((q.x0) < (minx)) minx = (float)(q.x0); if ((q.x1) > (maxx)) maxx = (float)(q.x1); if ((stash._params_.flags & FONS_ZERO_TOPLEFT) != 0) {
-						if ((q.y0) < (miny)) miny = (float)(q.y0); if ((q.y1) > (maxy)) maxy = (float)(q.y1); }
-					else {
-						if ((q.y1) < (miny)) miny = (float)(q.y1); if ((q.y0) > (maxy)) maxy = (float)(q.y0); }
-				}
-				prevGlyphIndex = (int)(glyph != null ? glyph->index : -1); }
-			advance = (float)(x - startx);
-			if ((state->align & FONS_ALIGN_LEFT) != 0) {
-			}
-			else if ((state->align & FONS_ALIGN_RIGHT) != 0) {
-				minx -= (float)(advance); maxx -= (float)(advance); }
-			else if ((state->align & FONS_ALIGN_CENTER) != 0) {
-				minx -= (float)(advance * 0.5f); maxx -= (float)(advance * 0.5f); }
-
-			if ((bounds) != null) {
-				bounds[0] = (float)(minx); bounds[1] = (float)(miny); bounds[2] = (float)(maxx); bounds[3] = (float)(maxy); }
-
-			return (float)(advance);
-		}
-
-		public static void fonsVertMetrics(FONScontext stash, float* ascender, float* descender, float* lineh)
-		{
-			FONSfont font;
-			FONSstate* state = fons__getState(stash);
-			short isize = 0;
-			if ((stash) == null) return;
-			if (((state->font) < (0)) || ((state->font) >= (stash.nfonts))) return;
-			font = stash.fonts[state->font];
-			isize = ((short)(state->size * 10.0f));
-			if ((font.data) == null) return;
-			if ((ascender) != null) *ascender = (float)(font.ascender * isize / 10.0f);
-			if ((descender) != null) *descender = (float)(font.descender * isize / 10.0f);
-			if ((lineh) != null) *lineh = (float)(font.lineh * isize / 10.0f);
-		}
-
-		public static void fonsLineBounds(FONScontext stash, float y, float* miny, float* maxy)
-		{
-			FONSfont font;
-			FONSstate* state = fons__getState(stash);
-			short isize = 0;
-			if ((stash) == null) return;
-			if (((state->font) < (0)) || ((state->font) >= (stash.nfonts))) return;
-			font = stash.fonts[state->font];
-			isize = ((short)(state->size * 10.0f));
-			if ((font.data) == null) return;
-			y += (float)(fons__getVertAlign(stash, font, (int)(state->align), (short)(isize)));
-			if ((stash._params_.flags & FONS_ZERO_TOPLEFT) != 0) {
-				*miny = (float)(y - font.ascender * (float)(isize) / 10.0f); *maxy = (float)(*miny + font.lineh * isize / 10.0f); }
-			else {
-				*maxy = (float)(y + font.descender * (float)(isize) / 10.0f); *miny = (float)(*maxy - font.lineh * isize / 10.0f); }
-
-		}
-
-		public static byte* fonsGetTextureData(FONScontext stash, int* width, int* height)
-		{
-			if (width != null) *width = (int)(stash._params_.width);
-			if (height != null) *height = (int)(stash._params_.height);
-			return stash.texData;
-		}
-
-		public static int fonsValidateTexture(FONScontext stash, int* dirty)
-		{
-			if (((stash.dirtyRect[0]) < (stash.dirtyRect[2])) && ((stash.dirtyRect[1]) < (stash.dirtyRect[3]))) {
-				dirty[0] = (int)(stash.dirtyRect[0]); dirty[1] = (int)(stash.dirtyRect[1]); dirty[2] = (int)(stash.dirtyRect[2]); dirty[3] = (int)(stash.dirtyRect[3]); stash.dirtyRect[0] = (int)(stash._params_.width); stash.dirtyRect[1] = (int)(stash._params_.height); stash.dirtyRect[2] = (int)(0); stash.dirtyRect[3] = (int)(0); return (int)(1); }
-
-			return (int)(0);
-		}
-
-		public static void fonsDeleteInternal(FONScontext stash)
-		{
-			int i = 0;
-			if ((stash) == null) return;
-			if ((stash._params_.renderDelete) != null) stash._params_.renderDelete(stash._params_.userPtr);
-			for (i = (int)(0); (i) < (stash.nfonts); ++i) { fons__freeFont(stash.fonts[i]); }
-			if ((stash.atlas) != null) fons__deleteAtlas(stash.atlas);
-			if ((stash.fonts) != null) CRuntime.free(stash.fonts);
-			if ((stash.texData) != null) CRuntime.free(stash.texData);
-			if ((stash.scratch) != null) CRuntime.free(stash.scratch);
-			CRuntime.free(stash);
-			fons__tt_done(stash);
-		}
-
-		public static void fonsSetErrorCallback(FONScontext stash, void (void*, int, int) * callback, void* uptr)
-		{
-			if ((stash) == null) return;
-			stash.handleError = callback;
-			stash.errorUptr = uptr;
-		}
-
-		public static void fonsGetAtlasSize(FONScontext stash, int* width, int* height)
-		{
-			if ((stash) == null) return;
-			*width = (int)(stash._params_.width);
-			*height = (int)(stash._params_.height);
-		}
-
-		public static int fonsExpandAtlas(FONScontext stash, int width, int height)
-		{
-			int i = 0; int maxy = (int)(0);
-			byte* data = null;
-			if ((stash) == null) return (int)(0);
-			width = (int)(fons__maxi((int)(width), (int)(stash._params_.width)));
-			height = (int)(fons__maxi((int)(height), (int)(stash._params_.height)));
-			if (((width) == (stash._params_.width)) && ((height) == (stash._params_.height))) return (int)(1);
-			fons__flush(stash);
-			if (stash._params_.renderResize != null) {
-				if ((stash._params_.renderResize(stash._params_.userPtr, (int)(width), (int)(height))) == (0)) return (int)(0); }
-
-			data = (byte*)(CRuntime.malloc((ulong)(width * height)));
-			if ((data) == null) return (int)(0);
-			for (i = (int)(0); (i) < (stash._params_.height); i++) {
-				byte* dst = &data[i * width]; byte* src = &stash.texData[i * stash._params_.width]; CRuntime.memcpy(dst, src, (ulong)(stash._params_.width)); if ((width) > (stash._params_.width)) CRuntime.memset(dst + stash._params_.width, (int)(0), (ulong)(width - stash._params_.width)); }
-			if ((height) > (stash._params_.height)) CRuntime.memset(&data[stash._params_.height * width], (int)(0), (ulong)((height - stash._params_.height) * width));
-			CRuntime.free(stash.texData);
-			stash.texData = data;
-			fons__atlasExpand(stash.atlas, (int)(width), (int)(height));
-			for (i = (int)(0); (i) < (stash.atlas->nnodes); i++) { maxy = (int)(fons__maxi((int)(maxy), (int)(stash.atlas->nodes[i].y))); }
-			stash.dirtyRect[0] = (int)(0);
-			stash.dirtyRect[1] = (int)(0);
-			stash.dirtyRect[2] = (int)(stash._params_.width);
-			stash.dirtyRect[3] = (int)(maxy);
-			stash._params_.width = (int)(width);
-			stash._params_.height = (int)(height);
-			stash.itw = (float)(1.0f / stash._params_.width);
-			stash.ith = (float)(1.0f / stash._params_.height);
-			return (int)(1);
-		}
-
-		public static int fonsResetAtlas(FONScontext stash, int width, int height)
-		{
-			int i = 0; int j = 0;
-			if ((stash) == null) return (int)(0);
-			fons__flush(stash);
-			if (stash._params_.renderResize != null) {
-				if ((stash._params_.renderResize(stash._params_.userPtr, (int)(width), (int)(height))) == (0)) return (int)(0); }
-
-			fons__atlasReset(stash.atlas, (int)(width), (int)(height));
-			stash.texData = (byte*)(CRuntime.realloc(stash.texData, (ulong)(width * height)));
-			if ((stash.texData) == null) return (int)(0);
-			CRuntime.memset(stash.texData, (int)(0), (ulong)(width * height));
-			stash.dirtyRect[0] = (int)(width);
-			stash.dirtyRect[1] = (int)(height);
-			stash.dirtyRect[2] = (int)(0);
-			stash.dirtyRect[3] = (int)(0);
-			for (i = (int)(0); (i) < (stash.nfonts); i++) {
-				FONSfont font = stash.fonts[i]; font.nglyphs = (int)(0); for (j = (int)(0); (j) < (256); j++) { font.lut[j] = (int)(-1); } }
-			stash._params_.width = (int)(width);
-			stash._params_.height = (int)(height);
-			stash.itw = (float)(1.0f / stash._params_.width);
-			stash.ith = (float)(1.0f / stash._params_.height);
-			fons__addWhiteRect(stash, (int)(2), (int)(2));
-			return (int)(1);
-		}
-
-		public static float nvg__sqrtf(float a)
-		{
-			return (float)(sqrtf((float)(a)));
+			return (float)(Math.Ceiling((float)(a)));
 		}
 
 		public static float nvg__modf(float a, float b)
 		{
-			return (float)(fmodf((float)(a), (float)(b)));
-		}
-
-		public static float nvg__sinf(float a)
-		{
-			return (float)(sinf((float)(a)));
-		}
-
-		public static float nvg__cosf(float a)
-		{
-			return (float)(cosf((float)(a)));
-		}
-
-		public static float nvg__tanf(float a)
-		{
-			return (float)(tanf((float)(a)));
-		}
-
-		public static float nvg__atan2f(float a, float b)
-		{
-			return (float)(atan2f((float)(a), (float)(b)));
-		}
-
-		public static float nvg__acosf(float a)
-		{
-			return (float)(acosf((float)(a)));
+			return (float)(CRuntime.fmod((float)(a), (float)(b)));
 		}
 
 		public static int nvg__mini(int a, int b)
@@ -1645,39 +189,52 @@ namespace NanoVGSharp
 
 		public static float nvg__normalize(float* x, float* y)
 		{
-			float d = (float)(nvg__sqrtf((float)((*x) * (*x) + (*y) * (*y))));
-			if ((d) > (1e-6f)) {
-				float id = (float)(1.0f / d); *x *= (float)(id); *y *= (float)(id); }
+			float d = (float)(sqrtf((float)((*x) * (*x) + (*y) * (*y))));
+			if ((d) > (1e-6f))
+			{
+				float id = (float)(1.0f / d);
+				*x *= (float)(id);
+				*y *= (float)(id);
+			}
 
 			return (float)(d);
 		}
 
 		public static void nvg__deletePathCache(NVGpathCache c)
 		{
-			if ((c) == null) return;
-			if (c.points != null) CRuntime.free(c.points);
-			if (c.paths != null) CRuntime.free(c.paths);
-			if (c.verts != null) CRuntime.free(c.verts);
+			if ((c) == null)
+				return;
+			if (c.points != null)
+				CRuntime.free(c.points);
+			if (c.paths != null)
+				CRuntime.free(c.paths);
+			if (c.verts != null)
+				CRuntime.free(c.verts);
 		}
 
 		public static NVGpathCache nvg__allocPathCache()
 		{
 			NVGpathCache c = new NVGpathCache();
-			if ((c) == null) goto error;
+			if ((c) == null)
+				goto error;
 			c.points = (NVGpoint*)(CRuntime.malloc((ulong)(sizeof(NVGpoint) * 128)));
-			if (c.points == null) goto error;
+			if (c.points == null)
+				goto error;
 			c.npoints = (int)(0);
 			c.cpoints = (int)(128);
 			c.paths = (NVGpath*)(CRuntime.malloc((ulong)(sizeof(NVGpath) * 16)));
-			if (c.paths == null) goto error;
+			if (c.paths == null)
+				goto error;
 			c.npaths = (int)(0);
 			c.cpaths = (int)(16);
 			c.verts = (NVGvertex*)(CRuntime.malloc((ulong)(sizeof(NVGvertex) * 256)));
-			if (c.verts == null) goto error;
+			if (c.verts == null)
+				goto error;
 			c.nverts = (int)(0);
 			c.cverts = (int)(256);
 			return c;
-		error:;
+		error:
+			;
 			nvg__deletePathCache(c);
 			return null;
 		}
@@ -1692,31 +249,68 @@ namespace NanoVGSharp
 
 		public static NVGcompositeOperationState nvg__compositeOperationState(int op)
 		{
-			int sfactor = 0; int dfactor = 0;
-			if ((op) == (NVG_SOURCE_OVER)) {
-				sfactor = (int)(NVG_ONE); dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA); }
-			else if ((op) == (NVG_SOURCE_IN)) {
-				sfactor = (int)(NVG_DST_ALPHA); dfactor = (int)(NVG_ZERO); }
-			else if ((op) == (NVG_SOURCE_OUT)) {
-				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA); dfactor = (int)(NVG_ZERO); }
-			else if ((op) == (NVG_ATOP)) {
-				sfactor = (int)(NVG_DST_ALPHA); dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA); }
-			else if ((op) == (NVG_DESTINATION_OVER)) {
-				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA); dfactor = (int)(NVG_ONE); }
-			else if ((op) == (NVG_DESTINATION_IN)) {
-				sfactor = (int)(NVG_ZERO); dfactor = (int)(NVG_SRC_ALPHA); }
-			else if ((op) == (NVG_DESTINATION_OUT)) {
-				sfactor = (int)(NVG_ZERO); dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA); }
-			else if ((op) == (NVG_DESTINATION_ATOP)) {
-				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA); dfactor = (int)(NVG_SRC_ALPHA); }
-			else if ((op) == (NVG_LIGHTER)) {
-				sfactor = (int)(NVG_ONE); dfactor = (int)(NVG_ONE); }
-			else if ((op) == (NVG_COPY)) {
-				sfactor = (int)(NVG_ONE); dfactor = (int)(NVG_ZERO); }
-			else if ((op) == (NVG_XOR)) {
-				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA); dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA); }
-			else {
-				sfactor = (int)(NVG_ONE); dfactor = (int)(NVG_ZERO); }
+			int sfactor = 0;
+			int dfactor = 0;
+			if ((op) == (NVG_SOURCE_OVER))
+			{
+				sfactor = (int)(NVG_ONE);
+				dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA);
+			}
+			else if ((op) == (NVG_SOURCE_IN))
+			{
+				sfactor = (int)(NVG_DST_ALPHA);
+				dfactor = (int)(NVG_ZERO);
+			}
+			else if ((op) == (NVG_SOURCE_OUT))
+			{
+				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA);
+				dfactor = (int)(NVG_ZERO);
+			}
+			else if ((op) == (NVG_ATOP))
+			{
+				sfactor = (int)(NVG_DST_ALPHA);
+				dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA);
+			}
+			else if ((op) == (NVG_DESTINATION_OVER))
+			{
+				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA);
+				dfactor = (int)(NVG_ONE);
+			}
+			else if ((op) == (NVG_DESTINATION_IN))
+			{
+				sfactor = (int)(NVG_ZERO);
+				dfactor = (int)(NVG_SRC_ALPHA);
+			}
+			else if ((op) == (NVG_DESTINATION_OUT))
+			{
+				sfactor = (int)(NVG_ZERO);
+				dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA);
+			}
+			else if ((op) == (NVG_DESTINATION_ATOP))
+			{
+				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA);
+				dfactor = (int)(NVG_SRC_ALPHA);
+			}
+			else if ((op) == (NVG_LIGHTER))
+			{
+				sfactor = (int)(NVG_ONE);
+				dfactor = (int)(NVG_ONE);
+			}
+			else if ((op) == (NVG_COPY))
+			{
+				sfactor = (int)(NVG_ONE);
+				dfactor = (int)(NVG_ZERO);
+			}
+			else if ((op) == (NVG_XOR))
+			{
+				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA);
+				dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA);
+			}
+			else
+			{
+				sfactor = (int)(NVG_ONE);
+				dfactor = (int)(NVG_ZERO);
+			}
 
 			NVGcompositeOperationState state = new NVGcompositeOperationState();
 			state.srcRGB = (int)(sfactor);
@@ -1736,19 +330,26 @@ namespace NanoVGSharp
 			FONSparams fontParams = new FONSparams();
 			NVGcontext ctx = new NVGcontext();
 			int i = 0;
-			if ((ctx) == null) goto error;
+			if ((ctx) == null)
+				goto error;
 			ctx._params_ = (NVGparams)(_params_);
-			for (i = (int)(0); (i) < (4); i++) { ctx.fontImages[i] = (int)(0); }
+			for (i = (int)(0); (i) < (4); i++)
+			{
+				ctx.fontImages[i] = (int)(0);
+			}
 			ctx.commands = (float*)(CRuntime.malloc((ulong)(sizeof(float) * 256)));
-			if (ctx.commands == null) goto error;
+			if (ctx.commands == null)
+				goto error;
 			ctx.ncommands = (int)(0);
 			ctx.ccommands = (int)(256);
 			ctx.cache = nvg__allocPathCache();
-			if ((ctx.cache) == null) goto error;
+			if ((ctx.cache) == null)
+				goto error;
 			nvgSave(ctx);
 			nvgReset(ctx);
 			nvg__setDevicePixelRatio(ctx, (float)(1.0f));
-			if ((ctx._params_.renderCreate(ctx._params_.userPtr)) == (0)) goto error;
+			if ((ctx._params_.renderCreate(ctx._params_.userPtr)) == (0))
+				goto error;
 			fontParams.width = (int)(512);
 			fontParams.height = (int)(512);
 			fontParams.flags = (byte)(FONS_ZERO_TOPLEFT);
@@ -1758,12 +359,15 @@ namespace NanoVGSharp
 			fontParams.renderDelete = null;
 			fontParams.userPtr = null;
 			ctx.fs = fonsCreateInternal(fontParams);
-			if ((ctx.fs) == null) goto error;
+			if ((ctx.fs) == null)
+				goto error;
 			ctx.fontImages[0] = (int)(ctx._params_.renderCreateTexture(ctx._params_.userPtr, (int)(NVG_TEXTURE_ALPHA), (int)(fontParams.width), (int)(fontParams.height), (int)(0), null));
-			if ((ctx.fontImages[0]) == (0)) goto error;
+			if ((ctx.fontImages[0]) == (0))
+				goto error;
 			ctx.fontImageIdx = (int)(0);
 			return ctx;
-		error:;
+		error:
+			;
 			nvgDeleteInternal(ctx);
 			return null;
 		}
@@ -1776,15 +380,24 @@ namespace NanoVGSharp
 		public static void nvgDeleteInternal(NVGcontext ctx)
 		{
 			int i = 0;
-			if ((ctx) == null) return;
-			if (ctx.commands != null) CRuntime.free(ctx.commands);
-			if (ctx.cache != null) nvg__deletePathCache(ctx.cache);
-			if ((ctx.fs) != null) fonsDeleteInternal(ctx.fs);
-			for (i = (int)(0); (i) < (4); i++) {
-				if (ctx.fontImages[i] != 0) {
-					nvgDeleteImage(ctx, (int)(ctx.fontImages[i])); ctx.fontImages[i] = (int)(0); }
+			if ((ctx) == null)
+				return;
+			if (ctx.commands != null)
+				CRuntime.free(ctx.commands);
+			if (ctx.cache != null)
+				nvg__deletePathCache(ctx.cache);
+			if ((ctx.fs) != null)
+				fonsDeleteInternal(ctx.fs);
+			for (i = (int)(0); (i) < (4); i++)
+			{
+				if (ctx.fontImages[i] != 0)
+				{
+					nvgDeleteImage(ctx, (int)(ctx.fontImages[i]));
+					ctx.fontImages[i] = (int)(0);
+				}
 			}
-			if (ctx._params_.renderDelete != null) ctx._params_.renderDelete(ctx._params_.userPtr);
+			if (ctx._params_.renderDelete != null)
+				ctx._params_.renderDelete(ctx._params_.userPtr);
 		}
 
 		public static void nvgBeginFrame(NVGcontext ctx, float windowWidth, float windowHeight, float devicePixelRatio)
@@ -1808,11 +421,37 @@ namespace NanoVGSharp
 		public static void nvgEndFrame(NVGcontext ctx)
 		{
 			ctx._params_.renderFlush(ctx._params_.userPtr);
-			if (ctx.fontImageIdx != 0) {
-				int fontImage = (int)(ctx.fontImages[ctx.fontImageIdx]); int i = 0; int j = 0; int iw = 0; int ih = 0; if ((fontImage) == (0)) return; nvgImageSize(ctx, (int)(fontImage), &iw, &ih); for (i = (int)(j = (int)(0)); (i) < (ctx.fontImageIdx); i++) {
-					if (ctx.fontImages[i] != 0) {
-						int nw = 0; int nh = 0; nvgImageSize(ctx, (int)(ctx.fontImages[i]), &nw, &nh); if (((nw) < (iw)) || ((nh) < (ih))) nvgDeleteImage(ctx, (int)(ctx.fontImages[i])); else ctx.fontImages[j++] = (int)(ctx.fontImages[i]); }
-				} ctx.fontImages[j++] = (int)(ctx.fontImages[0]); ctx.fontImages[0] = (int)(fontImage); ctx.fontImageIdx = (int)(0); for (i = (int)(j); (i) < (4); i++) { ctx.fontImages[i] = (int)(0); } }
+			if (ctx.fontImageIdx != 0)
+			{
+				int fontImage = (int)(ctx.fontImages[ctx.fontImageIdx]);
+				int i = 0;
+				int j = 0;
+				int iw = 0;
+				int ih = 0;
+				if ((fontImage) == (0))
+					return;
+				nvgImageSize(ctx, (int)(fontImage), &iw, &ih);
+				for (i = (int)(j = (int)(0)); (i) < (ctx.fontImageIdx); i++)
+				{
+					if (ctx.fontImages[i] != 0)
+					{
+						int nw = 0;
+						int nh = 0;
+						nvgImageSize(ctx, (int)(ctx.fontImages[i]), &nw, &nh);
+						if (((nw) < (iw)) || ((nh) < (ih)))
+							nvgDeleteImage(ctx, (int)(ctx.fontImages[i]));
+						else
+							ctx.fontImages[j++] = (int)(ctx.fontImages[i]);
+					}
+				}
+				ctx.fontImages[j++] = (int)(ctx.fontImages[0]);
+				ctx.fontImages[0] = (int)(fontImage);
+				ctx.fontImageIdx = (int)(0);
+				for (i = (int)(j); (i) < (4); i++)
+				{
+					ctx.fontImages[i] = (int)(0);
+				}
+			}
 
 		}
 
@@ -1865,8 +504,13 @@ namespace NanoVGSharp
 			NVGcolor cint = new NVGcolor();
 			u = (float)(nvg__clampf((float)(u), (float)(0.0f), (float)(1.0f)));
 			oneminu = (float)(1.0f - u);
-			for (i = (int)(0); (i) < (4); i++) {
-				cint.r = (float)(c0.r * oneminu + c1.r * u); cint.g = (float)(c0.g * oneminu + c1.g * u); cint.b = (float)(c0.b * oneminu + c1.b * u); cint.a = (float)(c0.a * oneminu + c1.a * u); }
+			for (i = (int)(0); (i) < (4); i++)
+			{
+				cint.r = (float)(c0.r * oneminu + c1.r * u);
+				cint.g = (float)(c0.g * oneminu + c1.g * u);
+				cint.b = (float)(c0.b * oneminu + c1.b * u);
+				cint.a = (float)(c0.a * oneminu + c1.a * u);
+			}
 			return cint;
 		}
 
@@ -1877,18 +521,27 @@ namespace NanoVGSharp
 
 		public static float nvg__hue(float h, float m1, float m2)
 		{
-			if ((h) < (0)) h += (float)(1);
-			if ((h) > (1)) h -= (float)(1);
-			if ((h) < (1.0f / 6.0f)) return (float)(m1 + (m2 - m1) * h * 6.0f); else if ((h) < (3.0f / 6.0f)) return (float)(m2); else if ((h) < (4.0f / 6.0f)) return (float)(m1 + (m2 - m1) * (2.0f / 3.0f - h) * 6.0f);
+			if ((h) < (0))
+				h += (float)(1);
+			if ((h) > (1))
+				h -= (float)(1);
+			if ((h) < (1.0f / 6.0f))
+				return (float)(m1 + (m2 - m1) * h * 6.0f);
+			else if ((h) < (3.0f / 6.0f))
+				return (float)(m2);
+			else if ((h) < (4.0f / 6.0f))
+				return (float)(m1 + (m2 - m1) * (2.0f / 3.0f - h) * 6.0f);
 			return (float)(m1);
 		}
 
 		public static NVGcolor nvgHSLA(float h, float s, float l, byte a)
 		{
-			float m1 = 0; float m2 = 0;
+			float m1 = 0;
+			float m2 = 0;
 			NVGcolor col = new NVGcolor();
 			h = (float)(nvg__modf((float)(h), (float)(1.0f)));
-			if ((h) < (0.0f)) h += (float)(1.0f);
+			if ((h) < (0.0f))
+				h += (float)(1.0f);
 			s = (float)(nvg__clampf((float)(s), (float)(0.0f), (float)(1.0f)));
 			l = (float)(nvg__clampf((float)(l), (float)(0.0f), (float)(1.0f)));
 			m2 = (float)(l <= 0.5f ? (l * (1 + s)) : (l + s - l * s));
@@ -1932,7 +585,8 @@ namespace NanoVGSharp
 
 		public static void nvgTransformRotate(float* t, float a)
 		{
-			float cs = (float)(nvg__cosf((float)(a))); float sn = (float)(nvg__sinf((float)(a)));
+			float cs = (float)(cosf((float)(a)));
+			float sn = (float)(sinf((float)(a)));
 			t[0] = (float)(cs);
 			t[1] = (float)(sn);
 			t[2] = (float)(-sn);
@@ -1945,7 +599,7 @@ namespace NanoVGSharp
 		{
 			t[0] = (float)(1.0f);
 			t[1] = (float)(0.0f);
-			t[2] = (float)(nvg__tanf((float)(a)));
+			t[2] = (float)(tanf((float)(a)));
 			t[3] = (float)(1.0f);
 			t[4] = (float)(0.0f);
 			t[5] = (float)(0.0f);
@@ -1954,7 +608,7 @@ namespace NanoVGSharp
 		public static void nvgTransformSkewY(float* t, float a)
 		{
 			t[0] = (float)(1.0f);
-			t[1] = (float)(nvg__tanf((float)(a)));
+			t[1] = (float)(tanf((float)(a)));
 			t[2] = (float)(0.0f);
 			t[3] = (float)(1.0f);
 			t[4] = (float)(0.0f);
@@ -1984,9 +638,13 @@ namespace NanoVGSharp
 
 		public static int nvgTransformInverse(float* inv, float* t)
 		{
-			double invdet = 0; double det = (double)((double)(t[0]) * t[3] - (double)(t[2]) * t[1]);
-			if (((det) > (-1e-6)) && ((det) < (1e-6))) {
-				nvgTransformIdentity(inv); return (int)(0); }
+			double invdet = 0;
+			double det = (double)((double)(t[0]) * t[3] - (double)(t[2]) * t[1]);
+			if (((det) > (-1e-6)) && ((det) < (1e-6)))
+			{
+				nvgTransformIdentity(inv);
+				return (int)(0);
+			}
 
 			invdet = (double)(1.0 / det);
 			inv[0] = ((float)(t[3] * invdet));
@@ -2026,14 +684,17 @@ namespace NanoVGSharp
 
 		public static void nvgSave(NVGcontext ctx)
 		{
-			if ((ctx.nstates) >= (32)) return;
-			if ((ctx.nstates) > (0)) CRuntime.memcpy(&ctx.states[ctx.nstates], &ctx.states[ctx.nstates - 1], (ulong)(sizeof(NVGstate)));
+			if ((ctx.nstates) >= (32))
+				return;
+			if ((ctx.nstates) > (0))
+				CRuntime.memcpy(&ctx.states[ctx.nstates], &ctx.states[ctx.nstates - 1], (ulong)(sizeof(NVGstate)));
 			ctx.nstates++;
 		}
 
 		public static void nvgRestore(NVGcontext ctx)
 		{
-			if (ctx.nstates <= 1) return;
+			if (ctx.nstates <= 1)
+				return;
 			ctx.nstates--;
 		}
 
@@ -2160,7 +821,8 @@ namespace NanoVGSharp
 		public static void nvgCurrentTransform(NVGcontext ctx, float* xform)
 		{
 			NVGstate* state = nvg__getState(ctx);
-			if ((xform) == null) return;
+			if ((xform) == null)
+				return;
 			CRuntime.memcpy(xform, state->xform, (ulong)(sizeof(float) * 6));
 		}
 
@@ -2192,10 +854,15 @@ namespace NanoVGSharp
 
 		public static int nvgCreateImageMem(NVGcontext ctx, int imageFlags, byte* data, int ndata)
 		{
-			int w = 0; int h = 0; int n = 0; int image = 0;
+			int w = 0;
+			int h = 0;
+			int n = 0;
+			int image = 0;
 			byte* img = StbImage.stbi_load_from_memory(data, (int)(ndata), &w, &h, &n, (int)(4));
-			if ((img) == null) {
-				return (int)(0); }
+			if ((img) == null)
+			{
+				return (int)(0);
+			}
 
 			image = (int)(nvgCreateImageRGBA(ctx, (int)(w), (int)(h), (int)(imageFlags), img));
 
@@ -2210,7 +877,8 @@ namespace NanoVGSharp
 
 		public static void nvgUpdateImage(NVGcontext ctx, int image, byte* data)
 		{
-			int w = 0; int h = 0;
+			int w = 0;
+			int h = 0;
 			ctx._params_.renderGetTextureSize(ctx._params_.userPtr, (int)(image), &w, &h);
 			ctx._params_.renderUpdateTexture(ctx._params_.userPtr, (int)(image), (int)(0), (int)(0), (int)(w), (int)(h), data);
 		}
@@ -2228,16 +896,24 @@ namespace NanoVGSharp
 		public static NVGpaint nvgLinearGradient(NVGcontext ctx, float sx, float sy, float ex, float ey, NVGcolor icol, NVGcolor ocol)
 		{
 			NVGpaint p = new NVGpaint();
-			float dx = 0; float dy = 0; float d = 0;
+			float dx = 0;
+			float dy = 0;
+			float d = 0;
 			float large = (float)(1e5);
 			CRuntime.memset(&p, (int)(0), (ulong)(sizeof(NVGpaint)));
 			dx = (float)(ex - sx);
 			dy = (float)(ey - sy);
-			d = (float)(sqrtf((float)(dx * dx + dy * dy)));
-			if ((d) > (0.0001f)) {
-				dx /= (float)(d); dy /= (float)(d); }
-			else {
-				dx = (float)(0); dy = (float)(1); }
+			d = (float)(Math.Sqrt((float)(dx * dx + dy * dy)));
+			if ((d) > (0.0001f))
+			{
+				dx /= (float)(d);
+				dy /= (float)(d);
+			}
+			else
+			{
+				dx = (float)(0);
+				dy = (float)(1);
+			}
 
 			p.xform[0] = (float)(dy);
 			p.xform[1] = (float)(-dx);
@@ -2330,11 +1006,18 @@ namespace NanoVGSharp
 		public static void nvgIntersectScissor(NVGcontext ctx, float x, float y, float w, float h)
 		{
 			NVGstate* state = nvg__getState(ctx);
-			float* pxform = stackalloc float[6]; float* invxorm = stackalloc float[6];
+			float* pxform = stackalloc float[6];
+			float* invxorm = stackalloc float[6];
 			float* rect = stackalloc float[4];
-			float ex = 0; float ey = 0; float tex = 0; float tey = 0;
-			if ((state->scissor.extent[0]) < (0)) {
-				nvgScissor(ctx, (float)(x), (float)(y), (float)(w), (float)(h)); return; }
+			float ex = 0;
+			float ey = 0;
+			float tex = 0;
+			float tey = 0;
+			if ((state->scissor.extent[0]) < (0))
+			{
+				nvgScissor(ctx, (float)(x), (float)(y), (float)(w), (float)(h));
+				return;
+			}
 
 			CRuntime.memcpy(pxform, state->scissor.xform, (ulong)(sizeof(float) * 6));
 			ex = (float)(state->scissor.extent[0]);
@@ -2386,15 +1069,24 @@ namespace NanoVGSharp
 
 		public static float nvg__distPtSeg(float x, float y, float px, float py, float qx, float qy)
 		{
-			float pqx = 0; float pqy = 0; float dx = 0; float dy = 0; float d = 0; float t = 0;
+			float pqx = 0;
+			float pqy = 0;
+			float dx = 0;
+			float dy = 0;
+			float d = 0;
+			float t = 0;
 			pqx = (float)(qx - px);
 			pqy = (float)(qy - py);
 			dx = (float)(x - px);
 			dy = (float)(y - py);
 			d = (float)(pqx * pqx + pqy * pqy);
 			t = (float)(pqx * dx + pqy * dy);
-			if ((d) > (0)) t /= (float)(d);
-			if ((t) < (0)) t = (float)(0); else if ((t) > (1)) t = (float)(1);
+			if ((d) > (0))
+				t /= (float)(d);
+			if ((t) < (0))
+				t = (float)(0);
+			else if ((t) > (1))
+				t = (float)(1);
 			dx = (float)(px + t * pqx - x);
 			dy = (float)(py + t * pqy - y);
 			return (float)(dx * dx + dy * dy);
@@ -2415,13 +1107,42 @@ namespace NanoVGSharp
 				ctx.ccommands = (int)(ccommands);
 			}
 
-			if (((int)(vals[0]) != NVG_CLOSE) && ((int)(vals[0]) != NVG_WINDING)) {
-				ctx.commandx = (float)(vals[nvals - 2]); ctx.commandy = (float)(vals[nvals - 1]); }
+			if (((int)(vals[0]) != NVG_CLOSE) && ((int)(vals[0]) != NVG_WINDING))
+			{
+				ctx.commandx = (float)(vals[nvals - 2]);
+				ctx.commandy = (float)(vals[nvals - 1]);
+			}
 
 			i = (int)(0);
-			while ((i) < (nvals)) {
-				int cmd = (int)(vals[i]); switch (cmd) {
-					case NVG_MOVETO: nvgTransformPoint(&vals[i + 1], &vals[i + 2], state->xform, (float)(vals[i + 1]), (float)(vals[i + 2])); i += (int)(3); break; case NVG_LINETO: nvgTransformPoint(&vals[i + 1], &vals[i + 2], state->xform, (float)(vals[i + 1]), (float)(vals[i + 2])); i += (int)(3); break; case NVG_BEZIERTO: nvgTransformPoint(&vals[i + 1], &vals[i + 2], state->xform, (float)(vals[i + 1]), (float)(vals[i + 2])); nvgTransformPoint(&vals[i + 3], &vals[i + 4], state->xform, (float)(vals[i + 3]), (float)(vals[i + 4])); nvgTransformPoint(&vals[i + 5], &vals[i + 6], state->xform, (float)(vals[i + 5]), (float)(vals[i + 6])); i += (int)(7); break; case NVG_CLOSE: i++; break; case NVG_WINDING: i += (int)(2); break; default: i++; }
+			while ((i) < (nvals))
+			{
+				int cmd = (int)(vals[i]);
+				switch (cmd)
+				{
+					case NVG_MOVETO:
+						nvgTransformPoint(&vals[i + 1], &vals[i + 2], state->xform, (float)(vals[i + 1]), (float)(vals[i + 2]));
+						i += (int)(3);
+						break;
+					case NVG_LINETO:
+						nvgTransformPoint(&vals[i + 1], &vals[i + 2], state->xform, (float)(vals[i + 1]), (float)(vals[i + 2]));
+						i += (int)(3);
+						break;
+					case NVG_BEZIERTO:
+						nvgTransformPoint(&vals[i + 1], &vals[i + 2], state->xform, (float)(vals[i + 1]), (float)(vals[i + 2]));
+						nvgTransformPoint(&vals[i + 3], &vals[i + 4], state->xform, (float)(vals[i + 3]), (float)(vals[i + 4]));
+						nvgTransformPoint(&vals[i + 5], &vals[i + 6], state->xform, (float)(vals[i + 5]), (float)(vals[i + 6]));
+						i += (int)(7);
+						break;
+					case NVG_CLOSE:
+						i++;
+						break;
+					case NVG_WINDING:
+						i += (int)(2);
+						break;
+					default:
+						i++;
+						break;
+				}
 			}
 			CRuntime.memcpy(&ctx.commands[ctx.ncommands], vals, (ulong)(nvals * sizeof(float)));
 			ctx.ncommands += (int)(nvals);
@@ -2435,15 +1156,24 @@ namespace NanoVGSharp
 
 		public static NVGpath* nvg__lastPath(NVGcontext ctx)
 		{
-			if ((ctx.cache.npaths) > (0)) return &ctx.cache.paths[ctx.cache.npaths - 1];
+			if ((ctx.cache.npaths) > (0))
+				return &ctx.cache.paths[ctx.cache.npaths - 1];
 			return null;
 		}
 
 		public static void nvg__addPath(NVGcontext ctx)
 		{
 			NVGpath* path;
-			if ((ctx.cache.npaths + 1) > (ctx.cache.cpaths)) {
-				NVGpath* paths; int cpaths = (int)(ctx.cache.npaths + 1 + ctx.cache.cpaths / 2); paths = (NVGpath*)(CRuntime.realloc(ctx.cache.paths, (ulong)(sizeof(NVGpath) * cpaths))); if ((paths) == null) return; ctx.cache.paths = paths; ctx.cache.cpaths = (int)(cpaths); }
+			if ((ctx.cache.npaths + 1) > (ctx.cache.cpaths))
+			{
+				NVGpath* paths;
+				int cpaths = (int)(ctx.cache.npaths + 1 + ctx.cache.cpaths / 2);
+				paths = (NVGpath*)(CRuntime.realloc(ctx.cache.paths, (ulong)(sizeof(NVGpath) * cpaths)));
+				if ((paths) == null)
+					return;
+				ctx.cache.paths = paths;
+				ctx.cache.cpaths = (int)(cpaths);
+			}
 
 			path = &ctx.cache.paths[ctx.cache.npaths];
 			CRuntime.memset(path, (int)(0), (ulong)(sizeof(NVGpath)));
@@ -2454,7 +1184,8 @@ namespace NanoVGSharp
 
 		public static NVGpoint* nvg__lastPoint(NVGcontext ctx)
 		{
-			if ((ctx.cache.npoints) > (0)) return &ctx.cache.points[ctx.cache.npoints - 1];
+			if ((ctx.cache.npoints) > (0))
+				return &ctx.cache.points[ctx.cache.npoints - 1];
 			return null;
 		}
 
@@ -2462,14 +1193,28 @@ namespace NanoVGSharp
 		{
 			NVGpath* path = nvg__lastPath(ctx);
 			NVGpoint* pt;
-			if ((path) == null) return;
-			if (((path->count) > (0)) && ((ctx.cache.npoints) > (0))) {
-				pt = nvg__lastPoint(ctx); if ((nvg__ptEquals((float)(pt->x), (float)(pt->y), (float)(x), (float)(y), (float)(ctx.distTol))) != 0) {
-					pt->flags |= (byte)(flags); return; }
+			if ((path) == null)
+				return;
+			if (((path->count) > (0)) && ((ctx.cache.npoints) > (0)))
+			{
+				pt = nvg__lastPoint(ctx);
+				if ((nvg__ptEquals((float)(pt->x), (float)(pt->y), (float)(x), (float)(y), (float)(ctx.distTol))) != 0)
+				{
+					pt->flags |= (byte)(flags);
+					return;
+				}
 			}
 
-			if ((ctx.cache.npoints + 1) > (ctx.cache.cpoints)) {
-				NVGpoint* points; int cpoints = (int)(ctx.cache.npoints + 1 + ctx.cache.cpoints / 2); points = (NVGpoint*)(CRuntime.realloc(ctx.cache.points, (ulong)(sizeof(NVGpoint) * cpoints))); if ((points) == null) return; ctx.cache.points = points; ctx.cache.cpoints = (int)(cpoints); }
+			if ((ctx.cache.npoints + 1) > (ctx.cache.cpoints))
+			{
+				NVGpoint* points;
+				int cpoints = (int)(ctx.cache.npoints + 1 + ctx.cache.cpoints / 2);
+				points = (NVGpoint*)(CRuntime.realloc(ctx.cache.points, (ulong)(sizeof(NVGpoint) * cpoints)));
+				if ((points) == null)
+					return;
+				ctx.cache.points = points;
+				ctx.cache.cpoints = (int)(cpoints);
+			}
 
 			pt = &ctx.cache.points[ctx.cache.npoints];
 			CRuntime.memset(pt, (int)(0), (ulong)(sizeof(NVGpoint)));
@@ -2483,28 +1228,38 @@ namespace NanoVGSharp
 		public static void nvg__closePath(NVGcontext ctx)
 		{
 			NVGpath* path = nvg__lastPath(ctx);
-			if ((path) == null) return;
+			if ((path) == null)
+				return;
 			path->closed = (byte)(1);
 		}
 
 		public static void nvg__pathWinding(NVGcontext ctx, int winding)
 		{
 			NVGpath* path = nvg__lastPath(ctx);
-			if ((path) == null) return;
+			if ((path) == null)
+				return;
 			path->winding = (int)(winding);
 		}
 
 		public static float nvg__getAverageScale(float* t)
 		{
-			float sx = (float)(sqrtf((float)(t[0] * t[0] + t[2] * t[2])));
-			float sy = (float)(sqrtf((float)(t[1] * t[1] + t[3] * t[3])));
+			float sx = (float)(Math.Sqrt((float)(t[0] * t[0] + t[2] * t[2])));
+			float sy = (float)(Math.Sqrt((float)(t[1] * t[1] + t[3] * t[3])));
 			return (float)((sx + sy) * 0.5f);
 		}
 
 		public static NVGvertex* nvg__allocTempVerts(NVGcontext ctx, int nverts)
 		{
-			if ((nverts) > (ctx.cache.cverts)) {
-				NVGvertex* verts; int cverts = (int)((nverts + 0xff) & ~0xff); verts = (NVGvertex*)(CRuntime.realloc(ctx.cache.verts, (ulong)(sizeof(NVGvertex) * cverts))); if ((verts) == null) return null; ctx.cache.verts = verts; ctx.cache.cverts = (int)(cverts); }
+			if ((nverts) > (ctx.cache.cverts))
+			{
+				NVGvertex* verts;
+				int cverts = (int)((nverts + 0xff) & ~0xff);
+				verts = (NVGvertex*)(CRuntime.realloc(ctx.cache.verts, (ulong)(sizeof(NVGvertex) * cverts)));
+				if ((verts) == null)
+					return null;
+				ctx.cache.verts = verts;
+				ctx.cache.cverts = (int)(cverts);
+			}
 
 			return ctx.cache.verts;
 		}
@@ -2522,17 +1277,29 @@ namespace NanoVGSharp
 		{
 			int i = 0;
 			float area = (float)(0);
-			for (i = (int)(2); (i) < (npts); i++) {
-				NVGpoint* a = &pts[0]; NVGpoint* b = &pts[i - 1]; NVGpoint* c = &pts[i]; area += (float)(nvg__triarea2((float)(a->x), (float)(a->y), (float)(b->x), (float)(b->y), (float)(c->x), (float)(c->y))); }
+			for (i = (int)(2); (i) < (npts); i++)
+			{
+				NVGpoint* a = &pts[0];
+				NVGpoint* b = &pts[i - 1];
+				NVGpoint* c = &pts[i];
+				area += (float)(nvg__triarea2((float)(a->x), (float)(a->y), (float)(b->x), (float)(b->y), (float)(c->x), (float)(c->y)));
+			}
 			return (float)(area * 0.5f);
 		}
 
 		public static void nvg__polyReverse(NVGpoint* pts, int npts)
 		{
 			NVGpoint tmp = new NVGpoint();
-			int i = (int)(0); int j = (int)(npts - 1);
-			while ((i) < (j)) {
-				tmp = (NVGpoint)(pts[i]); pts[i] = (NVGpoint)(pts[j]); pts[j] = (NVGpoint)(tmp); i++; j--; }
+			int i = (int)(0);
+			int j = (int)(npts - 1);
+			while ((i) < (j))
+			{
+				tmp = (NVGpoint)(pts[i]);
+				pts[i] = (NVGpoint)(pts[j]);
+				pts[j] = (NVGpoint)(tmp);
+				i++;
+				j--;
+			}
 		}
 
 		public static void nvg__vset(NVGvertex* vtx, float x, float y, float u, float v)
@@ -2545,9 +1312,24 @@ namespace NanoVGSharp
 
 		public static void nvg__tesselateBezier(NVGcontext ctx, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int level, int type)
 		{
-			float x12 = 0; float y12 = 0; float x23 = 0; float y23 = 0; float x34 = 0; float y34 = 0; float x123 = 0; float y123 = 0; float x234 = 0; float y234 = 0; float x1234 = 0; float y1234 = 0;
-			float dx = 0; float dy = 0; float d2 = 0; float d3 = 0;
-			if ((level) > (10)) return;
+			float x12 = 0;
+			float y12 = 0;
+			float x23 = 0;
+			float y23 = 0;
+			float x34 = 0;
+			float y34 = 0;
+			float x123 = 0;
+			float y123 = 0;
+			float x234 = 0;
+			float y234 = 0;
+			float x1234 = 0;
+			float y1234 = 0;
+			float dx = 0;
+			float dy = 0;
+			float d2 = 0;
+			float d3 = 0;
+			if ((level) > (10))
+				return;
 			x12 = (float)((x1 + x2) * 0.5f);
 			y12 = (float)((y1 + y2) * 0.5f);
 			x23 = (float)((x2 + x3) * 0.5f);
@@ -2560,8 +1342,11 @@ namespace NanoVGSharp
 			dy = (float)(y4 - y1);
 			d2 = (float)(nvg__absf((float)((x2 - x4) * dy - (y2 - y4) * dx)));
 			d3 = (float)(nvg__absf((float)((x3 - x4) * dy - (y3 - y4) * dx)));
-			if (((d2 + d3) * (d2 + d3)) < (ctx.tessTol * (dx * dx + dy * dy))) {
-				nvg__addPoint(ctx, (float)(x4), (float)(y4), (int)(type)); return; }
+			if (((d2 + d3) * (d2 + d3)) < (ctx.tessTol * (dx * dx + dy * dy)))
+			{
+				nvg__addPoint(ctx, (float)(x4), (float)(y4), (int)(type));
+				return;
+			}
 
 			x234 = (float)((x23 + x34) * 0.5f);
 			y234 = (float)((y23 + y34) * 0.5f);
@@ -2579,28 +1364,89 @@ namespace NanoVGSharp
 			NVGpoint* p1;
 			NVGpoint* pts;
 			NVGpath* path;
-			int i = 0; int j = 0;
+			int i = 0;
+			int j = 0;
 			float* cp1;
 			float* cp2;
 			float* p;
 			float area = 0;
-			if ((cache.npaths) > (0)) return;
+			if ((cache.npaths) > (0))
+				return;
 			i = (int)(0);
-			while ((i) < (ctx.ncommands)) {
-				int cmd = (int)(ctx.commands[i]); switch (cmd) {
-					case NVG_MOVETO: nvg__addPath(ctx); p = &ctx.commands[i + 1]; nvg__addPoint(ctx, (float)(p[0]), (float)(p[1]), (int)(NVG_PT_CORNER)); i += (int)(3); break; case NVG_LINETO: p = &ctx.commands[i + 1]; nvg__addPoint(ctx, (float)(p[0]), (float)(p[1]), (int)(NVG_PT_CORNER)); i += (int)(3); break; case NVG_BEZIERTO: last = nvg__lastPoint(ctx); if (last != null) {
-							cp1 = &ctx.commands[i + 1]; cp2 = &ctx.commands[i + 3]; p = &ctx.commands[i + 5]; nvg__tesselateBezier(ctx, (float)(last->x), (float)(last->y), (float)(cp1[0]), (float)(cp1[1]), (float)(cp2[0]), (float)(cp2[1]), (float)(p[0]), (float)(p[1]), (int)(0), (int)(NVG_PT_CORNER)); }
-						i += (int)(7); break; case NVG_CLOSE: nvg__closePath(ctx); i++; break; case NVG_WINDING: nvg__pathWinding(ctx, (int)(ctx.commands[i + 1])); i += (int)(2); break; default: i++; }
+			while ((i) < (ctx.ncommands))
+			{
+				int cmd = (int)(ctx.commands[i]);
+				switch (cmd)
+				{
+					case NVG_MOVETO:
+						nvg__addPath(ctx);
+						p = &ctx.commands[i + 1];
+						nvg__addPoint(ctx, (float)(p[0]), (float)(p[1]), (int)(NVG_PT_CORNER));
+						i += (int)(3);
+						break;
+					case NVG_LINETO:
+						p = &ctx.commands[i + 1];
+						nvg__addPoint(ctx, (float)(p[0]), (float)(p[1]), (int)(NVG_PT_CORNER));
+						i += (int)(3);
+						break;
+					case NVG_BEZIERTO:
+						last = nvg__lastPoint(ctx);
+						if (last != null)
+						{
+							cp1 = &ctx.commands[i + 1];
+							cp2 = &ctx.commands[i + 3];
+							p = &ctx.commands[i + 5];
+							nvg__tesselateBezier(ctx, (float)(last->x), (float)(last->y), (float)(cp1[0]), (float)(cp1[1]), (float)(cp2[0]), (float)(cp2[1]), (float)(p[0]), (float)(p[1]), (int)(0), (int)(NVG_PT_CORNER));
+						}
+						i += (int)(7);
+						break;
+					case NVG_CLOSE:
+						nvg__closePath(ctx);
+						i++;
+						break;
+					case NVG_WINDING:
+						nvg__pathWinding(ctx, (int)(ctx.commands[i + 1]));
+						i += (int)(2);
+						break;
+					default:
+						i++;
+						break;
+				}
 			}
 			cache.bounds[0] = (float)(cache.bounds[1] = (float)(1e6f));
 			cache.bounds[2] = (float)(cache.bounds[3] = (float)(-1e6f));
-			for (j = (int)(0); (j) < (cache.npaths); j++) {
-				path = &cache.paths[j]; pts = &cache.points[path->first]; p0 = &pts[path->count - 1]; p1 = &pts[0]; if ((nvg__ptEquals((float)(p0->x), (float)(p0->y), (float)(p1->x), (float)(p1->y), (float)(ctx.distTol))) != 0) {
-					path->count--; p0 = &pts[path->count - 1]; path->closed = (byte)(1); }
-				if ((path->count) > (2)) {
-					area = (float)(nvg__polyArea(pts, (int)(path->count))); if (((path->winding) == (NVG_CCW)) && ((area) < (0.0f))) nvg__polyReverse(pts, (int)(path->count)); if (((path->winding) == (NVG_CW)) && ((area) > (0.0f))) nvg__polyReverse(pts, (int)(path->count)); }
-				for (i = (int)(0); (i) < (path->count); i++) {
-					p0->dx = (float)(p1->x - p0->x); p0->dy = (float)(p1->y - p0->y); p0->len = (float)(nvg__normalize(&p0->dx, &p0->dy)); cache.bounds[0] = (float)(nvg__minf((float)(cache.bounds[0]), (float)(p0->x))); cache.bounds[1] = (float)(nvg__minf((float)(cache.bounds[1]), (float)(p0->y))); cache.bounds[2] = (float)(nvg__maxf((float)(cache.bounds[2]), (float)(p0->x))); cache.bounds[3] = (float)(nvg__maxf((float)(cache.bounds[3]), (float)(p0->y))); p0 = p1++; } }
+			for (j = (int)(0); (j) < (cache.npaths); j++)
+			{
+				path = &cache.paths[j];
+				pts = &cache.points[path->first];
+				p0 = &pts[path->count - 1];
+				p1 = &pts[0];
+				if ((nvg__ptEquals((float)(p0->x), (float)(p0->y), (float)(p1->x), (float)(p1->y), (float)(ctx.distTol))) != 0)
+				{
+					path->count--;
+					p0 = &pts[path->count - 1];
+					path->closed = (byte)(1);
+				}
+				if ((path->count) > (2))
+				{
+					area = (float)(nvg__polyArea(pts, (int)(path->count)));
+					if (((path->winding) == (NVG_CCW)) && ((area) < (0.0f)))
+						nvg__polyReverse(pts, (int)(path->count));
+					if (((path->winding) == (NVG_CW)) && ((area) > (0.0f)))
+						nvg__polyReverse(pts, (int)(path->count));
+				}
+				for (i = (int)(0); (i) < (path->count); i++)
+				{
+					p0->dx = (float)(p1->x - p0->x);
+					p0->dy = (float)(p1->y - p0->y);
+					p0->len = (float)(nvg__normalize(&p0->dx, &p0->dy));
+					cache.bounds[0] = (float)(nvg__minf((float)(cache.bounds[0]), (float)(p0->x)));
+					cache.bounds[1] = (float)(nvg__minf((float)(cache.bounds[1]), (float)(p0->y)));
+					cache.bounds[2] = (float)(nvg__maxf((float)(cache.bounds[2]), (float)(p0->x)));
+					cache.bounds[3] = (float)(nvg__maxf((float)(cache.bounds[3]), (float)(p0->y)));
+					p0 = p1++;
+				}
+			}
 		}
 
 		public static int nvg__curveDivs(float r, float arc, float tol)
@@ -2611,50 +1457,197 @@ namespace NanoVGSharp
 
 		public static void nvg__chooseBevel(int bevel, NVGpoint* p0, NVGpoint* p1, float w, float* x0, float* y0, float* x1, float* y1)
 		{
-			if ((bevel) != 0) {
-				*x0 = (float)(p1->x + p0->dy * w); *y0 = (float)(p1->y - p0->dx * w); *x1 = (float)(p1->x + p1->dy * w); *y1 = (float)(p1->y - p1->dx * w); }
-			else {
-				*x0 = (float)(p1->x + p1->dmx * w); *y0 = (float)(p1->y + p1->dmy * w); *x1 = (float)(p1->x + p1->dmx * w); *y1 = (float)(p1->y + p1->dmy * w); }
+			if ((bevel) != 0)
+			{
+				*x0 = (float)(p1->x + p0->dy * w);
+				*y0 = (float)(p1->y - p0->dx * w);
+				*x1 = (float)(p1->x + p1->dy * w);
+				*y1 = (float)(p1->y - p1->dx * w);
+			}
+			else
+			{
+				*x0 = (float)(p1->x + p1->dmx * w);
+				*y0 = (float)(p1->y + p1->dmy * w);
+				*x1 = (float)(p1->x + p1->dmx * w);
+				*y1 = (float)(p1->y + p1->dmy * w);
+			}
 
 		}
 
 		public static NVGvertex* nvg__roundJoin(NVGvertex* dst, NVGpoint* p0, NVGpoint* p1, float lw, float rw, float lu, float ru, int ncap, float fringe)
 		{
-			int i = 0; int n = 0;
+			int i = 0;
+			int n = 0;
 			float dlx0 = (float)(p0->dy);
 			float dly0 = (float)(-p0->dx);
 			float dlx1 = (float)(p1->dy);
 			float dly1 = (float)(-p1->dx);
-			if ((p1->flags & NVG_PT_LEFT) != 0) {
-				float lx0 = 0; float ly0 = 0; float lx1 = 0; float ly1 = 0; float a0 = 0; float a1 = 0; nvg__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(lw), &lx0, &ly0, &lx1, &ly1); a0 = (float)(atan2f((float)(-dly0), (float)(-dlx0))); a1 = (float)(atan2f((float)(-dly1), (float)(-dlx1))); if ((a1) > (a0)) a1 -= (float)(3.14159274 * 2); nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - dlx0 * rw), (float)(p1->y - dly0 * rw), (float)(ru), (float)(1)); dst++; n = (int)(nvg__clampi((int)(ceilf((float)(((a0 - a1) / 3.14159274) * ncap))), (int)(2), (int)(ncap))); for (i = (int)(0); (i) < (n); i++) {
-					float u = (float)(i / (float)(n - 1)); float a = (float)(a0 + u * (a1 - a0)); float rx = (float)(p1->x + cosf((float)(a)) * rw); float ry = (float)(p1->y + sinf((float)(a)) * rw); nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1)); dst++; nvg__vset(dst, (float)(rx), (float)(ry), (float)(ru), (float)(1)); dst++; } nvg__vset(dst, (float)(lx1), (float)(ly1), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - dlx1 * rw), (float)(p1->y - dly1 * rw), (float)(ru), (float)(1)); dst++; }
-			else {
-				float rx0 = 0; float ry0 = 0; float rx1 = 0; float ry1 = 0; float a0 = 0; float a1 = 0; nvg__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(-rw), &rx0, &ry0, &rx1, &ry1); a0 = (float)(atan2f((float)(dly0), (float)(dlx0))); a1 = (float)(atan2f((float)(dly1), (float)(dlx1))); if ((a1) < (a0)) a1 += (float)(3.14159274 * 2); nvg__vset(dst, (float)(p1->x + dlx0 * rw), (float)(p1->y + dly0 * rw), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1)); dst++; n = (int)(nvg__clampi((int)(ceilf((float)(((a1 - a0) / 3.14159274) * ncap))), (int)(2), (int)(ncap))); for (i = (int)(0); (i) < (n); i++) {
-					float u = (float)(i / (float)(n - 1)); float a = (float)(a0 + u * (a1 - a0)); float lx = (float)(p1->x + cosf((float)(a)) * lw); float ly = (float)(p1->y + sinf((float)(a)) * lw); nvg__vset(dst, (float)(lx), (float)(ly), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1)); dst++; } nvg__vset(dst, (float)(p1->x + dlx1 * rw), (float)(p1->y + dly1 * rw), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(rx1), (float)(ry1), (float)(ru), (float)(1)); dst++; }
+			if ((p1->flags & NVG_PT_LEFT) != 0)
+			{
+				float lx0 = 0;
+				float ly0 = 0;
+				float lx1 = 0;
+				float ly1 = 0;
+				float a0 = 0;
+				float a1 = 0;
+				nvg__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(lw), &lx0, &ly0, &lx1, &ly1);
+				a0 = (float)(atan2f((float)(-dly0), (float)(-dlx0)));
+				a1 = (float)(atan2f((float)(-dly1), (float)(-dlx1)));
+				if ((a1) > (a0))
+					a1 -= (float)(3.14159274 * 2);
+				nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(p1->x - dlx0 * rw), (float)(p1->y - dly0 * rw), (float)(ru), (float)(1));
+				dst++;
+				n = (int)(nvg__clampi((int)(ceilf((float)(((a0 - a1) / 3.14159274) * ncap))), (int)(2), (int)(ncap)));
+				for (i = (int)(0); (i) < (n); i++)
+				{
+					float u = (float)(i / (float)(n - 1));
+					float a = (float)(a0 + u * (a1 - a0));
+					float rx = (float)(p1->x + cosf((float)(a)) * rw);
+					float ry = (float)(p1->y + sinf((float)(a)) * rw);
+					nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(rx), (float)(ry), (float)(ru), (float)(1));
+					dst++;
+				}
+				nvg__vset(dst, (float)(lx1), (float)(ly1), (float)(lu), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(p1->x - dlx1 * rw), (float)(p1->y - dly1 * rw), (float)(ru), (float)(1));
+				dst++;
+			}
+			else
+			{
+				float rx0 = 0;
+				float ry0 = 0;
+				float rx1 = 0;
+				float ry1 = 0;
+				float a0 = 0;
+				float a1 = 0;
+				nvg__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(-rw), &rx0, &ry0, &rx1, &ry1);
+				a0 = (float)(atan2f((float)(dly0), (float)(dlx0)));
+				a1 = (float)(atan2f((float)(dly1), (float)(dlx1)));
+				if ((a1) < (a0))
+					a1 += (float)(3.14159274 * 2);
+				nvg__vset(dst, (float)(p1->x + dlx0 * rw), (float)(p1->y + dly0 * rw), (float)(lu), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1));
+				dst++;
+				n = (int)(nvg__clampi((int)(ceilf((float)(((a1 - a0) / 3.14159274) * ncap))), (int)(2), (int)(ncap)));
+				for (i = (int)(0); (i) < (n); i++)
+				{
+					float u = (float)(i / (float)(n - 1));
+					float a = (float)(a0 + u * (a1 - a0));
+					float lx = (float)(p1->x + cosf((float)(a)) * lw);
+					float ly = (float)(p1->y + sinf((float)(a)) * lw);
+					nvg__vset(dst, (float)(lx), (float)(ly), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1));
+					dst++;
+				}
+				nvg__vset(dst, (float)(p1->x + dlx1 * rw), (float)(p1->y + dly1 * rw), (float)(lu), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(rx1), (float)(ry1), (float)(ru), (float)(1));
+				dst++;
+			}
 
 			return dst;
 		}
 
 		public static NVGvertex* nvg__bevelJoin(NVGvertex* dst, NVGpoint* p0, NVGpoint* p1, float lw, float rw, float lu, float ru, float fringe)
 		{
-			float rx0 = 0; float ry0 = 0; float rx1 = 0; float ry1 = 0;
-			float lx0 = 0; float ly0 = 0; float lx1 = 0; float ly1 = 0;
+			float rx0 = 0;
+			float ry0 = 0;
+			float rx1 = 0;
+			float ry1 = 0;
+			float lx0 = 0;
+			float ly0 = 0;
+			float lx1 = 0;
+			float ly1 = 0;
 			float dlx0 = (float)(p0->dy);
 			float dly0 = (float)(-p0->dx);
 			float dlx1 = (float)(p1->dy);
 			float dly1 = (float)(-p1->dx);
-			if ((p1->flags & NVG_PT_LEFT) != 0) {
-				nvg__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(lw), &lx0, &ly0, &lx1, &ly1); nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - dlx0 * rw), (float)(p1->y - dly0 * rw), (float)(ru), (float)(1)); dst++; if ((p1->flags & NVG_PT_BEVEL) != 0) {
-					nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - dlx0 * rw), (float)(p1->y - dly0 * rw), (float)(ru), (float)(1)); dst++; nvg__vset(dst, (float)(lx1), (float)(ly1), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - dlx1 * rw), (float)(p1->y - dly1 * rw), (float)(ru), (float)(1)); dst++; }
-				else {
-					rx0 = (float)(p1->x - p1->dmx * rw); ry0 = (float)(p1->y - p1->dmy * rw); nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - dlx0 * rw), (float)(p1->y - dly0 * rw), (float)(ru), (float)(1)); dst++; nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1)); dst++; nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - dlx1 * rw), (float)(p1->y - dly1 * rw), (float)(ru), (float)(1)); dst++; }
-				nvg__vset(dst, (float)(lx1), (float)(ly1), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - dlx1 * rw), (float)(p1->y - dly1 * rw), (float)(ru), (float)(1)); dst++; }
-			else {
-				nvg__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(-rw), &rx0, &ry0, &rx1, &ry1); nvg__vset(dst, (float)(p1->x + dlx0 * lw), (float)(p1->y + dly0 * lw), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1)); dst++; if ((p1->flags & NVG_PT_BEVEL) != 0) {
-					nvg__vset(dst, (float)(p1->x + dlx0 * lw), (float)(p1->y + dly0 * lw), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x + dlx1 * lw), (float)(p1->y + dly1 * lw), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(rx1), (float)(ry1), (float)(ru), (float)(1)); dst++; }
-				else {
-					lx0 = (float)(p1->x + p1->dmx * lw); ly0 = (float)(p1->y + p1->dmy * lw); nvg__vset(dst, (float)(p1->x + dlx0 * lw), (float)(p1->y + dly0 * lw), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1)); dst++; nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x + dlx1 * lw), (float)(p1->y + dly1 * lw), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1)); dst++; }
-				nvg__vset(dst, (float)(p1->x + dlx1 * lw), (float)(p1->y + dly1 * lw), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(rx1), (float)(ry1), (float)(ru), (float)(1)); dst++; }
+			if ((p1->flags & NVG_PT_LEFT) != 0)
+			{
+				nvg__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(lw), &lx0, &ly0, &lx1, &ly1);
+				nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(p1->x - dlx0 * rw), (float)(p1->y - dly0 * rw), (float)(ru), (float)(1));
+				dst++;
+				if ((p1->flags & NVG_PT_BEVEL) != 0)
+				{
+					nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x - dlx0 * rw), (float)(p1->y - dly0 * rw), (float)(ru), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(lx1), (float)(ly1), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x - dlx1 * rw), (float)(p1->y - dly1 * rw), (float)(ru), (float)(1));
+					dst++;
+				}
+				else
+				{
+					rx0 = (float)(p1->x - p1->dmx * rw);
+					ry0 = (float)(p1->y - p1->dmy * rw);
+					nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x - dlx0 * rw), (float)(p1->y - dly0 * rw), (float)(ru), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x - dlx1 * rw), (float)(p1->y - dly1 * rw), (float)(ru), (float)(1));
+					dst++;
+				}
+				nvg__vset(dst, (float)(lx1), (float)(ly1), (float)(lu), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(p1->x - dlx1 * rw), (float)(p1->y - dly1 * rw), (float)(ru), (float)(1));
+				dst++;
+			}
+			else
+			{
+				nvg__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(-rw), &rx0, &ry0, &rx1, &ry1);
+				nvg__vset(dst, (float)(p1->x + dlx0 * lw), (float)(p1->y + dly0 * lw), (float)(lu), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1));
+				dst++;
+				if ((p1->flags & NVG_PT_BEVEL) != 0)
+				{
+					nvg__vset(dst, (float)(p1->x + dlx0 * lw), (float)(p1->y + dly0 * lw), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x + dlx1 * lw), (float)(p1->y + dly1 * lw), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(rx1), (float)(ry1), (float)(ru), (float)(1));
+					dst++;
+				}
+				else
+				{
+					lx0 = (float)(p1->x + p1->dmx * lw);
+					ly0 = (float)(p1->y + p1->dmy * lw);
+					nvg__vset(dst, (float)(p1->x + dlx0 * lw), (float)(p1->y + dly0 * lw), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x + dlx1 * lw), (float)(p1->y + dly1 * lw), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(p1->x), (float)(p1->y), (float)(0.5f), (float)(1));
+					dst++;
+				}
+				nvg__vset(dst, (float)(p1->x + dlx1 * lw), (float)(p1->y + dly1 * lw), (float)(lu), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(rx1), (float)(ry1), (float)(ru), (float)(1));
+				dst++;
+			}
 
 			return dst;
 		}
@@ -2700,8 +1693,16 @@ namespace NanoVGSharp
 			float py = (float)(p->y);
 			float dlx = (float)(dy);
 			float dly = (float)(-dx);
-			for (i = (int)(0); (i) < (ncap); i++) {
-				float a = (float)(i / (float)(ncap - 1) * 3.14159274); float ax = (float)(cosf((float)(a)) * w); float ay = (float)(sinf((float)(a)) * w); nvg__vset(dst, (float)(px - dlx * ax - dx * ay), (float)(py - dly * ax - dy * ay), (float)(u0), (float)(1)); dst++; nvg__vset(dst, (float)(px), (float)(py), (float)(0.5f), (float)(1)); dst++; }
+			for (i = (int)(0); (i) < (ncap); i++)
+			{
+				float a = (float)(i / (float)(ncap - 1) * 3.14159274);
+				float ax = (float)(cosf((float)(a)) * w);
+				float ay = (float)(sinf((float)(a)) * w);
+				nvg__vset(dst, (float)(px - dlx * ax - dx * ay), (float)(py - dly * ax - dy * ay), (float)(u0), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(px), (float)(py), (float)(0.5f), (float)(1));
+				dst++;
+			}
 			nvg__vset(dst, (float)(px + dlx * w), (float)(py + dly * w), (float)(u0), (float)(1));
 			dst++;
 			nvg__vset(dst, (float)(px - dlx * w), (float)(py - dly * w), (float)(u1), (float)(1));
@@ -2720,30 +1721,84 @@ namespace NanoVGSharp
 			dst++;
 			nvg__vset(dst, (float)(px - dlx * w), (float)(py - dly * w), (float)(u1), (float)(1));
 			dst++;
-			for (i = (int)(0); (i) < (ncap); i++) {
-				float a = (float)(i / (float)(ncap - 1) * 3.14159274); float ax = (float)(cosf((float)(a)) * w); float ay = (float)(sinf((float)(a)) * w); nvg__vset(dst, (float)(px), (float)(py), (float)(0.5f), (float)(1)); dst++; nvg__vset(dst, (float)(px - dlx * ax + dx * ay), (float)(py - dly * ax + dy * ay), (float)(u0), (float)(1)); dst++; }
+			for (i = (int)(0); (i) < (ncap); i++)
+			{
+				float a = (float)(i / (float)(ncap - 1) * 3.14159274);
+				float ax = (float)(cosf((float)(a)) * w);
+				float ay = (float)(sinf((float)(a)) * w);
+				nvg__vset(dst, (float)(px), (float)(py), (float)(0.5f), (float)(1));
+				dst++;
+				nvg__vset(dst, (float)(px - dlx * ax + dx * ay), (float)(py - dly * ax + dy * ay), (float)(u0), (float)(1));
+				dst++;
+			}
 			return dst;
 		}
 
 		public static void nvg__calculateJoins(NVGcontext ctx, float w, int lineJoin, float miterLimit)
 		{
 			NVGpathCache cache = ctx.cache;
-			int i = 0; int j = 0;
+			int i = 0;
+			int j = 0;
 			float iw = (float)(0.0f);
-			if ((w) > (0.0f)) iw = (float)(1.0f / w);
-			for (i = (int)(0); (i) < (cache.npaths); i++) {
-				NVGpath* path = &cache.paths[i]; NVGpoint* pts = &cache.points[path->first]; NVGpoint* p0 = &pts[path->count - 1]; NVGpoint* p1 = &pts[0]; int nleft = (int)(0); path->nbevel = (int)(0); for (j = (int)(0); (j) < (path->count); j++) {
-					float dlx0 = 0; float dly0 = 0; float dlx1 = 0; float dly1 = 0; float dmr2 = 0; float cross = 0; float limit = 0; dlx0 = (float)(p0->dy); dly0 = (float)(-p0->dx); dlx1 = (float)(p1->dy); dly1 = (float)(-p1->dx); p1->dmx = (float)((dlx0 + dlx1) * 0.5f); p1->dmy = (float)((dly0 + dly1) * 0.5f); dmr2 = (float)(p1->dmx * p1->dmx + p1->dmy * p1->dmy); if ((dmr2) > (0.000001f)) {
-						float scale = (float)(1.0f / dmr2); if ((scale) > (600.0f)) {
-							scale = (float)(600.0f); }
-						p1->dmx *= (float)(scale); p1->dmy *= (float)(scale); }
-					p1->flags = (byte)((p1->flags & NVG_PT_CORNER) ? NVG_PT_CORNER : 0); cross = (float)(p1->dx * p0->dy - p0->dx * p1->dy); if ((cross) > (0.0f)) {
-						nleft++; p1->flags |= (byte)(NVG_PT_LEFT); }
-					limit = (float)(nvg__maxf((float)(1.01f), (float)(nvg__minf((float)(p0->len), (float)(p1->len)) * iw))); if ((dmr2 * limit * limit) < (1.0f)) p1->flags |= (byte)(NVG_PR_INNERBEVEL); if ((p1->flags & NVG_PT_CORNER) != 0) {
-						if ((((dmr2 * miterLimit * miterLimit) < (1.0f)) || ((lineJoin) == (NVG_BEVEL))) || ((lineJoin) == (NVG_ROUND))) {
-							p1->flags |= (byte)(NVG_PT_BEVEL); }
+			if ((w) > (0.0f))
+				iw = (float)(1.0f / w);
+			for (i = (int)(0); (i) < (cache.npaths); i++)
+			{
+				NVGpath* path = &cache.paths[i];
+				NVGpoint* pts = &cache.points[path->first];
+				NVGpoint* p0 = &pts[path->count - 1];
+				NVGpoint* p1 = &pts[0];
+				int nleft = (int)(0);
+				path->nbevel = (int)(0);
+				for (j = (int)(0); (j) < (path->count); j++)
+				{
+					float dlx0 = 0;
+					float dly0 = 0;
+					float dlx1 = 0;
+					float dly1 = 0;
+					float dmr2 = 0;
+					float cross = 0;
+					float limit = 0;
+					dlx0 = (float)(p0->dy);
+					dly0 = (float)(-p0->dx);
+					dlx1 = (float)(p1->dy);
+					dly1 = (float)(-p1->dx);
+					p1->dmx = (float)((dlx0 + dlx1) * 0.5f);
+					p1->dmy = (float)((dly0 + dly1) * 0.5f);
+					dmr2 = (float)(p1->dmx * p1->dmx + p1->dmy * p1->dmy);
+					if ((dmr2) > (0.000001f))
+					{
+						float scale = (float)(1.0f / dmr2);
+						if ((scale) > (600.0f))
+						{
+							scale = (float)(600.0f);
+						}
+						p1->dmx *= (float)(scale);
+						p1->dmy *= (float)(scale);
 					}
-					if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0) path->nbevel++; p0 = p1++; } path->convex = (int)(((nleft) == (path->count)) ? 1 : 0); }
+					p1->flags = (byte)((p1->flags & NVG_PT_CORNER) ? NVG_PT_CORNER : 0);
+					cross = (float)(p1->dx * p0->dy - p0->dx * p1->dy);
+					if ((cross) > (0.0f))
+					{
+						nleft++;
+						p1->flags |= (byte)(NVG_PT_LEFT);
+					}
+					limit = (float)(nvg__maxf((float)(1.01f), (float)(nvg__minf((float)(p0->len), (float)(p1->len)) * iw)));
+					if ((dmr2 * limit * limit) < (1.0f))
+						p1->flags |= (byte)(NVG_PR_INNERBEVEL);
+					if ((p1->flags & NVG_PT_CORNER) != 0)
+					{
+						if ((((dmr2 * miterLimit * miterLimit) < (1.0f)) || ((lineJoin) == (NVG_BEVEL))) || ((lineJoin) == (NVG_ROUND)))
+						{
+							p1->flags |= (byte)(NVG_PT_BEVEL);
+						}
+					}
+					if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+						path->nbevel++;
+					p0 = p1++;
+				}
+				path->convex = (int)(((nleft) == (path->count)) ? 1 : 0);
+			}
 		}
 
 		public static int nvg__expandStroke(NVGcontext ctx, float w, float fringe, int lineCap, int lineJoin, float miterLimit)
@@ -2751,47 +1806,131 @@ namespace NanoVGSharp
 			NVGpathCache cache = ctx.cache;
 			NVGvertex* verts;
 			NVGvertex* dst;
-			int cverts = 0; int i = 0; int j = 0;
+			int cverts = 0;
+			int i = 0;
+			int j = 0;
 			float aa = (float)(fringe);
-			float u0 = (float)(0.0f); float u1 = (float)(1.0f);
+			float u0 = (float)(0.0f);
+			float u1 = (float)(1.0f);
 			int ncap = (int)(nvg__curveDivs((float)(w), (float)(3.14159274), (float)(ctx.tessTol)));
 			w += (float)(aa * 0.5f);
-			if ((aa) == (0.0f)) {
-				u0 = (float)(0.5f); u1 = (float)(0.5f); }
+			if ((aa) == (0.0f))
+			{
+				u0 = (float)(0.5f);
+				u1 = (float)(0.5f);
+			}
 
 			nvg__calculateJoins(ctx, (float)(w), (int)(lineJoin), (float)(miterLimit));
 			cverts = (int)(0);
-			for (i = (int)(0); (i) < (cache.npaths); i++) {
-				NVGpath* path = &cache.paths[i]; int loop = (int)(((path->closed) == (0)) ? 0 : 1); if ((lineJoin) == (NVG_ROUND)) cverts += (int)((path->count + path->nbevel * (ncap + 2) + 1) * 2); else cverts += (int)((path->count + path->nbevel * 5 + 1) * 2); if ((loop) == (0)) {
-					if ((lineCap) == (NVG_ROUND)) {
-						cverts += (int)((ncap * 2 + 2) * 2); }
-					else {
-						cverts += (int)((3 + 3) * 2); }
+			for (i = (int)(0); (i) < (cache.npaths); i++)
+			{
+				NVGpath* path = &cache.paths[i];
+				int loop = (int)(((path->closed) == (0)) ? 0 : 1);
+				if ((lineJoin) == (NVG_ROUND))
+					cverts += (int)((path->count + path->nbevel * (ncap + 2) + 1) * 2);
+				else
+					cverts += (int)((path->count + path->nbevel * 5 + 1) * 2);
+				if ((loop) == (0))
+				{
+					if ((lineCap) == (NVG_ROUND))
+					{
+						cverts += (int)((ncap * 2 + 2) * 2);
+					}
+					else
+					{
+						cverts += (int)((3 + 3) * 2);
+					}
 				}
 			}
 			verts = nvg__allocTempVerts(ctx, (int)(cverts));
-			if ((verts) == null) return (int)(0);
-			for (i = (int)(0); (i) < (cache.npaths); i++) {
-				NVGpath* path = &cache.paths[i]; NVGpoint* pts = &cache.points[path->first]; NVGpoint* p0; NVGpoint* p1; int s = 0; int e = 0; int loop = 0; float dx = 0; float dy = 0; path->fill = null; path->nfill = (int)(0); loop = (int)(((path->closed) == (0)) ? 0 : 1); dst = verts; path->stroke = dst; if ((loop) != 0) {
-					p0 = &pts[path->count - 1]; p1 = &pts[0]; s = (int)(0); e = (int)(path->count); }
-				else {
-					p0 = &pts[0]; p1 = &pts[1]; s = (int)(1); e = (int)(path->count - 1); }
-				if ((loop) == (0)) {
-					dx = (float)(p1->x - p0->x); dy = (float)(p1->y - p0->y); nvg__normalize(&dx, &dy); if ((lineCap) == (NVG_BUTT)) dst = nvg__buttCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (float)(-aa * 0.5f), (float)(aa), (float)(u0), (float)(u1)); else if (((lineCap) == (NVG_BUTT)) || ((lineCap) == (NVG_SQUARE))) dst = nvg__buttCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (float)(w - aa), (float)(aa), (float)(u0), (float)(u1)); else if ((lineCap) == (NVG_ROUND)) dst = nvg__roundCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1)); }
-				for (j = (int)(s); (j) < (e); ++j) {
-					if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0) {
-						if ((lineJoin) == (NVG_ROUND)) {
-							dst = nvg__roundJoin(dst, p0, p1, (float)(w), (float)(w), (float)(u0), (float)(u1), (int)(ncap), (float)(aa)); }
-						else {
-							dst = nvg__bevelJoin(dst, p0, p1, (float)(w), (float)(w), (float)(u0), (float)(u1), (float)(aa)); }
+			if ((verts) == null)
+				return (int)(0);
+			for (i = (int)(0); (i) < (cache.npaths); i++)
+			{
+				NVGpath* path = &cache.paths[i];
+				NVGpoint* pts = &cache.points[path->first];
+				NVGpoint* p0;
+				NVGpoint* p1;
+				int s = 0;
+				int e = 0;
+				int loop = 0;
+				float dx = 0;
+				float dy = 0;
+				path->fill = null;
+				path->nfill = (int)(0);
+				loop = (int)(((path->closed) == (0)) ? 0 : 1);
+				dst = verts;
+				path->stroke = dst;
+				if ((loop) != 0)
+				{
+					p0 = &pts[path->count - 1];
+					p1 = &pts[0];
+					s = (int)(0);
+					e = (int)(path->count);
+				}
+				else
+				{
+					p0 = &pts[0];
+					p1 = &pts[1];
+					s = (int)(1);
+					e = (int)(path->count - 1);
+				}
+				if ((loop) == (0))
+				{
+					dx = (float)(p1->x - p0->x);
+					dy = (float)(p1->y - p0->y);
+					nvg__normalize(&dx, &dy);
+					if ((lineCap) == (NVG_BUTT))
+						dst = nvg__buttCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (float)(-aa * 0.5f), (float)(aa), (float)(u0), (float)(u1));
+					else if (((lineCap) == (NVG_BUTT)) || ((lineCap) == (NVG_SQUARE)))
+						dst = nvg__buttCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (float)(w - aa), (float)(aa), (float)(u0), (float)(u1));
+					else if ((lineCap) == (NVG_ROUND))
+						dst = nvg__roundCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1));
+				}
+				for (j = (int)(s); (j) < (e); ++j)
+				{
+					if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+					{
+						if ((lineJoin) == (NVG_ROUND))
+						{
+							dst = nvg__roundJoin(dst, p0, p1, (float)(w), (float)(w), (float)(u0), (float)(u1), (int)(ncap), (float)(aa));
+						}
+						else
+						{
+							dst = nvg__bevelJoin(dst, p0, p1, (float)(w), (float)(w), (float)(u0), (float)(u1), (float)(aa));
+						}
 					}
-					else {
-						nvg__vset(dst, (float)(p1->x + (p1->dmx * w)), (float)(p1->y + (p1->dmy * w)), (float)(u0), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - (p1->dmx * w)), (float)(p1->y - (p1->dmy * w)), (float)(u1), (float)(1)); dst++; }
-					p0 = p1++; } if ((loop) != 0) {
-					nvg__vset(dst, (float)(verts[0].x), (float)(verts[0].y), (float)(u0), (float)(1)); dst++; nvg__vset(dst, (float)(verts[1].x), (float)(verts[1].y), (float)(u1), (float)(1)); dst++; }
-				else {
-					dx = (float)(p1->x - p0->x); dy = (float)(p1->y - p0->y); nvg__normalize(&dx, &dy); if ((lineCap) == (NVG_BUTT)) dst = nvg__buttCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (float)(-aa * 0.5f), (float)(aa), (float)(u0), (float)(u1)); else if (((lineCap) == (NVG_BUTT)) || ((lineCap) == (NVG_SQUARE))) dst = nvg__buttCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (float)(w - aa), (float)(aa), (float)(u0), (float)(u1)); else if ((lineCap) == (NVG_ROUND)) dst = nvg__roundCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1)); }
-				path->nstroke = ((int)(dst - verts)); verts = dst; }
+					else
+					{
+						nvg__vset(dst, (float)(p1->x + (p1->dmx * w)), (float)(p1->y + (p1->dmy * w)), (float)(u0), (float)(1));
+						dst++;
+						nvg__vset(dst, (float)(p1->x - (p1->dmx * w)), (float)(p1->y - (p1->dmy * w)), (float)(u1), (float)(1));
+						dst++;
+					}
+					p0 = p1++;
+				}
+				if ((loop) != 0)
+				{
+					nvg__vset(dst, (float)(verts[0].x), (float)(verts[0].y), (float)(u0), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(verts[1].x), (float)(verts[1].y), (float)(u1), (float)(1));
+					dst++;
+				}
+				else
+				{
+					dx = (float)(p1->x - p0->x);
+					dy = (float)(p1->y - p0->y);
+					nvg__normalize(&dx, &dy);
+					if ((lineCap) == (NVG_BUTT))
+						dst = nvg__buttCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (float)(-aa * 0.5f), (float)(aa), (float)(u0), (float)(u1));
+					else if (((lineCap) == (NVG_BUTT)) || ((lineCap) == (NVG_SQUARE)))
+						dst = nvg__buttCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (float)(w - aa), (float)(aa), (float)(u0), (float)(u1));
+					else if ((lineCap) == (NVG_ROUND))
+						dst = nvg__roundCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1));
+				}
+				path->nstroke = ((int)(dst - verts));
+				verts = dst;
+			}
 			return (int)(1);
 		}
 
@@ -2800,42 +1939,130 @@ namespace NanoVGSharp
 			NVGpathCache cache = ctx.cache;
 			NVGvertex* verts;
 			NVGvertex* dst;
-			int cverts = 0; int convex = 0; int i = 0; int j = 0;
+			int cverts = 0;
+			int convex = 0;
+			int i = 0;
+			int j = 0;
 			float aa = (float)(ctx.fringeWidth);
 			int fringe = (int)((w) > (0.0f) ? 1 : 0);
 			nvg__calculateJoins(ctx, (float)(w), (int)(lineJoin), (float)(miterLimit));
 			cverts = (int)(0);
-			for (i = (int)(0); (i) < (cache.npaths); i++) {
-				NVGpath* path = &cache.paths[i]; cverts += (int)(path->count + path->nbevel + 1); if ((fringe) != 0) cverts += (int)((path->count + path->nbevel * 5 + 1) * 2); }
+			for (i = (int)(0); (i) < (cache.npaths); i++)
+			{
+				NVGpath* path = &cache.paths[i];
+				cverts += (int)(path->count + path->nbevel + 1);
+				if ((fringe) != 0)
+					cverts += (int)((path->count + path->nbevel * 5 + 1) * 2);
+			}
 			verts = nvg__allocTempVerts(ctx, (int)(cverts));
-			if ((verts) == null) return (int)(0);
+			if ((verts) == null)
+				return (int)(0);
 			convex = (int)(((cache.npaths) == (1)) && ((cache.paths[0].convex) != 0) ? 1 : 0);
-			for (i = (int)(0); (i) < (cache.npaths); i++) {
-				NVGpath* path = &cache.paths[i]; NVGpoint* pts = &cache.points[path->first]; NVGpoint* p0; NVGpoint* p1; float rw = 0; float lw = 0; float woff = 0; float ru = 0; float lu = 0; woff = (float)(0.5f * aa); dst = verts; path->fill = dst; if ((fringe) != 0) {
-					p0 = &pts[path->count - 1]; p1 = &pts[0]; for (j = (int)(0); (j) < (path->count); ++j) {
-						if ((p1->flags & NVG_PT_BEVEL) != 0) {
-							float dlx0 = (float)(p0->dy); float dly0 = (float)(-p0->dx); float dlx1 = (float)(p1->dy); float dly1 = (float)(-p1->dx); if ((p1->flags & NVG_PT_LEFT) != 0) {
-								float lx = (float)(p1->x + p1->dmx * woff); float ly = (float)(p1->y + p1->dmy * woff); nvg__vset(dst, (float)(lx), (float)(ly), (float)(0.5f), (float)(1)); dst++; }
-							else {
-								float lx0 = (float)(p1->x + dlx0 * woff); float ly0 = (float)(p1->y + dly0 * woff); float lx1 = (float)(p1->x + dlx1 * woff); float ly1 = (float)(p1->y + dly1 * woff); nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(0.5f), (float)(1)); dst++; nvg__vset(dst, (float)(lx1), (float)(ly1), (float)(0.5f), (float)(1)); dst++; }
+			for (i = (int)(0); (i) < (cache.npaths); i++)
+			{
+				NVGpath* path = &cache.paths[i];
+				NVGpoint* pts = &cache.points[path->first];
+				NVGpoint* p0;
+				NVGpoint* p1;
+				float rw = 0;
+				float lw = 0;
+				float woff = 0;
+				float ru = 0;
+				float lu = 0;
+				woff = (float)(0.5f * aa);
+				dst = verts;
+				path->fill = dst;
+				if ((fringe) != 0)
+				{
+					p0 = &pts[path->count - 1];
+					p1 = &pts[0];
+					for (j = (int)(0); (j) < (path->count); ++j)
+					{
+						if ((p1->flags & NVG_PT_BEVEL) != 0)
+						{
+							float dlx0 = (float)(p0->dy);
+							float dly0 = (float)(-p0->dx);
+							float dlx1 = (float)(p1->dy);
+							float dly1 = (float)(-p1->dx);
+							if ((p1->flags & NVG_PT_LEFT) != 0)
+							{
+								float lx = (float)(p1->x + p1->dmx * woff);
+								float ly = (float)(p1->y + p1->dmy * woff);
+								nvg__vset(dst, (float)(lx), (float)(ly), (float)(0.5f), (float)(1));
+								dst++;
+							}
+							else
+							{
+								float lx0 = (float)(p1->x + dlx0 * woff);
+								float ly0 = (float)(p1->y + dly0 * woff);
+								float lx1 = (float)(p1->x + dlx1 * woff);
+								float ly1 = (float)(p1->y + dly1 * woff);
+								nvg__vset(dst, (float)(lx0), (float)(ly0), (float)(0.5f), (float)(1));
+								dst++;
+								nvg__vset(dst, (float)(lx1), (float)(ly1), (float)(0.5f), (float)(1));
+								dst++;
+							}
 						}
-						else {
-							nvg__vset(dst, (float)(p1->x + (p1->dmx * woff)), (float)(p1->y + (p1->dmy * woff)), (float)(0.5f), (float)(1)); dst++; }
-						p0 = p1++; } }
-				else {
-					for (j = (int)(0); (j) < (path->count); ++j) {
-						nvg__vset(dst, (float)(pts[j].x), (float)(pts[j].y), (float)(0.5f), (float)(1)); dst++; } }
-				path->nfill = ((int)(dst - verts)); verts = dst; if ((fringe) != 0) {
-					lw = (float)(w + woff); rw = (float)(w - woff); lu = (float)(0); ru = (float)(1); dst = verts; path->stroke = dst; if ((convex) != 0) {
-						lw = (float)(woff); lu = (float)(0.5f); }
-					p0 = &pts[path->count - 1]; p1 = &pts[0]; for (j = (int)(0); (j) < (path->count); ++j) {
-						if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0) {
-							dst = nvg__bevelJoin(dst, p0, p1, (float)(lw), (float)(rw), (float)(lu), (float)(ru), (float)(ctx.fringeWidth)); }
-						else {
-							nvg__vset(dst, (float)(p1->x + (p1->dmx * lw)), (float)(p1->y + (p1->dmy * lw)), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(p1->x - (p1->dmx * rw)), (float)(p1->y - (p1->dmy * rw)), (float)(ru), (float)(1)); dst++; }
-						p0 = p1++; } nvg__vset(dst, (float)(verts[0].x), (float)(verts[0].y), (float)(lu), (float)(1)); dst++; nvg__vset(dst, (float)(verts[1].x), (float)(verts[1].y), (float)(ru), (float)(1)); dst++; path->nstroke = ((int)(dst - verts)); verts = dst; }
-				else {
-					path->stroke = null; path->nstroke = (int)(0); }
+						else
+						{
+							nvg__vset(dst, (float)(p1->x + (p1->dmx * woff)), (float)(p1->y + (p1->dmy * woff)), (float)(0.5f), (float)(1));
+							dst++;
+						}
+						p0 = p1++;
+					}
+				}
+				else
+				{
+					for (j = (int)(0); (j) < (path->count); ++j)
+					{
+						nvg__vset(dst, (float)(pts[j].x), (float)(pts[j].y), (float)(0.5f), (float)(1));
+						dst++;
+					}
+				}
+				path->nfill = ((int)(dst - verts));
+				verts = dst;
+				if ((fringe) != 0)
+				{
+					lw = (float)(w + woff);
+					rw = (float)(w - woff);
+					lu = (float)(0);
+					ru = (float)(1);
+					dst = verts;
+					path->stroke = dst;
+					if ((convex) != 0)
+					{
+						lw = (float)(woff);
+						lu = (float)(0.5f);
+					}
+					p0 = &pts[path->count - 1];
+					p1 = &pts[0];
+					for (j = (int)(0); (j) < (path->count); ++j)
+					{
+						if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+						{
+							dst = nvg__bevelJoin(dst, p0, p1, (float)(lw), (float)(rw), (float)(lu), (float)(ru), (float)(ctx.fringeWidth));
+						}
+						else
+						{
+							nvg__vset(dst, (float)(p1->x + (p1->dmx * lw)), (float)(p1->y + (p1->dmy * lw)), (float)(lu), (float)(1));
+							dst++;
+							nvg__vset(dst, (float)(p1->x - (p1->dmx * rw)), (float)(p1->y - (p1->dmy * rw)), (float)(ru), (float)(1));
+							dst++;
+						}
+						p0 = p1++;
+					}
+					nvg__vset(dst, (float)(verts[0].x), (float)(verts[0].y), (float)(lu), (float)(1));
+					dst++;
+					nvg__vset(dst, (float)(verts[1].x), (float)(verts[1].y), (float)(ru), (float)(1));
+					dst++;
+					path->nstroke = ((int)(dst - verts));
+					verts = dst;
+				}
+				else
+				{
+					path->stroke = null;
+					path->nstroke = (int)(0);
+				}
 			}
 			return (int)(1);
 		}
@@ -2900,13 +2127,27 @@ namespace NanoVGSharp
 		{
 			float x0 = (float)(ctx.commandx);
 			float y0 = (float)(ctx.commandy);
-			float dx0 = 0; float dy0 = 0; float dx1 = 0; float dy1 = 0; float a = 0; float d = 0; float cx = 0; float cy = 0; float a0 = 0; float a1 = 0;
+			float dx0 = 0;
+			float dy0 = 0;
+			float dx1 = 0;
+			float dy1 = 0;
+			float a = 0;
+			float d = 0;
+			float cx = 0;
+			float cy = 0;
+			float a0 = 0;
+			float a1 = 0;
 			int dir = 0;
-			if ((ctx.ncommands) == (0)) {
-				return; }
+			if ((ctx.ncommands) == (0))
+			{
+				return;
+			}
 
-			if (((((nvg__ptEquals((float)(x0), (float)(y0), (float)(x1), (float)(y1), (float)(ctx.distTol))) != 0) || ((nvg__ptEquals((float)(x1), (float)(y1), (float)(x2), (float)(y2), (float)(ctx.distTol))) != 0)) || ((nvg__distPtSeg((float)(x1), (float)(y1), (float)(x0), (float)(y0), (float)(x2), (float)(y2))) < (ctx.distTol * ctx.distTol))) || ((radius) < (ctx.distTol))) {
-				nvgLineTo(ctx, (float)(x1), (float)(y1)); return; }
+			if (((((nvg__ptEquals((float)(x0), (float)(y0), (float)(x1), (float)(y1), (float)(ctx.distTol))) != 0) || ((nvg__ptEquals((float)(x1), (float)(y1), (float)(x2), (float)(y2), (float)(ctx.distTol))) != 0)) || ((nvg__distPtSeg((float)(x1), (float)(y1), (float)(x0), (float)(y0), (float)(x2), (float)(y2))) < (ctx.distTol * ctx.distTol))) || ((radius) < (ctx.distTol)))
+			{
+				nvgLineTo(ctx, (float)(x1), (float)(y1));
+				return;
+			}
 
 			dx0 = (float)(x0 - x1);
 			dy0 = (float)(y0 - y1);
@@ -2915,14 +2156,29 @@ namespace NanoVGSharp
 			nvg__normalize(&dx0, &dy0);
 			nvg__normalize(&dx1, &dy1);
 			a = (float)(nvg__acosf((float)(dx0 * dx1 + dy0 * dy1)));
-			d = (float)(radius / nvg__tanf((float)(a / 2.0f)));
-			if ((d) > (10000.0f)) {
-				nvgLineTo(ctx, (float)(x1), (float)(y1)); return; }
+			d = (float)(radius / tanf((float)(a / 2.0f)));
+			if ((d) > (10000.0f))
+			{
+				nvgLineTo(ctx, (float)(x1), (float)(y1));
+				return;
+			}
 
-			if ((nvg__cross((float)(dx0), (float)(dy0), (float)(dx1), (float)(dy1))) > (0.0f)) {
-				cx = (float)(x1 + dx0 * d + dy0 * radius); cy = (float)(y1 + dy0 * d + -dx0 * radius); a0 = (float)(nvg__atan2f((float)(dx0), (float)(-dy0))); a1 = (float)(nvg__atan2f((float)(-dx1), (float)(dy1))); dir = (int)(NVG_CW); }
-			else {
-				cx = (float)(x1 + dx0 * d + -dy0 * radius); cy = (float)(y1 + dy0 * d + dx0 * radius); a0 = (float)(nvg__atan2f((float)(-dx0), (float)(dy0))); a1 = (float)(nvg__atan2f((float)(dx1), (float)(-dy1))); dir = (int)(NVG_CCW); }
+			if ((nvg__cross((float)(dx0), (float)(dy0), (float)(dx1), (float)(dy1))) > (0.0f))
+			{
+				cx = (float)(x1 + dx0 * d + dy0 * radius);
+				cy = (float)(y1 + dy0 * d + -dx0 * radius);
+				a0 = (float)(nvg__atan2f((float)(dx0), (float)(-dy0)));
+				a1 = (float)(nvg__atan2f((float)(-dx1), (float)(dy1)));
+				dir = (int)(NVG_CW);
+			}
+			else
+			{
+				cx = (float)(x1 + dx0 * d + -dy0 * radius);
+				cy = (float)(y1 + dy0 * d + dx0 * radius);
+				a0 = (float)(nvg__atan2f((float)(-dx0), (float)(dy0)));
+				a1 = (float)(nvg__atan2f((float)(dx1), (float)(-dy1)));
+				dir = (int)(NVG_CCW);
+			}
 
 			nvgArc(ctx, (float)(cx), (float)(cy), (float)(radius), (float)(a0), (float)(a1), (int)(dir));
 		}
@@ -2946,37 +2202,91 @@ namespace NanoVGSharp
 
 		public static void nvgArc(NVGcontext ctx, float cx, float cy, float r, float a0, float a1, int dir)
 		{
-			float a = (float)(0); float da = (float)(0); float hda = (float)(0); float kappa = (float)(0);
-			float dx = (float)(0); float dy = (float)(0); float x = (float)(0); float y = (float)(0); float tanx = (float)(0); float tany = (float)(0);
-			float px = (float)(0); float py = (float)(0); float ptanx = (float)(0); float ptany = (float)(0);
+			float a = (float)(0);
+			float da = (float)(0);
+			float hda = (float)(0);
+			float kappa = (float)(0);
+			float dx = (float)(0);
+			float dy = (float)(0);
+			float x = (float)(0);
+			float y = (float)(0);
+			float tanx = (float)(0);
+			float tany = (float)(0);
+			float px = (float)(0);
+			float py = (float)(0);
+			float ptanx = (float)(0);
+			float ptany = (float)(0);
 			float* vals = stackalloc float[3 + 5 * 7 + 100];
-			int i = 0; int ndivs = 0; int nvals = 0;
+			int i = 0;
+			int ndivs = 0;
+			int nvals = 0;
 			int move = (int)((ctx.ncommands) > (0) ? NVG_LINETO : NVG_MOVETO);
 			da = (float)(a1 - a0);
-			if ((dir) == (NVG_CW)) {
-				if ((nvg__absf((float)(da))) >= (3.14159274 * 2)) {
-					da = (float)(3.14159274 * 2); }
-				else {
-					while ((da) < (0.0f)) { da += (float)(3.14159274 * 2); } }
+			if ((dir) == (NVG_CW))
+			{
+				if ((nvg__absf((float)(da))) >= (3.14159274 * 2))
+				{
+					da = (float)(3.14159274 * 2);
+				}
+				else
+				{
+					while ((da) < (0.0f))
+					{
+						da += (float)(3.14159274 * 2);
+					}
+				}
 			}
-			else {
-				if ((nvg__absf((float)(da))) >= (3.14159274 * 2)) {
-					da = (float)(-3.14159274 * 2); }
-				else {
-					while ((da) > (0.0f)) { da -= (float)(3.14159274 * 2); } }
+			else
+			{
+				if ((nvg__absf((float)(da))) >= (3.14159274 * 2))
+				{
+					da = (float)(-3.14159274 * 2);
+				}
+				else
+				{
+					while ((da) > (0.0f))
+					{
+						da -= (float)(3.14159274 * 2);
+					}
+				}
 			}
 
 			ndivs = (int)(nvg__maxi((int)(1), (int)(nvg__mini((int)(nvg__absf((float)(da)) / (3.14159274 * 0.5f) + 0.5f), (int)(5)))));
 			hda = (float)((da / (float)(ndivs)) / 2.0f);
-			kappa = (float)(nvg__absf((float)(4.0f / 3.0f * (1.0f - nvg__cosf((float)(hda))) / nvg__sinf((float)(hda)))));
-			if ((dir) == (NVG_CCW)) kappa = (float)(-kappa);
+			kappa = (float)(nvg__absf((float)(4.0f / 3.0f * (1.0f - cosf((float)(hda))) / sinf((float)(hda)))));
+			if ((dir) == (NVG_CCW))
+				kappa = (float)(-kappa);
 			nvals = (int)(0);
-			for (i = (int)(0); i <= ndivs; i++) {
-				a = (float)(a0 + da * (i / (float)(ndivs))); dx = (float)(nvg__cosf((float)(a))); dy = (float)(nvg__sinf((float)(a))); x = (float)(cx + dx * r); y = (float)(cy + dy * r); tanx = (float)(-dy * r * kappa); tany = (float)(dx * r * kappa); if ((i) == (0)) {
-					vals[nvals++] = ((float)(move)); vals[nvals++] = (float)(x); vals[nvals++] = (float)(y); }
-				else {
-					vals[nvals++] = (float)(NVG_BEZIERTO); vals[nvals++] = (float)(px + ptanx); vals[nvals++] = (float)(py + ptany); vals[nvals++] = (float)(x - tanx); vals[nvals++] = (float)(y - tany); vals[nvals++] = (float)(x); vals[nvals++] = (float)(y); }
-				px = (float)(x); py = (float)(y); ptanx = (float)(tanx); ptany = (float)(tany); }
+			for (i = (int)(0); i <= ndivs; i++)
+			{
+				a = (float)(a0 + da * (i / (float)(ndivs)));
+				dx = (float)(cosf((float)(a)));
+				dy = (float)(sinf((float)(a)));
+				x = (float)(cx + dx * r);
+				y = (float)(cy + dy * r);
+				tanx = (float)(-dy * r * kappa);
+				tany = (float)(dx * r * kappa);
+				if ((i) == (0))
+				{
+					vals[nvals++] = ((float)(move));
+					vals[nvals++] = (float)(x);
+					vals[nvals++] = (float)(y);
+				}
+				else
+				{
+					vals[nvals++] = (float)(NVG_BEZIERTO);
+					vals[nvals++] = (float)(px + ptanx);
+					vals[nvals++] = (float)(py + ptany);
+					vals[nvals++] = (float)(x - tanx);
+					vals[nvals++] = (float)(y - tany);
+					vals[nvals++] = (float)(x);
+					vals[nvals++] = (float)(y);
+				}
+				px = (float)(x);
+				py = (float)(y);
+				ptanx = (float)(tanx);
+				ptany = (float)(tany);
+			}
 			nvg__appendCommands(ctx, vals, (int)(nvals));
 		}
 
@@ -3007,10 +2317,24 @@ namespace NanoVGSharp
 
 		public static void nvgRoundedRectVarying(NVGcontext ctx, float x, float y, float w, float h, float radTopLeft, float radTopRight, float radBottomRight, float radBottomLeft)
 		{
-			if (((((radTopLeft) < (0.1f)) && ((radTopRight) < (0.1f))) && ((radBottomRight) < (0.1f))) && ((radBottomLeft) < (0.1f))) {
-				nvgRect(ctx, (float)(x), (float)(y), (float)(w), (float)(h)); return; }
-			else {
-				float halfw = (float)(nvg__absf((float)(w)) * 0.5f); float halfh = (float)(nvg__absf((float)(h)) * 0.5f); float rxBL = (float)(nvg__minf((float)(radBottomLeft), (float)(halfw)) * nvg__signf((float)(w))); float ryBL = (float)(nvg__minf((float)(radBottomLeft), (float)(halfh)) * nvg__signf((float)(h))); float rxBR = (float)(nvg__minf((float)(radBottomRight), (float)(halfw)) * nvg__signf((float)(w))); float ryBR = (float)(nvg__minf((float)(radBottomRight), (float)(halfh)) * nvg__signf((float)(h))); float rxTR = (float)(nvg__minf((float)(radTopRight), (float)(halfw)) * nvg__signf((float)(w))); float ryTR = (float)(nvg__minf((float)(radTopRight), (float)(halfh)) * nvg__signf((float)(h))); float rxTL = (float)(nvg__minf((float)(radTopLeft), (float)(halfw)) * nvg__signf((float)(w))); float ryTL = (float)(nvg__minf((float)(radTopLeft), (float)(halfh)) * nvg__signf((float)(h))); float* vals = stackalloc float[44];
+			if (((((radTopLeft) < (0.1f)) && ((radTopRight) < (0.1f))) && ((radBottomRight) < (0.1f))) && ((radBottomLeft) < (0.1f)))
+			{
+				nvgRect(ctx, (float)(x), (float)(y), (float)(w), (float)(h));
+				return;
+			}
+			else
+			{
+				float halfw = (float)(nvg__absf((float)(w)) * 0.5f);
+				float halfh = (float)(nvg__absf((float)(h)) * 0.5f);
+				float rxBL = (float)(nvg__minf((float)(radBottomLeft), (float)(halfw)) * nvg__signf((float)(w)));
+				float ryBL = (float)(nvg__minf((float)(radBottomLeft), (float)(halfh)) * nvg__signf((float)(h)));
+				float rxBR = (float)(nvg__minf((float)(radBottomRight), (float)(halfw)) * nvg__signf((float)(w)));
+				float ryBR = (float)(nvg__minf((float)(radBottomRight), (float)(halfh)) * nvg__signf((float)(h)));
+				float rxTR = (float)(nvg__minf((float)(radTopRight), (float)(halfw)) * nvg__signf((float)(w)));
+				float ryTR = (float)(nvg__minf((float)(radTopRight), (float)(halfh)) * nvg__signf((float)(h)));
+				float rxTL = (float)(nvg__minf((float)(radTopLeft), (float)(halfw)) * nvg__signf((float)(w)));
+				float ryTL = (float)(nvg__minf((float)(radTopLeft), (float)(halfh)) * nvg__signf((float)(h)));
+				float* vals = stackalloc float[44];
 				vals[0] = (float)(NVG_MOVETO);
 				vals[1] = (float)(x);
 				vals[2] = (float)(y + ryTL);
@@ -3055,7 +2379,8 @@ namespace NanoVGSharp
 				vals[41] = (float)(x);
 				vals[42] = (float)(y + ryTL);
 				vals[43] = (float)(NVG_CLOSE);
-				nvg__appendCommands(ctx, vals, 44); }
+				nvg__appendCommands(ctx, vals, 44);
+			}
 
 		}
 
@@ -3103,18 +2428,34 @@ namespace NanoVGSharp
 			nvgEllipse(ctx, (float)(cx), (float)(cy), (float)(r), (float)(r));
 		}
 
-		public static void nvgDebugDumpPathCache(NVGcontext ctx)
+/*		public static void nvgDebugDumpPathCache(NVGcontext ctx)
 		{
 			NVGpath* path;
-			int i = 0; int j = 0;
+			int i = 0;
+			int j = 0;
 			printf("Dumping %d cached paths\n", (int)(ctx.cache.npaths));
-			for (i = (int)(0); (i) < (ctx.cache.npaths); i++) {
-				path = &ctx.cache.paths[i]; printf(" - Path %d\n", (int)(i)); if ((path->nfill) != 0) {
-					printf("   - fill: %d\n", (int)(path->nfill)); for (j = (int)(0); (j) < (path->nfill); j++) { printf("%f\t%f\n", (double)(path->fill[j].x), (double)(path->fill[j].y)); } }
-				if ((path->nstroke) != 0) {
-					printf("   - stroke: %d\n", (int)(path->nstroke)); for (j = (int)(0); (j) < (path->nstroke); j++) { printf("%f\t%f\n", (double)(path->stroke[j].x), (double)(path->stroke[j].y)); } }
+			for (i = (int)(0); (i) < (ctx.cache.npaths); i++)
+			{
+				path = &ctx.cache.paths[i];
+				printf(" - Path %d\n", (int)(i));
+				if ((path->nfill) != 0)
+				{
+					printf("   - fill: %d\n", (int)(path->nfill));
+					for (j = (int)(0); (j) < (path->nfill); j++)
+					{
+						printf("%f\t%f\n", (double)(path->fill[j].x), (double)(path->fill[j].y));
+					}
+				}
+				if ((path->nstroke) != 0)
+				{
+					printf("   - stroke: %d\n", (int)(path->nstroke));
+					for (j = (int)(0); (j) < (path->nstroke); j++)
+					{
+						printf("%f\t%f\n", (double)(path->stroke[j].x), (double)(path->stroke[j].y));
+					}
+				}
 			}
-		}
+		}*/
 
 		public static void nvgFill(NVGcontext ctx)
 		{
@@ -3123,12 +2464,20 @@ namespace NanoVGSharp
 			NVGpaint fillPaint = (NVGpaint)(state->fill);
 			int i = 0;
 			nvg__flattenPaths(ctx);
-			if (((ctx._params_.edgeAntiAlias) != 0) && ((state->shapeAntiAlias) != 0)) nvg__expandFill(ctx, (float)(ctx.fringeWidth), (int)(NVG_MITER), (float)(2.4f)); else nvg__expandFill(ctx, (float)(0.0f), (int)(NVG_MITER), (float)(2.4f));
+			if (((ctx._params_.edgeAntiAlias) != 0) && ((state->shapeAntiAlias) != 0))
+				nvg__expandFill(ctx, (float)(ctx.fringeWidth), (int)(NVG_MITER), (float)(2.4f));
+			else
+				nvg__expandFill(ctx, (float)(0.0f), (int)(NVG_MITER), (float)(2.4f));
 			fillPaint.innerColor.a *= (float)(state->alpha);
 			fillPaint.outerColor.a *= (float)(state->alpha);
 			ctx._params_.renderFill(ctx._params_.userPtr, &fillPaint, (NVGcompositeOperationState)(state->compositeOperation), &state->scissor, (float)(ctx.fringeWidth), ctx.cache.bounds, ctx.cache.paths, (int)(ctx.cache.npaths));
-			for (i = (int)(0); (i) < (ctx.cache.npaths); i++) {
-				path = &ctx.cache.paths[i]; ctx.fillTriCount += (int)(path->nfill - 2); ctx.fillTriCount += (int)(path->nstroke - 2); ctx.drawCallCount += (int)(2); }
+			for (i = (int)(0); (i) < (ctx.cache.npaths); i++)
+			{
+				path = &ctx.cache.paths[i];
+				ctx.fillTriCount += (int)(path->nfill - 2);
+				ctx.fillTriCount += (int)(path->nstroke - 2);
+				ctx.drawCallCount += (int)(2);
+			}
 		}
 
 		public static void nvgStroke(NVGcontext ctx)
@@ -3139,16 +2488,28 @@ namespace NanoVGSharp
 			NVGpaint strokePaint = (NVGpaint)(state->stroke);
 			NVGpath* path;
 			int i = 0;
-			if ((strokeWidth) < (ctx.fringeWidth)) {
-				float alpha = (float)(nvg__clampf((float)(strokeWidth / ctx.fringeWidth), (float)(0.0f), (float)(1.0f))); strokePaint.innerColor.a *= (float)(alpha * alpha); strokePaint.outerColor.a *= (float)(alpha * alpha); strokeWidth = (float)(ctx.fringeWidth); }
+			if ((strokeWidth) < (ctx.fringeWidth))
+			{
+				float alpha = (float)(nvg__clampf((float)(strokeWidth / ctx.fringeWidth), (float)(0.0f), (float)(1.0f)));
+				strokePaint.innerColor.a *= (float)(alpha * alpha);
+				strokePaint.outerColor.a *= (float)(alpha * alpha);
+				strokeWidth = (float)(ctx.fringeWidth);
+			}
 
 			strokePaint.innerColor.a *= (float)(state->alpha);
 			strokePaint.outerColor.a *= (float)(state->alpha);
 			nvg__flattenPaths(ctx);
-			if (((ctx._params_.edgeAntiAlias) != 0) && ((state->shapeAntiAlias) != 0)) nvg__expandStroke(ctx, (float)(strokeWidth * 0.5f), (float)(ctx.fringeWidth), (int)(state->lineCap), (int)(state->lineJoin), (float)(state->miterLimit)); else nvg__expandStroke(ctx, (float)(strokeWidth * 0.5f), (float)(0.0f), (int)(state->lineCap), (int)(state->lineJoin), (float)(state->miterLimit));
+			if (((ctx._params_.edgeAntiAlias) != 0) && ((state->shapeAntiAlias) != 0))
+				nvg__expandStroke(ctx, (float)(strokeWidth * 0.5f), (float)(ctx.fringeWidth), (int)(state->lineCap), (int)(state->lineJoin), (float)(state->miterLimit));
+			else
+				nvg__expandStroke(ctx, (float)(strokeWidth * 0.5f), (float)(0.0f), (int)(state->lineCap), (int)(state->lineJoin), (float)(state->miterLimit));
 			ctx._params_.renderStroke(ctx._params_.userPtr, &strokePaint, (NVGcompositeOperationState)(state->compositeOperation), &state->scissor, (float)(ctx.fringeWidth), (float)(strokeWidth), ctx.cache.paths, (int)(ctx.cache.npaths));
-			for (i = (int)(0); (i) < (ctx.cache.npaths); i++) {
-				path = &ctx.cache.paths[i]; ctx.strokeTriCount += (int)(path->nstroke - 2); ctx.drawCallCount++; }
+			for (i = (int)(0); (i) < (ctx.cache.npaths); i++)
+			{
+				path = &ctx.cache.paths[i];
+				ctx.strokeTriCount += (int)(path->nstroke - 2);
+				ctx.drawCallCount++;
+			}
 		}
 
 		public static int nvgCreateFontMem(NVGcontext ctx, sbyte* name, byte* data, int ndata, int freeData)
@@ -3158,13 +2519,15 @@ namespace NanoVGSharp
 
 		public static int nvgFindFont(NVGcontext ctx, sbyte* name)
 		{
-			if ((name) == null) return (int)(-1);
+			if ((name) == null)
+				return (int)(-1);
 			return (int)(fonsGetFontByName(ctx.fs, name));
 		}
 
 		public static int nvgAddFallbackFontId(NVGcontext ctx, int baseFont, int fallbackFont)
 		{
-			if (((baseFont) == (-1)) || ((fallbackFont) == (-1))) return (int)(0);
+			if (((baseFont) == (-1)) || ((fallbackFont) == (-1)))
+				return (int)(0);
 			return (int)(fonsAddFallbackFont(ctx.fs, (int)(baseFont), (int)(fallbackFont)));
 		}
 
@@ -3228,20 +2591,44 @@ namespace NanoVGSharp
 		public static void nvg__flushTextTexture(NVGcontext ctx)
 		{
 			int* dirty = stackalloc int[4];
-			if ((fonsValidateTexture(ctx.fs, dirty)) != 0) {
-				int fontImage = (int)(ctx.fontImages[ctx.fontImageIdx]); if (fontImage != 0) {
-					int iw = 0; int ih = 0; byte* data = fonsGetTextureData(ctx.fs, &iw, &ih); int x = (int)(dirty[0]); int y = (int)(dirty[1]); int w = (int)(dirty[2] - dirty[0]); int h = (int)(dirty[3] - dirty[1]); ctx._params_.renderUpdateTexture(ctx._params_.userPtr, (int)(fontImage), (int)(x), (int)(y), (int)(w), (int)(h), data); }
+			if ((fonsValidateTexture(ctx.fs, dirty)) != 0)
+			{
+				int fontImage = (int)(ctx.fontImages[ctx.fontImageIdx]);
+				if (fontImage != 0)
+				{
+					int iw = 0;
+					int ih = 0;
+					byte* data = fonsGetTextureData(ctx.fs, &iw, &ih);
+					int x = (int)(dirty[0]);
+					int y = (int)(dirty[1]);
+					int w = (int)(dirty[2] - dirty[0]);
+					int h = (int)(dirty[3] - dirty[1]);
+					ctx._params_.renderUpdateTexture(ctx._params_.userPtr, (int)(fontImage), (int)(x), (int)(y), (int)(w), (int)(h), data);
+				}
 			}
 
 		}
 
 		public static int nvg__allocTextAtlas(NVGcontext ctx)
 		{
-			int iw = 0; int ih = 0;
+			int iw = 0;
+			int ih = 0;
 			nvg__flushTextTexture(ctx);
-			if ((ctx.fontImageIdx) >= (4 - 1)) return (int)(0);
-			if (ctx.fontImages[ctx.fontImageIdx + 1] != 0) nvgImageSize(ctx, (int)(ctx.fontImages[ctx.fontImageIdx + 1]), &iw, &ih); else {
-				nvgImageSize(ctx, (int)(ctx.fontImages[ctx.fontImageIdx]), &iw, &ih); if ((iw) > (ih)) ih *= (int)(2); else iw *= (int)(2); if (((iw) > (2048)) || ((ih) > (2048))) iw = (int)(ih = (int)(2048)); ctx.fontImages[ctx.fontImageIdx + 1] = (int)(ctx._params_.renderCreateTexture(ctx._params_.userPtr, (int)(NVG_TEXTURE_ALPHA), (int)(iw), (int)(ih), (int)(0), null)); }
+			if ((ctx.fontImageIdx) >= (4 - 1))
+				return (int)(0);
+			if (ctx.fontImages[ctx.fontImageIdx + 1] != 0)
+				nvgImageSize(ctx, (int)(ctx.fontImages[ctx.fontImageIdx + 1]), &iw, &ih);
+			else
+			{
+				nvgImageSize(ctx, (int)(ctx.fontImages[ctx.fontImageIdx]), &iw, &ih);
+				if ((iw) > (ih))
+					ih *= (int)(2);
+				else
+					iw *= (int)(2);
+				if (((iw) > (2048)) || ((ih) > (2048)))
+					iw = (int)(ih = (int)(2048));
+				ctx.fontImages[ctx.fontImageIdx + 1] = (int)(ctx._params_.renderCreateTexture(ctx._params_.userPtr, (int)(NVG_TEXTURE_ALPHA), (int)(iw), (int)(ih), (int)(0), null));
+			}
 
 			++ctx.fontImageIdx;
 			fonsResetAtlas(ctx.fs, (int)(iw), (int)(ih));
@@ -3263,15 +2650,18 @@ namespace NanoVGSharp
 		public static float nvgText(NVGcontext ctx, float x, float y, sbyte* _string_, sbyte* end)
 		{
 			NVGstate* state = nvg__getState(ctx);
-			FONStextIter iter = new FONStextIter(); FONStextIter prevIter = new FONStextIter();
+			FONStextIter iter = new FONStextIter();
+			FONStextIter prevIter = new FONStextIter();
 			FONSquad q = new FONSquad();
 			NVGvertex* verts;
 			float scale = (float)(nvg__getFontScale(state) * ctx.devicePxRatio);
 			float invscale = (float)(1.0f / scale);
 			int cverts = (int)(0);
 			int nverts = (int)(0);
-			if ((end) == null) end = _string_ + CRuntime.strlen(_string_);
-			if ((state->fontId) == (-1)) return (float)(x);
+			if ((end) == null)
+				end = _string_ + CRuntime.strlen(_string_);
+			if ((state->fontId) == (-1))
+				return (float)(x);
 			fonsSetSize(ctx.fs, (float)(state->fontSize * scale));
 			fonsSetSpacing(ctx.fs, (float)(state->letterSpacing * scale));
 			fonsSetBlur(ctx.fs, (float)(state->fontBlur * scale));
@@ -3279,16 +2669,47 @@ namespace NanoVGSharp
 			fonsSetFont(ctx.fs, (int)(state->fontId));
 			cverts = (int)(nvg__maxi((int)(2), (int)(end - _string_)) * 6);
 			verts = nvg__allocTempVerts(ctx, (int)(cverts));
-			if ((verts) == null) return (float)(x);
+			if ((verts) == null)
+				return (float)(x);
 			fonsTextIterInit(ctx.fs, iter, (float)(x * scale), (float)(y * scale), _string_, end, (int)(FONS_GLYPH_BITMAP_REQUIRED));
 			prevIter = (FONStextIter)(iter);
-			while ((fonsTextIterNext(ctx.fs, iter, &q)) != 0) {
-				float* c = stackalloc float[4 * 2]; if ((iter.prevGlyphIndex) == (-1)) {
-					if (nverts != 0) {
-						nvg__renderText(ctx, verts, (int)(nverts)); nverts = (int)(0); }
-					if (nvg__allocTextAtlas(ctx) == 0) break; iter = (FONStextIter)(prevIter); fonsTextIterNext(ctx.fs, iter, &q); if ((iter.prevGlyphIndex) == (-1)) break; }
-				prevIter = (FONStextIter)(iter); nvgTransformPoint(&c[0], &c[1], state->xform, (float)(q.x0 * invscale), (float)(q.y0 * invscale)); nvgTransformPoint(&c[2], &c[3], state->xform, (float)(q.x1 * invscale), (float)(q.y0 * invscale)); nvgTransformPoint(&c[4], &c[5], state->xform, (float)(q.x1 * invscale), (float)(q.y1 * invscale)); nvgTransformPoint(&c[6], &c[7], state->xform, (float)(q.x0 * invscale), (float)(q.y1 * invscale)); if (nverts + 6 <= cverts) {
-					nvg__vset(&verts[nverts], (float)(c[0]), (float)(c[1]), (float)(q.s0), (float)(q.t0)); nverts++; nvg__vset(&verts[nverts], (float)(c[4]), (float)(c[5]), (float)(q.s1), (float)(q.t1)); nverts++; nvg__vset(&verts[nverts], (float)(c[2]), (float)(c[3]), (float)(q.s1), (float)(q.t0)); nverts++; nvg__vset(&verts[nverts], (float)(c[0]), (float)(c[1]), (float)(q.s0), (float)(q.t0)); nverts++; nvg__vset(&verts[nverts], (float)(c[6]), (float)(c[7]), (float)(q.s0), (float)(q.t1)); nverts++; nvg__vset(&verts[nverts], (float)(c[4]), (float)(c[5]), (float)(q.s1), (float)(q.t1)); nverts++; }
+			while ((fonsTextIterNext(ctx.fs, iter, &q)) != 0)
+			{
+				float* c = stackalloc float[4 * 2];
+				if ((iter.prevGlyphIndex) == (-1))
+				{
+					if (nverts != 0)
+					{
+						nvg__renderText(ctx, verts, (int)(nverts));
+						nverts = (int)(0);
+					}
+					if (nvg__allocTextAtlas(ctx) == 0)
+						break;
+					iter = (FONStextIter)(prevIter);
+					fonsTextIterNext(ctx.fs, iter, &q);
+					if ((iter.prevGlyphIndex) == (-1))
+						break;
+				}
+				prevIter = (FONStextIter)(iter);
+				nvgTransformPoint(&c[0], &c[1], state->xform, (float)(q.x0 * invscale), (float)(q.y0 * invscale));
+				nvgTransformPoint(&c[2], &c[3], state->xform, (float)(q.x1 * invscale), (float)(q.y0 * invscale));
+				nvgTransformPoint(&c[4], &c[5], state->xform, (float)(q.x1 * invscale), (float)(q.y1 * invscale));
+				nvgTransformPoint(&c[6], &c[7], state->xform, (float)(q.x0 * invscale), (float)(q.y1 * invscale));
+				if (nverts + 6 <= cverts)
+				{
+					nvg__vset(&verts[nverts], (float)(c[0]), (float)(c[1]), (float)(q.s0), (float)(q.t0));
+					nverts++;
+					nvg__vset(&verts[nverts], (float)(c[4]), (float)(c[5]), (float)(q.s1), (float)(q.t1));
+					nverts++;
+					nvg__vset(&verts[nverts], (float)(c[2]), (float)(c[3]), (float)(q.s1), (float)(q.t0));
+					nverts++;
+					nvg__vset(&verts[nverts], (float)(c[0]), (float)(c[1]), (float)(q.s0), (float)(q.t0));
+					nverts++;
+					nvg__vset(&verts[nverts], (float)(c[6]), (float)(c[7]), (float)(q.s0), (float)(q.t1));
+					nverts++;
+					nvg__vset(&verts[nverts], (float)(c[4]), (float)(c[5]), (float)(q.s1), (float)(q.t1));
+					nverts++;
+				}
 			}
 			nvg__flushTextTexture(ctx);
 			nvg__renderText(ctx, verts, (int)(nverts));
@@ -3299,17 +2720,31 @@ namespace NanoVGSharp
 		{
 			NVGstate* state = nvg__getState(ctx);
 			NVGtextRow* rows = stackalloc NVGtextRow[2];
-			int nrows = (int)(0); int i = 0;
+			int nrows = (int)(0);
+			int i = 0;
 			int oldAlign = (int)(state->textAlign);
 			int haling = (int)(state->textAlign & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT));
 			int valign = (int)(state->textAlign & (NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE));
 			float lineh = (float)(0);
-			if ((state->fontId) == (-1)) return;
+			if ((state->fontId) == (-1))
+				return;
 			nvgTextMetrics(ctx, null, null, &lineh);
 			state->textAlign = (int)(NVG_ALIGN_LEFT | valign);
-			while ((nrows = (int)(nvgTextBreakLines(ctx, _string_, end, (float)(breakRowWidth), rows, (int)(2))))) {
-				for (i = (int)(0); (i) < (nrows); i++) {
-					NVGtextRow* row = &rows[i]; if ((haling & NVG_ALIGN_LEFT) != 0) nvgText(ctx, (float)(x), (float)(y), row->start, row->end); else if ((haling & NVG_ALIGN_CENTER) != 0) nvgText(ctx, (float)(x + breakRowWidth * 0.5f - row->width * 0.5f), (float)(y), row->start, row->end); else if ((haling & NVG_ALIGN_RIGHT) != 0) nvgText(ctx, (float)(x + breakRowWidth - row->width), (float)(y), row->start, row->end); y += (float)(lineh * state->lineHeight); } _string_ = rows[nrows - 1].next; }
+			while ((nrows = (int)(nvgTextBreakLines(ctx, _string_, end, (float)(breakRowWidth), rows, (int)(2)))))
+			{
+				for (i = (int)(0); (i) < (nrows); i++)
+				{
+					NVGtextRow* row = &rows[i];
+					if ((haling & NVG_ALIGN_LEFT) != 0)
+						nvgText(ctx, (float)(x), (float)(y), row->start, row->end);
+					else if ((haling & NVG_ALIGN_CENTER) != 0)
+						nvgText(ctx, (float)(x + breakRowWidth * 0.5f - row->width * 0.5f), (float)(y), row->start, row->end);
+					else if ((haling & NVG_ALIGN_RIGHT) != 0)
+						nvgText(ctx, (float)(x + breakRowWidth - row->width), (float)(y), row->start, row->end);
+					y += (float)(lineh * state->lineHeight);
+				}
+				_string_ = rows[nrows - 1].next;
+			}
 			state->textAlign = (int)(oldAlign);
 		}
 
@@ -3318,12 +2753,16 @@ namespace NanoVGSharp
 			NVGstate* state = nvg__getState(ctx);
 			float scale = (float)(nvg__getFontScale(state) * ctx.devicePxRatio);
 			float invscale = (float)(1.0f / scale);
-			FONStextIter iter = new FONStextIter(); FONStextIter prevIter = new FONStextIter();
+			FONStextIter iter = new FONStextIter();
+			FONStextIter prevIter = new FONStextIter();
 			FONSquad q = new FONSquad();
 			int npos = (int)(0);
-			if ((state->fontId) == (-1)) return (int)(0);
-			if ((end) == null) end = _string_ + CRuntime.strlen(_string_);
-			if ((_string_) == (end)) return (int)(0);
+			if ((state->fontId) == (-1))
+				return (int)(0);
+			if ((end) == null)
+				end = _string_ + CRuntime.strlen(_string_);
+			if ((_string_) == (end))
+				return (int)(0);
 			fonsSetSize(ctx.fs, (float)(state->fontSize * scale));
 			fonsSetSpacing(ctx.fs, (float)(state->letterSpacing * scale));
 			fonsSetBlur(ctx.fs, (float)(state->fontBlur * scale));
@@ -3331,10 +2770,22 @@ namespace NanoVGSharp
 			fonsSetFont(ctx.fs, (int)(state->fontId));
 			fonsTextIterInit(ctx.fs, iter, (float)(x * scale), (float)(y * scale), _string_, end, (int)(FONS_GLYPH_BITMAP_OPTIONAL));
 			prevIter = (FONStextIter)(iter);
-			while ((fonsTextIterNext(ctx.fs, iter, &q)) != 0) {
-				if (((iter.prevGlyphIndex) < (0)) && ((nvg__allocTextAtlas(ctx)) != 0)) {
-					iter = (FONStextIter)(prevIter); fonsTextIterNext(ctx.fs, iter, &q); }
-				prevIter = (FONStextIter)(iter); positions[npos].str = iter.str; positions[npos].x = (float)(iter.x * invscale); positions[npos].minx = (float)(nvg__minf((float)(iter.x), (float)(q.x0)) * invscale); positions[npos].maxx = (float)(nvg__maxf((float)(iter.nextx), (float)(q.x1)) * invscale); npos++; if ((npos) >= (maxPositions)) break; }
+			while ((fonsTextIterNext(ctx.fs, iter, &q)) != 0)
+			{
+				if (((iter.prevGlyphIndex) < (0)) && ((nvg__allocTextAtlas(ctx)) != 0))
+				{
+					iter = (FONStextIter)(prevIter);
+					fonsTextIterNext(ctx.fs, iter, &q);
+				}
+				prevIter = (FONStextIter)(iter);
+				positions[npos].str = iter.str;
+				positions[npos].x = (float)(iter.x * invscale);
+				positions[npos].minx = (float)(nvg__minf((float)(iter.x), (float)(q.x0)) * invscale);
+				positions[npos].maxx = (float)(nvg__maxf((float)(iter.nextx), (float)(q.x1)) * invscale);
+				npos++;
+				if ((npos) >= (maxPositions))
+					break;
+			}
 			return (int)(npos);
 		}
 
@@ -3343,7 +2794,8 @@ namespace NanoVGSharp
 			NVGstate* state = nvg__getState(ctx);
 			float scale = (float)(nvg__getFontScale(state) * ctx.devicePxRatio);
 			float invscale = (float)(1.0f / scale);
-			FONStextIter iter = new FONStextIter(); FONStextIter prevIter = new FONStextIter();
+			FONStextIter iter = new FONStextIter();
+			FONStextIter prevIter = new FONStextIter();
 			FONSquad q = new FONSquad();
 			int nrows = (int)(0);
 			float rowStartX = (float)(0);
@@ -3358,69 +2810,204 @@ namespace NanoVGSharp
 			sbyte* breakEnd = null;
 			float breakWidth = (float)(0);
 			float breakMaxX = (float)(0);
-			int type = (int)(NVG_SPACE); int ptype = (int)(NVG_SPACE);
+			int type = (int)(NVG_SPACE);
+			int ptype = (int)(NVG_SPACE);
 			uint pcodepoint = (uint)(0);
-			if ((maxRows) == (0)) return (int)(0);
-			if ((state->fontId) == (-1)) return (int)(0);
-			if ((end) == null) end = _string_ + CRuntime.strlen(_string_);
-			if ((_string_) == (end)) return (int)(0);
+			if ((maxRows) == (0))
+				return (int)(0);
+			if ((state->fontId) == (-1))
+				return (int)(0);
+			if ((end) == null)
+				end = _string_ + CRuntime.strlen(_string_);
+			if ((_string_) == (end))
+				return (int)(0);
 			fonsSetSize(ctx.fs, (float)(state->fontSize * scale));
 			fonsSetSpacing(ctx.fs, (float)(state->letterSpacing * scale));
 			fonsSetBlur(ctx.fs, (float)(state->fontBlur * scale));
 			fonsSetAlign(ctx.fs, (int)(state->textAlign));
 			fonsSetFont(ctx.fs, (int)(state->fontId));
 			breakRowWidth *= (float)(scale);
-			fonsTextIterInit(ctx.fs, iter, (float)(0), (float)(0), _string_, end, (int)(FONS_GLYPH_BITMAP_OPTIONAL));
+			fonsTextIterInit(ctx.fs, iter, (float)(0), (float)(0), _string_, (int)(FONS_GLYPH_BITMAP_OPTIONAL));
 			prevIter = (FONStextIter)(iter);
-			while ((fonsTextIterNext(ctx.fs, iter, &q)) != 0) {
-				if (((iter.prevGlyphIndex) < (0)) && ((nvg__allocTextAtlas(ctx)) != 0)) {
-					iter = (FONStextIter)(prevIter); fonsTextIterNext(ctx.fs, iter, &q); }
-				prevIter = (FONStextIter)(iter); switch (iter.codepoint) {
-					case 9: case 11: case 12: case 32: case 0x00a0: type = (int)(NVG_SPACE); break; case 10: type = (int)((pcodepoint) == (13) ? NVG_SPACE : NVG_NEWLINE); break; case 13: type = (int)((pcodepoint) == (10) ? NVG_SPACE : NVG_NEWLINE); break; case 0x0085: type = (int)(NVG_NEWLINE); break; default: if ((((((((iter.codepoint) >= (0x4E00)) && (iter.codepoint <= 0x9FFF)) || (((iter.codepoint) >= (0x3000)) && (iter.codepoint <= 0x30FF))) || (((iter.codepoint) >= (0xFF00)) && (iter.codepoint <= 0xFFEF))) || (((iter.codepoint) >= (0x1100)) && (iter.codepoint <= 0x11FF))) || (((iter.codepoint) >= (0x3130)) && (iter.codepoint <= 0x318F))) || (((iter.codepoint) >= (0xAC00)) && (iter.codepoint <= 0xD7AF))) type = (int)(NVG_CJK_CHAR); else type = (int)(NVG_CHAR); break; }
-				if ((type) == (NVG_NEWLINE)) {
-					rows[nrows].start = rowStart != null ? rowStart : iter.str; rows[nrows].end = rowEnd != null ? rowEnd : iter.str; rows[nrows].width = (float)(rowWidth * invscale); rows[nrows].minx = (float)(rowMinX * invscale); rows[nrows].maxx = (float)(rowMaxX * invscale); rows[nrows].next = iter.next; nrows++; if ((nrows) >= (maxRows)) return (int)(nrows); breakEnd = rowStart; breakWidth = (float)(0.0); breakMaxX = (float)(0.0); rowStart = null; rowEnd = null; rowWidth = (float)(0); rowMinX = (float)(rowMaxX = (float)(0)); }
-				else {
-					if ((rowStart) == null) {
-						if (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR))) {
-							rowStartX = (float)(iter.x); rowStart = iter.str; rowEnd = iter.next; rowWidth = (float)(iter.nextx - rowStartX); rowMinX = (float)(q.x0 - rowStartX); rowMaxX = (float)(q.x1 - rowStartX); wordStart = iter.str; wordStartX = (float)(iter.x); wordMinX = (float)(q.x0 - rowStartX); breakEnd = rowStart; breakWidth = (float)(0.0); breakMaxX = (float)(0.0); }
+			while ((fonsTextIterNext(ctx.fs, iter, &q)) != 0)
+			{
+				if (((iter.prevGlyphIndex) < (0)) && ((nvg__allocTextAtlas(ctx)) != 0))
+				{
+					iter = (FONStextIter)(prevIter);
+					fonsTextIterNext(ctx.fs, iter, &q);
+				}
+				prevIter = (FONStextIter)(iter);
+				switch (iter.codepoint)
+				{
+					case 9:
+					case 11:
+					case 12:
+					case 32:
+					case 0x00a0:
+						type = (int)(NVG_SPACE);
+						break;
+					case 10:
+						type = (int)((pcodepoint) == (13) ? NVG_SPACE : NVG_NEWLINE);
+						break;
+					case 13:
+						type = (int)((pcodepoint) == (10) ? NVG_SPACE : NVG_NEWLINE);
+						break;
+					case 0x0085:
+						type = (int)(NVG_NEWLINE);
+						break;
+					default:
+						if ((((((((iter.codepoint) >= (0x4E00)) && (iter.codepoint <= 0x9FFF)) || (((iter.codepoint) >= (0x3000)) && (iter.codepoint <= 0x30FF))) || (((iter.codepoint) >= (0xFF00)) && (iter.codepoint <= 0xFFEF))) || (((iter.codepoint) >= (0x1100)) && (iter.codepoint <= 0x11FF))) || (((iter.codepoint) >= (0x3130)) && (iter.codepoint <= 0x318F))) || (((iter.codepoint) >= (0xAC00)) && (iter.codepoint <= 0xD7AF)))
+							type = (int)(NVG_CJK_CHAR);
+						else
+							type = (int)(NVG_CHAR);
+						break;
+				}
+				if ((type) == (NVG_NEWLINE))
+				{
+					rows[nrows].start = rowStart != null ? rowStart : iter.str;
+					rows[nrows].end = rowEnd != null ? rowEnd : iter.str;
+					rows[nrows].width = (float)(rowWidth * invscale);
+					rows[nrows].minx = (float)(rowMinX * invscale);
+					rows[nrows].maxx = (float)(rowMaxX * invscale);
+					rows[nrows].next = iter.next;
+					nrows++;
+					if ((nrows) >= (maxRows))
+						return (int)(nrows);
+					breakEnd = rowStart;
+					breakWidth = (float)(0.0);
+					breakMaxX = (float)(0.0);
+					rowStart = null;
+					rowEnd = null;
+					rowWidth = (float)(0);
+					rowMinX = (float)(rowMaxX = (float)(0));
+				}
+				else
+				{
+					if ((rowStart) == null)
+					{
+						if (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR)))
+						{
+							rowStartX = (float)(iter.x);
+							rowStart = iter.str;
+							rowEnd = iter.next;
+							rowWidth = (float)(iter.nextx - rowStartX);
+							rowMinX = (float)(q.x0 - rowStartX);
+							rowMaxX = (float)(q.x1 - rowStartX);
+							wordStart = iter.str;
+							wordStartX = (float)(iter.x);
+							wordMinX = (float)(q.x0 - rowStartX);
+							breakEnd = rowStart;
+							breakWidth = (float)(0.0);
+							breakMaxX = (float)(0.0);
+						}
 					}
-					else {
-						float nextWidth = (float)(iter.nextx - rowStartX); if (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR))) {
-							rowEnd = iter.next; rowWidth = (float)(iter.nextx - rowStartX); rowMaxX = (float)(q.x1 - rowStartX); }
-						if (((((ptype) == (NVG_CHAR)) || ((ptype) == (NVG_CJK_CHAR))) && ((type) == (NVG_SPACE))) || ((type) == (NVG_CJK_CHAR))) {
-							breakEnd = iter.str; breakWidth = (float)(rowWidth); breakMaxX = (float)(rowMaxX); }
-						if ((((ptype) == (NVG_SPACE)) && (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR)))) || ((type) == (NVG_CJK_CHAR))) {
-							wordStart = iter.str; wordStartX = (float)(iter.x); wordMinX = (float)(q.x0 - rowStartX); }
-						if ((((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR))) && ((nextWidth) > (breakRowWidth))) {
-							if ((breakEnd) == (rowStart)) {
-								rows[nrows].start = rowStart; rows[nrows].end = iter.str; rows[nrows].width = (float)(rowWidth * invscale); rows[nrows].minx = (float)(rowMinX * invscale); rows[nrows].maxx = (float)(rowMaxX * invscale); rows[nrows].next = iter.str; nrows++; if ((nrows) >= (maxRows)) return (int)(nrows); rowStartX = (float)(iter.x); rowStart = iter.str; rowEnd = iter.next; rowWidth = (float)(iter.nextx - rowStartX); rowMinX = (float)(q.x0 - rowStartX); rowMaxX = (float)(q.x1 - rowStartX); wordStart = iter.str; wordStartX = (float)(iter.x); wordMinX = (float)(q.x0 - rowStartX); }
-							else {
-								rows[nrows].start = rowStart; rows[nrows].end = breakEnd; rows[nrows].width = (float)(breakWidth * invscale); rows[nrows].minx = (float)(rowMinX * invscale); rows[nrows].maxx = (float)(breakMaxX * invscale); rows[nrows].next = wordStart; nrows++; if ((nrows) >= (maxRows)) return (int)(nrows); rowStartX = (float)(wordStartX); rowStart = wordStart; rowEnd = iter.next; rowWidth = (float)(iter.nextx - rowStartX); rowMinX = (float)(wordMinX); rowMaxX = (float)(q.x1 - rowStartX); }
-							breakEnd = rowStart; breakWidth = (float)(0.0); breakMaxX = (float)(0.0); }
+					else
+					{
+						float nextWidth = (float)(iter.nextx - rowStartX);
+						if (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR)))
+						{
+							rowEnd = iter.next;
+							rowWidth = (float)(iter.nextx - rowStartX);
+							rowMaxX = (float)(q.x1 - rowStartX);
+						}
+						if (((((ptype) == (NVG_CHAR)) || ((ptype) == (NVG_CJK_CHAR))) && ((type) == (NVG_SPACE))) || ((type) == (NVG_CJK_CHAR)))
+						{
+							breakEnd = iter.str;
+							breakWidth = (float)(rowWidth);
+							breakMaxX = (float)(rowMaxX);
+						}
+						if ((((ptype) == (NVG_SPACE)) && (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR)))) || ((type) == (NVG_CJK_CHAR)))
+						{
+							wordStart = iter.str;
+							wordStartX = (float)(iter.x);
+							wordMinX = (float)(q.x0 - rowStartX);
+						}
+						if ((((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR))) && ((nextWidth) > (breakRowWidth)))
+						{
+							if ((breakEnd) == (rowStart))
+							{
+								rows[nrows].start = rowStart;
+								rows[nrows].end = iter.str;
+								rows[nrows].width = (float)(rowWidth * invscale);
+								rows[nrows].minx = (float)(rowMinX * invscale);
+								rows[nrows].maxx = (float)(rowMaxX * invscale);
+								rows[nrows].next = iter.str;
+								nrows++;
+								if ((nrows) >= (maxRows))
+									return (int)(nrows);
+								rowStartX = (float)(iter.x);
+								rowStart = iter.str;
+								rowEnd = iter.next;
+								rowWidth = (float)(iter.nextx - rowStartX);
+								rowMinX = (float)(q.x0 - rowStartX);
+								rowMaxX = (float)(q.x1 - rowStartX);
+								wordStart = iter.str;
+								wordStartX = (float)(iter.x);
+								wordMinX = (float)(q.x0 - rowStartX);
+							}
+							else
+							{
+								rows[nrows].start = rowStart;
+								rows[nrows].end = breakEnd;
+								rows[nrows].width = (float)(breakWidth * invscale);
+								rows[nrows].minx = (float)(rowMinX * invscale);
+								rows[nrows].maxx = (float)(breakMaxX * invscale);
+								rows[nrows].next = wordStart;
+								nrows++;
+								if ((nrows) >= (maxRows))
+									return (int)(nrows);
+								rowStartX = (float)(wordStartX);
+								rowStart = wordStart;
+								rowEnd = iter.next;
+								rowWidth = (float)(iter.nextx - rowStartX);
+								rowMinX = (float)(wordMinX);
+								rowMaxX = (float)(q.x1 - rowStartX);
+							}
+							breakEnd = rowStart;
+							breakWidth = (float)(0.0);
+							breakMaxX = (float)(0.0);
+						}
 					}
 				}
-				pcodepoint = (uint)(iter.codepoint); ptype = (int)(type); }
-			if (rowStart != null) {
-				rows[nrows].start = rowStart; rows[nrows].end = rowEnd; rows[nrows].width = (float)(rowWidth * invscale); rows[nrows].minx = (float)(rowMinX * invscale); rows[nrows].maxx = (float)(rowMaxX * invscale); rows[nrows].next = end; nrows++; }
+				pcodepoint = (uint)(iter.codepoint);
+				ptype = (int)(type);
+			}
+			if (rowStart != null)
+			{
+				rows[nrows].start = rowStart;
+				rows[nrows].end = rowEnd;
+				rows[nrows].width = (float)(rowWidth * invscale);
+				rows[nrows].minx = (float)(rowMinX * invscale);
+				rows[nrows].maxx = (float)(rowMaxX * invscale);
+				rows[nrows].next = end;
+				nrows++;
+			}
 
 			return (int)(nrows);
 		}
 
-		public static float nvgTextBounds(NVGcontext ctx, float x, float y, sbyte* _string_, sbyte* end, float* bounds)
+		public static float nvgTextBounds(NVGcontext ctx, float x, float y, string _string_, float* bounds)
 		{
 			NVGstate* state = nvg__getState(ctx);
 			float scale = (float)(nvg__getFontScale(state) * ctx.devicePxRatio);
 			float invscale = (float)(1.0f / scale);
 			float width = 0;
-			if ((state->fontId) == (-1)) return (float)(0);
+			if ((state->fontId) == (-1))
+				return (float)(0);
 			fonsSetSize(ctx.fs, (float)(state->fontSize * scale));
 			fonsSetSpacing(ctx.fs, (float)(state->letterSpacing * scale));
 			fonsSetBlur(ctx.fs, (float)(state->fontBlur * scale));
 			fonsSetAlign(ctx.fs, (int)(state->textAlign));
 			fonsSetFont(ctx.fs, (int)(state->fontId));
-			width = (float)(fonsTextBounds(ctx.fs, (float)(x * scale), (float)(y * scale), _string_, end, bounds));
-			if (bounds != null) {
-				fonsLineBounds(ctx.fs, (float)(y * scale), &bounds[1], &bounds[3]); bounds[0] *= (float)(invscale); bounds[1] *= (float)(invscale); bounds[2] *= (float)(invscale); bounds[3] *= (float)(invscale); }
+			width = (float)(fonsTextBounds(ctx.fs, (float)(x * scale), (float)(y * scale), _string_, bounds));
+			if (bounds != null)
+			{
+				fonsLineBounds(ctx.fs, (float)(y * scale), &bounds[1], &bounds[3]);
+				bounds[0] *= (float)(invscale);
+				bounds[1] *= (float)(invscale);
+				bounds[2] *= (float)(invscale);
+				bounds[3] *= (float)(invscale);
+			}
 
 			return (float)(width * invscale);
 		}
@@ -3431,14 +3018,24 @@ namespace NanoVGSharp
 			NVGtextRow* rows = stackalloc NVGtextRow[2];
 			float scale = (float)(nvg__getFontScale(state) * ctx.devicePxRatio);
 			float invscale = (float)(1.0f / scale);
-			int nrows = (int)(0); int i = 0;
+			int nrows = (int)(0);
+			int i = 0;
 			int oldAlign = (int)(state->textAlign);
 			int haling = (int)(state->textAlign & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT));
 			int valign = (int)(state->textAlign & (NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE));
-			float lineh = (float)(0); float rminy = (float)(0); float rmaxy = (float)(0);
-			float minx = 0; float miny = 0; float maxx = 0; float maxy = 0;
-			if ((state->fontId) == (-1)) {
-				if (bounds != null) bounds[0] = (float)(bounds[1] = (float)(bounds[2] = (float)(bounds[3] = (float)(0.0f)))); return; }
+			float lineh = (float)(0);
+			float rminy = (float)(0);
+			float rmaxy = (float)(0);
+			float minx = 0;
+			float miny = 0;
+			float maxx = 0;
+			float maxy = 0;
+			if ((state->fontId) == (-1))
+			{
+				if (bounds != null)
+					bounds[0] = (float)(bounds[1] = (float)(bounds[2] = (float)(bounds[3] = (float)(0.0f))));
+				return;
+			}
 
 			nvgTextMetrics(ctx, null, null, &lineh);
 			state->textAlign = (int)(NVG_ALIGN_LEFT | valign);
@@ -3452,12 +3049,38 @@ namespace NanoVGSharp
 			fonsLineBounds(ctx.fs, (float)(0), &rminy, &rmaxy);
 			rminy *= (float)(invscale);
 			rmaxy *= (float)(invscale);
-			while ((nrows = (int)(nvgTextBreakLines(ctx, _string_, end, (float)(breakRowWidth), rows, (int)(2))))) {
-				for (i = (int)(0); (i) < (nrows); i++) {
-					NVGtextRow* row = &rows[i]; float rminx = 0; float rmaxx = 0; float dx = (float)(0); if ((haling & NVG_ALIGN_LEFT) != 0) dx = (float)(0); else if ((haling & NVG_ALIGN_CENTER) != 0) dx = (float)(breakRowWidth * 0.5f - row->width * 0.5f); else if ((haling & NVG_ALIGN_RIGHT) != 0) dx = (float)(breakRowWidth - row->width); rminx = (float)(x + row->minx + dx); rmaxx = (float)(x + row->maxx + dx); minx = (float)(nvg__minf((float)(minx), (float)(rminx))); maxx = (float)(nvg__maxf((float)(maxx), (float)(rmaxx))); miny = (float)(nvg__minf((float)(miny), (float)(y + rminy))); maxy = (float)(nvg__maxf((float)(maxy), (float)(y + rmaxy))); y += (float)(lineh * state->lineHeight); } _string_ = rows[nrows - 1].next; }
+			while ((nrows = (int)(nvgTextBreakLines(ctx, _string_, end, (float)(breakRowWidth), rows, (int)(2)))))
+			{
+				for (i = (int)(0); (i) < (nrows); i++)
+				{
+					NVGtextRow* row = &rows[i];
+					float rminx = 0;
+					float rmaxx = 0;
+					float dx = (float)(0);
+					if ((haling & NVG_ALIGN_LEFT) != 0)
+						dx = (float)(0);
+					else if ((haling & NVG_ALIGN_CENTER) != 0)
+						dx = (float)(breakRowWidth * 0.5f - row->width * 0.5f);
+					else if ((haling & NVG_ALIGN_RIGHT) != 0)
+						dx = (float)(breakRowWidth - row->width);
+					rminx = (float)(x + row->minx + dx);
+					rmaxx = (float)(x + row->maxx + dx);
+					minx = (float)(nvg__minf((float)(minx), (float)(rminx)));
+					maxx = (float)(nvg__maxf((float)(maxx), (float)(rmaxx)));
+					miny = (float)(nvg__minf((float)(miny), (float)(y + rminy)));
+					maxy = (float)(nvg__maxf((float)(maxy), (float)(y + rmaxy)));
+					y += (float)(lineh * state->lineHeight);
+				}
+				_string_ = rows[nrows - 1].next;
+			}
 			state->textAlign = (int)(oldAlign);
-			if (bounds != null) {
-				bounds[0] = (float)(minx); bounds[1] = (float)(miny); bounds[2] = (float)(maxx); bounds[3] = (float)(maxy); }
+			if (bounds != null)
+			{
+				bounds[0] = (float)(minx);
+				bounds[1] = (float)(miny);
+				bounds[2] = (float)(maxx);
+				bounds[3] = (float)(maxy);
+			}
 
 		}
 
@@ -3466,17 +3089,20 @@ namespace NanoVGSharp
 			NVGstate* state = nvg__getState(ctx);
 			float scale = (float)(nvg__getFontScale(state) * ctx.devicePxRatio);
 			float invscale = (float)(1.0f / scale);
-			if ((state->fontId) == (-1)) return;
+			if ((state->fontId) == (-1))
+				return;
 			fonsSetSize(ctx.fs, (float)(state->fontSize * scale));
 			fonsSetSpacing(ctx.fs, (float)(state->letterSpacing * scale));
 			fonsSetBlur(ctx.fs, (float)(state->fontBlur * scale));
 			fonsSetAlign(ctx.fs, (int)(state->textAlign));
 			fonsSetFont(ctx.fs, (int)(state->fontId));
 			fonsVertMetrics(ctx.fs, ascender, descender, lineh);
-			if (ascender != null) *ascender *= (float)(invscale);
-			if (descender != null) *descender *= (float)(invscale);
-			if (lineh != null) *lineh *= (float)(invscale);
+			if (ascender != null)
+				*ascender *= (float)(invscale);
+			if (descender != null)
+				*descender *= (float)(invscale);
+			if (lineh != null)
+				*lineh *= (float)(invscale);
 		}
-
 	}
 }
