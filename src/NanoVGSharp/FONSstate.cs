@@ -1,9 +1,6 @@
-﻿using System.Runtime.InteropServices;
-
-namespace NanoVGSharp
+﻿namespace NanoVGSharp
 {
-	[StructLayout(LayoutKind.Sequential)]
-	public struct FONSstate
+	public class FONSstate
 	{
 		public int font;
 		public int align;
@@ -11,5 +8,18 @@ namespace NanoVGSharp
 		public uint color;
 		public float blur;
 		public float spacing;
+
+		public FONSstate Clone()
+		{
+			return new FONSstate
+			{
+				font = font,
+				align = align,
+				size = size,
+				color = color,
+				blur = blur,
+				spacing = spacing
+			};
+		}
 	}
 }

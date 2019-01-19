@@ -3,9 +3,9 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct NVGscissor
+	public struct NVGscissor
 	{
-		public fixed float xform[6];
-		public fixed float extent[2];
+		public Transform xform;
+		public float extent1, extent2;
 	}
 }

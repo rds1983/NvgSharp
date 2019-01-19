@@ -9,5 +9,10 @@ namespace NanoVGSharp
 		public float g;
 		public float b;
 		public float a;
+
+		public void Zero()
+		{
+			r = g = b = a = 0;
+		}
 	}
 }
