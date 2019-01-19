@@ -858,8 +858,8 @@ namespace NanoVGSharp
 						break;
 				}
 			}
-			cache.bounds[0] = (float)(cache.bounds[1] = (float)(1e6f));
-			cache.bounds[2] = (float)(cache.bounds[3] = (float)(-1e6f));
+			cache.bounds.b1 = (float)(cache.bounds.b2 = (float)(1e6f));
+			cache.bounds.b3 = (float)(cache.bounds.b4 = (float)(-1e6f));
 			for (j = (int)(0); (j) < (cache.npaths); j++)
 			{
 				path = &cache.paths[j];
@@ -885,10 +885,10 @@ namespace NanoVGSharp
 					p0->dx = (float)(p1->x - p0->x);
 					p0->dy = (float)(p1->y - p0->y);
 					p0->len = (float)(nvg__normalize(&p0->dx, &p0->dy));
-					cache.bounds[0] = (float)(nvg__minf((float)(cache.bounds[0]), (float)(p0->x)));
-					cache.bounds[1] = (float)(nvg__minf((float)(cache.bounds[1]), (float)(p0->y)));
-					cache.bounds[2] = (float)(nvg__maxf((float)(cache.bounds[2]), (float)(p0->x)));
-					cache.bounds[3] = (float)(nvg__maxf((float)(cache.bounds[3]), (float)(p0->y)));
+					cache.bounds.b1 = (float)(nvg__minf((float)(cache.bounds.b1), (float)(p0->x)));
+					cache.bounds.b2 = (float)(nvg__minf((float)(cache.bounds.b2), (float)(p0->y)));
+					cache.bounds.b3 = (float)(nvg__maxf((float)(cache.bounds.b3), (float)(p0->x)));
+					cache.bounds.b4 = (float)(nvg__maxf((float)(cache.bounds.b4), (float)(p0->y)));
 					p0 = p1++;
 				}
 			}
@@ -1627,7 +1627,8 @@ namespace NanoVGSharp
 				nvg__expandFill((float)(0.0f), (int)(NVG_MITER), (float)(2.4f));
 			fillPaint.innerColor.a *= (float)(state.alpha);
 			fillPaint.outerColor.a *= (float)(state.alpha);
-			_params_.renderFill(_params_.userPtr, &fillPaint, (NVGcompositeOperationState)(state.compositeOperation), &state.scissor, (float)(fringeWidth), cache.bounds, cache.paths, (int)(cache.npaths));
+				_params_.renderFill(_params_.userPtr, &fillPaint, (NVGcompositeOperationState)(state.compositeOperation), ref state.scissor, (float)(fringeWidth), cache.bounds, cache.paths, (int)(cache.npaths));
+
 			for (i = (int)(0); (i) < (cache.npaths); i++)
 			{
 				path = &cache.paths[i];
@@ -1660,7 +1661,7 @@ namespace NanoVGSharp
 				nvg__expandStroke((float)(strokeWidth * 0.5f), (float)(fringeWidth), (int)(state.lineCap), (int)(state.lineJoin), (float)(state.miterLimit));
 			else
 				nvg__expandStroke((float)(strokeWidth * 0.5f), (float)(0.0f), (int)(state.lineCap), (int)(state.lineJoin), (float)(state.miterLimit));
-			_params_.renderStroke(_params_.userPtr, &strokePaint, (NVGcompositeOperationState)(state.compositeOperation), &state.scissor, (float)(fringeWidth), (float)(strokeWidth), cache.paths, (int)(cache.npaths));
+			_params_.renderStroke(_params_.userPtr, &strokePaint, (NVGcompositeOperationState)(state.compositeOperation), ref state.scissor, (float)(fringeWidth), (float)(strokeWidth), cache.paths, (int)(cache.npaths));
 			for (i = (int)(0); (i) < (cache.npaths); i++)
 			{
 				path = &cache.paths[i];
@@ -1788,7 +1789,7 @@ namespace NanoVGSharp
 			paint.image = (int)(fontImages[fontImageIdx]);
 			paint.innerColor.a *= (float)(state.alpha);
 			paint.outerColor.a *= (float)(state.alpha);
-			_params_.renderTriangles(_params_.userPtr, &paint, (NVGcompositeOperationState)(state.compositeOperation), &state.scissor, verts, (int)(nverts));
+			_params_.renderTriangles(_params_.userPtr, &paint, (NVGcompositeOperationState)(state.compositeOperation), ref state.scissor, verts, (int)(nverts));
 			drawCallCount++;
 			textTriCount += (int)(nverts / 3);
 		}
@@ -2137,7 +2138,7 @@ namespace NanoVGSharp
 			return (int)(nrows);
 		}
 
-		public float nvgTextBounds(float x, float y, string _string_, float* bounds)
+		public float nvgTextBounds(float x, float y, string _string_, Bounds bounds)
 		{
 			NVGstate state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
@@ -2150,20 +2151,17 @@ namespace NanoVGSharp
 			fs.fonsSetBlur((float)(state.fontBlur * scale));
 			fs.fonsSetAlign((int)(state.textAlign));
 			fs.fonsSetFont((int)(state.fontId));
-			width = (float)(fs.fonsTextBounds((float)(x * scale), (float)(y * scale), _string_, bounds));
-			if (bounds != null)
-			{
-				fs.fonsLineBounds((float)(y * scale), &bounds[1], &bounds[3]);
-				bounds[0] *= (float)(invscale);
-				bounds[1] *= (float)(invscale);
-				bounds[2] *= (float)(invscale);
-				bounds[3] *= (float)(invscale);
-			}
+			width = (float)(fs.fonsTextBounds((float)(x * scale), (float)(y * scale), _string_, ref bounds));
+			fs.fonsLineBounds((float)(y * scale), ref bounds.b2, ref bounds.b4);
+			bounds.b1 *= (float)(invscale);
+			bounds.b2 *= (float)(invscale);
+			bounds.b3 *= (float)(invscale);
+			bounds.b4 *= (float)(invscale);
 
 			return (float)(width * invscale);
 		}
 
-		public void nvgTextBoxBounds(float x, float y, float breakRowWidth, StringLocation _string_, float* bounds)
+		public void nvgTextBoxBounds(float x, float y, float breakRowWidth, StringLocation _string_, Bounds bounds)
 		{
 			NVGstate state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
@@ -2181,8 +2179,7 @@ namespace NanoVGSharp
 			float maxy = 0;
 			if ((state.fontId) == (-1))
 			{
-				if (bounds != null)
-					bounds[0] = (float)(bounds[1] = (float)(bounds[2] = (float)(bounds[3] = (float)(0.0f))));
+				bounds.b1 = (float)(bounds.b2 = (float)(bounds.b3 = (float)(bounds.b4 = (float)(0.0f))));
 				return;
 			}
 
@@ -2195,7 +2192,7 @@ namespace NanoVGSharp
 			fs.fonsSetBlur((float)(state.fontBlur * scale));
 			fs.fonsSetAlign((int)(state.textAlign));
 			fs.fonsSetFont((int)(state.fontId));
-			fs.fonsLineBounds((float)(0), &rminy, &rmaxy);
+			fs.fonsLineBounds((float)(0), ref rminy, ref rmaxy);
 			rminy *= (float)(invscale);
 			rmaxy *= (float)(invscale);
 			while (true)
@@ -2228,14 +2225,10 @@ namespace NanoVGSharp
 				_string_ = rows[nrows - 1].next;
 			}
 			state.textAlign = (int)(oldAlign);
-			if (bounds != null)
-			{
-				bounds[0] = (float)(minx);
-				bounds[1] = (float)(miny);
-				bounds[2] = (float)(maxx);
-				bounds[3] = (float)(maxy);
-			}
-
+			bounds.b1 = (float)(minx);
+			bounds.b2 = (float)(miny);
+			bounds.b3 = (float)(maxx);
+			bounds.b4 = (float)(maxy);
 		}
 
 		public void nvgTextMetrics(float* ascender, float* descender, float* lineh)

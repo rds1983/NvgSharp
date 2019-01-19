@@ -14,7 +14,7 @@ namespace NanoVGSharp
 		public NVGvertex* verts;
 		public int nverts;
 		public int cverts;
-		public float[] bounds = new float[4];
+		public Bounds bounds = new Bounds();
 
 		public NVGpathCache()
 		{

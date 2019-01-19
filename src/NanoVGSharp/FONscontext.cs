@@ -580,12 +580,14 @@ namespace NanoVGSharp
 			}
 			else if ((state.align & FONS_ALIGN_RIGHT) != 0)
 			{
-				width = (float)(fonsTextBounds((float)(x), (float)(y), str, null));
+				var bounds = new Bounds();
+				width = (float)(fonsTextBounds((float)(x), (float)(y), str, ref bounds));
 				x -= (float)(width);
 			}
 			else if ((state.align & FONS_ALIGN_CENTER) != 0)
 			{
-				width = (float)(fonsTextBounds((float)(x), (float)(y), str, null));
+				var bounds = new Bounds();
+				width = (float)(fonsTextBounds((float)(x), (float)(y), str, ref bounds));
 				x -= (float)(width * 0.5f);
 			}
 
@@ -630,12 +632,14 @@ namespace NanoVGSharp
 			}
 			else if ((state.align & FONS_ALIGN_RIGHT) != 0)
 			{
-				width = (float)(fonsTextBounds((float)(x), (float)(y), str, null));
+				var bounds = new Bounds();
+				width = (float)(fonsTextBounds((float)(x), (float)(y), str, ref bounds));
 				x -= (float)(width);
 			}
 			else if ((state.align & FONS_ALIGN_CENTER) != 0)
 			{
-				width = (float)(fonsTextBounds((float)(x), (float)(y), str, null));
+				var bounds = new Bounds();
+				width = (float)(fonsTextBounds((float)(x), (float)(y), str, ref bounds));
 				x -= (float)(width * 0.5f);
 			}
 
@@ -708,7 +712,7 @@ namespace NanoVGSharp
 			fons__flush();
 		}
 
-		public float fonsTextBounds(float x, float y, StringLocation str, float* bounds)
+		public float fonsTextBounds(float x, float y, StringLocation str, ref Bounds bounds)
 		{
 			FONSstate state = fons__getState();
 			FONSquad q = new FONSquad();
@@ -777,13 +781,10 @@ namespace NanoVGSharp
 				maxx -= (float)(advance * 0.5f);
 			}
 
-			if ((bounds) != null)
-			{
-				bounds[0] = (float)(minx);
-				bounds[1] = (float)(miny);
-				bounds[2] = (float)(maxx);
-				bounds[3] = (float)(maxy);
-			}
+			bounds.b1 = (float)(minx);
+			bounds.b2 = (float)(miny);
+			bounds.b3 = (float)(maxx);
+			bounds.b4 = (float)(maxy);
 
 			return (float)(advance);
 		}
@@ -807,7 +808,7 @@ namespace NanoVGSharp
 				*lineh = (float)(font.lineh * isize / 10.0f);
 		}
 
-		public void fonsLineBounds(float y, float* miny, float* maxy)
+		public void fonsLineBounds(float y, ref float miny, ref float maxy)
 		{
 			FONSfont font;
 			FONSstate state = fons__getState();
@@ -821,13 +822,13 @@ namespace NanoVGSharp
 			y += (float)(fons__getVertAlign(font, (int)(state.align), (short)(isize)));
 			if ((_params_.flags & FONS_ZERO_TOPLEFT) != 0)
 			{
-				*miny = (float)(y - font.ascender * (float)(isize) / 10.0f);
-				*maxy = (float)(*miny + font.lineh * isize / 10.0f);
+				miny = (float)(y - font.ascender * (float)(isize) / 10.0f);
+				maxy = (float)(miny + font.lineh * isize / 10.0f);
 			}
 			else
 			{
-				*maxy = (float)(y + font.descender * (float)(isize) / 10.0f);
-				*miny = (float)(*maxy - font.lineh * isize / 10.0f);
+				maxy = (float)(y + font.descender * (float)(isize) / 10.0f);
+				miny = (float)(maxy - font.lineh * isize / 10.0f);
 			}
 
 		}
