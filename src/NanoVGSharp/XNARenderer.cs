@@ -37,6 +37,11 @@ namespace NanoVGSharp
 			basicEffect = new BasicEffect(device);
 		}
 
+		private Texture2D GetTextureById(int id)
+		{
+			return _textures[id - 1];
+		}
+
 		public int renderCreateTexture(int type, int w, int h, int imageFlags, byte[] d)
 		{
 			var texture = new Texture2D(_device, w, h);
@@ -48,7 +53,7 @@ namespace NanoVGSharp
 
 			_textures.Add(texture);
 
-			return _textures.Count - 1;
+			return _textures.Count;
 		}
 
 		public void renderDeleteTexture(int image)
@@ -58,7 +63,7 @@ namespace NanoVGSharp
 
 		public void renderUpdateTexture(int image, int x, int y, int w, int h, byte[] d)
 		{
-			var texture = _textures[image];
+			var texture = GetTextureById(image);
 
 			if (d != null)
 			{
@@ -85,7 +90,7 @@ namespace NanoVGSharp
 
 		public void renderGetTextureSize(int image, out int w, out int h)
 		{
-			var texture = _textures[image];
+			var texture = GetTextureById(image);
 
 			w = texture.Width;
 			h = texture.Height;
@@ -96,8 +101,8 @@ namespace NanoVGSharp
 			// TO DO
 		}
 
-		public void renderFill(ref NVGpaint paint, NVGcompositeOperationState compositeOperation, ref NVGscissor scissor, 
-			float fringe, Bounds bounds, Buffer<NVGpath> paths)
+		public void renderFill(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, 
+			float fringe, Bounds bounds, Buffer<Path> paths)
 		{
 			for (var i = 0; i < paths.Count; ++i)
 			{
@@ -107,13 +112,13 @@ namespace NanoVGSharp
 			}
 		}
 
-		public void renderStroke(ref NVGpaint paint, NVGcompositeOperationState compositeOperation, ref NVGscissor scissor, 
-			float fringe, float strokeWidth, Buffer<NVGpath> paths)
+		public void renderStroke(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, 
+			float fringe, float strokeWidth, Buffer<Path> paths)
 		{
 			throw new NotImplementedException();
 		}
 
-		public void renderTriangles(ref NVGpaint paint, NVGcompositeOperationState compositeOperation, ref NVGscissor scissor, ArraySegment<VertexPositionColorTexture> verts)
+		public void renderTriangles(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, ArraySegment<VertexPositionColorTexture> verts)
 		{
 			if (verts.Count <= 0)
 			{
@@ -147,7 +152,7 @@ namespace NanoVGSharp
 
 			_indexBuffer.SetData(indexes, 0, indexes.Length);
 
-			var texture = _textures[paint.image];
+			var texture = GetTextureById(paint.image);
 
 			basicEffect.TextureEnabled = true;
 			basicEffect.Texture = texture;

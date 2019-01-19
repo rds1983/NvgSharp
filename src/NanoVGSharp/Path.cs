@@ -3,7 +3,7 @@ using System;
 
 namespace NanoVGSharp
 {
-	public unsafe class NVGpath
+	public class Path
 	{
 		public int first;
 		public int count;

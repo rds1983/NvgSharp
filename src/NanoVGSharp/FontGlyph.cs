@@ -3,7 +3,7 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct FONSglyph
+	public struct FontGlyph
 	{
 		public uint codepoint;
 		public int index;

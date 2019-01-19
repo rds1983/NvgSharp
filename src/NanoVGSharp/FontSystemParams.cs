@@ -1,10 +1,9 @@
 ﻿namespace NanoVGSharp
 {
-	public unsafe class FONSparams
+	public class FontSystemParams
 	{
 		public int width;
 		public int height;
 		public byte flags;
-		public void* userPtr;
 	}
 }

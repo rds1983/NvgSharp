@@ -12,7 +12,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 	{
 		GraphicsDeviceManager _graphics;
 
-		private NVGcontext _context;
+		private NanoVGContext _context;
 		private SpriteBatch _spriteBatch;
 
 		public Game1()
@@ -34,7 +34,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 		{
 			var device = GraphicsDevice;
 
-			_context = new NVGcontext(GraphicsDevice, 0);
+			_context = new NanoVGContext(GraphicsDevice, 0);
 
 			byte[] bytes;
 			using (var ms = new MemoryStream())
@@ -76,17 +76,17 @@ namespace SpriteFontPlus.Samples.TtfBaking
 
 			_context.nvgBeginPath();
 			_context.nvgRect(0, 20, 200, 100);
-			_context.nvgFillColor(new NVGcolor { r = 0.0f, g = 1.0f, b = 0.0f, a = 1.0f });
+			_context.nvgFillColor(Color.BlueViolet);
 			_context.nvgFill();
 
 			_context.nvgText(0, 50, "The quick brown fox jumps over the lazy dog");
 			_context.nvgEndFrame();
 
-/*						var texture = ((XNARenderer)_context._renderer)._textures[1];
+/*			var texture = ((XNARenderer)_context._renderer)._textures[0];
 
-						_spriteBatch.Begin();
-						_spriteBatch.Draw(texture, Vector2.Zero, Color.White);
-						_spriteBatch.End();*/
+			_spriteBatch.Begin();
+			_spriteBatch.Draw(texture, Vector2.Zero, Color.White);
+			_spriteBatch.End();*/
 
 			base.Draw(gameTime);
 		}

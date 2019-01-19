@@ -2,7 +2,7 @@
 
 namespace NanoVGSharp
 {
-	public unsafe class FONSfont
+	public unsafe class Font
 	{
 		public StbTrueType.stbtt_fontinfo font = new StbTrueType.stbtt_fontinfo();
 		public string name;
@@ -12,7 +12,7 @@ namespace NanoVGSharp
 		public float ascender;
 		public float descender;
 		public float lineh;
-		public FONSglyph* glyphs;
+		public FontGlyph* glyphs;
 		public int cglyphs;
 		public int nglyphs;
 		public int[] lut = new int[256];

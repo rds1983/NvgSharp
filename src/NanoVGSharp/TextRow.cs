@@ -1,6 +1,6 @@
 ﻿namespace NanoVGSharp
 {
-	public class NVGtextRow
+	public class TextRow
 	{
 		public StringLocation start, end, next;
 		public float width;

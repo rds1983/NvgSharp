@@ -3,7 +3,7 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct NVGglyphPosition
+	public struct GlyphPosition
 	{
 		public StringLocation str;
 		public float x;

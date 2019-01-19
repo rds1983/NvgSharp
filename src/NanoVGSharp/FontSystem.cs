@@ -3,7 +3,7 @@ using System;
 
 namespace NanoVGSharp
 {
-	public unsafe class FONScontext : IDisposable
+	public unsafe class FontSystem : IDisposable
 	{
 		public const int FONS_ZERO_TOPLEFT = 1;
 		public const int FONS_ZERO_BOTTOMLEFT = 2;
@@ -23,13 +23,14 @@ namespace NanoVGSharp
 
 		public delegate void handleErrorDelegate(void* uptr, int error, int val);
 
-		public FONSparams _params_ = new FONSparams();
+		private int flags;
+		public FontSystemParams _params_ = new FontSystemParams();
 		public float itw;
 		public float ith;
 		public byte[] texData;
 		public int[] dirtyRect = new int[4];
-		public FONSfont[] fonts;
-		public FONSatlas atlas;
+		public Font[] fonts;
+		public FontAtlas atlas;
 		public int cfonts;
 		public int nfonts;
 		public float[] verts = new float[1024 * 2];
@@ -38,18 +39,18 @@ namespace NanoVGSharp
 		public int nverts;
 		public byte* scratch;
 		public int nscratch;
-		public FONSstate[] states = new FONSstate[20];
+		public FontSystemState[] states = new FontSystemState[20];
 		public int nstates;
 		public handleErrorDelegate handleError;
 		public void* errorUptr;
 
-		public FONScontext(FONSparams p)
+		public FontSystem(FontSystemParams p)
 		{
 			_params_ = p;
 			scratch = (byte*)(CRuntime.malloc((ulong)(96000)));
 
-			atlas = new FONSatlas((int)(_params_.width), (int)(_params_.height), (int)(256));
-			fonts = new FONSfont[4];
+			atlas = new FontAtlas((int)(_params_.width), (int)(_params_.height), (int)(256));
+			fonts = new Font[4];
 			cfonts = (int)(4);
 			nfonts = (int)(0);
 			itw = (float)(1.0f / _params_.width);
@@ -104,14 +105,14 @@ namespace NanoVGSharp
 			dirtyRect[3] = (int)(fons__maxi((int)(dirtyRect[3]), (int)(gy + h)));
 		}
 
-		public FONSstate fons__getState()
+		public FontSystemState fons__getState()
 		{
 			return states[nstates - 1];
 		}
 
 		public int fonsAddFallbackFont(int _base_, int fallback)
 		{
-			FONSfont baseFont = fonts[_base_];
+			Font baseFont = fonts[_base_];
 			if ((baseFont.nfallbacks) < (20))
 			{
 				baseFont.fallbacks[baseFont.nfallbacks++] = (int)(fallback);
@@ -166,7 +167,7 @@ namespace NanoVGSharp
 			}
 			else
 			{
-				states[nstates] = new FONSstate();
+				states[nstates] = new FontSystemState();
 			}
 			nstates++;
 		}
@@ -185,7 +186,7 @@ namespace NanoVGSharp
 
 		public void fonsClearState()
 		{
-			FONSstate state = fons__getState();
+			FontSystemState state = fons__getState();
 			state.size = (float)(12.0f);
 			state.color = (uint)(0xffffffff);
 			state.font = (int)(0);
@@ -202,7 +203,7 @@ namespace NanoVGSharp
 			return (int)(stbError);
 		}
 
-		public void fons__freeFont(FONSfont font)
+		public void fons__freeFont(Font font)
 		{
 			if ((font) == null)
 				return;
@@ -212,19 +213,19 @@ namespace NanoVGSharp
 
 		public int fons__allocFont()
 		{
-			FONSfont font = null;
+			Font font = null;
 			if ((nfonts + 1) > (cfonts))
 			{
 				cfonts = (int)((cfonts) == (0) ? 8 : cfonts * 2);
-				fonts = new FONSfont[cfonts];
+				fonts = new Font[cfonts];
 				if ((fonts) == null)
 					return (int)(-1);
 			}
 
-			font = new FONSfont();
+			font = new Font();
 			if ((font) == null)
 				goto error;
-			font.glyphs = (FONSglyph*)(CRuntime.malloc((ulong)(sizeof(FONSglyph) * 256)));
+			font.glyphs = (FontGlyph*)(CRuntime.malloc((ulong)(sizeof(FontGlyph) * 256)));
 			if ((font.glyphs) == null)
 				goto error;
 			font.cglyphs = (int)(256);
@@ -244,7 +245,7 @@ namespace NanoVGSharp
 			int descent = 0;
 			int fh = 0;
 			int lineGap = 0;
-			FONSfont font;
+			Font font;
 			int idx = (int)(fons__allocFont());
 			if ((idx) == (-1))
 				return (int)(-1);
@@ -300,7 +301,7 @@ namespace NanoVGSharp
 			fons__blurCols(dst, (int)(w), (int)(h), (int)(dstStride), (int)(alpha));
 		}
 
-		public FONSglyph* fons__getGlyph(FONSfont font, uint codepoint, short isize, short iblur, int bitmapOption)
+		public FontGlyph* fons__getGlyph(Font font, uint codepoint, short isize, short iblur, int bitmapOption)
 		{
 			int i = 0;
 			int g = 0;
@@ -317,12 +318,12 @@ namespace NanoVGSharp
 			int x = 0;
 			int y = 0;
 			float scale = 0;
-			FONSglyph* glyph = null;
+			FontGlyph* glyph = null;
 			uint h = 0;
 			float size = (float)(isize / 10.0f);
 			int pad = 0;
 			int added = 0;
-			FONSfont renderFont = font;
+			Font renderFont = font;
 			if ((isize) < (2))
 				return null;
 			if ((iblur) > (20))
@@ -349,7 +350,7 @@ namespace NanoVGSharp
 			{
 				for (i = (int)(0); (i) < (font.nfallbacks); ++i)
 				{
-					FONSfont fallbackFont = fonts[font.fallbacks[i]];
+					Font fallbackFont = fonts[font.fallbacks[i]];
 					int fallbackIndex = (int)(fallbackFont.font.fons__tt_getGlyphIndex((int)(codepoint)));
 					if (fallbackIndex != 0)
 					{
@@ -441,7 +442,7 @@ namespace NanoVGSharp
 			return glyph;
 		}
 
-		public void fons__getQuad(FONSfont font, int prevGlyphIndex, FONSglyph* glyph, float scale, float spacing, ref float x, ref float y, FONSquad* q)
+		public void fons__getQuad(Font font, int prevGlyphIndex, FontGlyph* glyph, float scale, float spacing, ref float x, ref float y, FontGlyphSquad* q)
 		{
 			float rx = 0;
 			float ry = 0;
@@ -520,7 +521,7 @@ namespace NanoVGSharp
 			nverts++;
 		}
 
-		public float fons__getVertAlign(FONSfont font, int align, short isize)
+		public float fons__getVertAlign(Font font, int align, short isize)
 		{
 			if ((_params_.flags & FONS_ZERO_TOPLEFT) != 0)
 			{
@@ -571,14 +572,14 @@ namespace NanoVGSharp
 				return 0.0f;
 			}
 
-			FONSstate state = fons__getState();
-			FONSglyph* glyph = null;
-			FONSquad q = new FONSquad();
+			FontSystemState state = fons__getState();
+			FontGlyph* glyph = null;
+			FontGlyphSquad q = new FontGlyphSquad();
 			int prevGlyphIndex = (int)(-1);
 			short isize = (short)(state.size * 10.0f);
 			short iblur = (short)(state.blur);
 			float scale = 0;
-			FONSfont font;
+			Font font;
 			float width = 0;
 			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
 				return (float)(x);
@@ -626,9 +627,9 @@ namespace NanoVGSharp
 			return (float)(x);
 		}
 
-		public int fonsTextIterInit(FONStextIter iter, float x, float y, StringLocation str, int bitmapOption)
+		public int fonsTextIterInit(FontTextIterator iter, float x, float y, StringLocation str, int bitmapOption)
 		{
-			FONSstate state = fons__getState();
+			FontSystemState state = fons__getState();
 			float width = 0;
 
 			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
@@ -666,7 +667,7 @@ namespace NanoVGSharp
 			return (int)(1);
 		}
 
-		public bool fonsTextIterNext(FONStextIter iter, FONSquad* quad)
+		public bool fonsTextIterNext(FontTextIterator iter, FontGlyphSquad* quad)
 		{
 			iter.str = iter.next;
 
@@ -711,7 +712,7 @@ namespace NanoVGSharp
 			fons__vertex((float)(x + w), (float)(y + h), (float)(1), (float)(1), (uint)(0xffffffff));
 			for (i = (int)(0); (i) < (atlas.nnodes); i++)
 			{
-				FONSatlasNode* n = &atlas.nodes[i];
+				FontAtlasNode* n = &atlas.nodes[i];
 				if ((nverts + 6) > (1024))
 					fons__flush();
 				fons__vertex((float)(x + n->x + 0), (float)(y + n->y + 0), (float)(u), (float)(v), (uint)(0xc00000ff));
@@ -726,14 +727,14 @@ namespace NanoVGSharp
 
 		public float fonsTextBounds(float x, float y, StringLocation str, ref Bounds bounds)
 		{
-			FONSstate state = fons__getState();
-			FONSquad q = new FONSquad();
-			FONSglyph* glyph = null;
+			FontSystemState state = fons__getState();
+			FontGlyphSquad q = new FontGlyphSquad();
+			FontGlyph* glyph = null;
 			int prevGlyphIndex = (int)(-1);
 			short isize = (short)(state.size * 10.0f);
 			short iblur = (short)(state.blur);
 			float scale = 0;
-			FONSfont font;
+			Font font;
 			float startx = 0;
 			float advance = 0;
 			float minx = 0;
@@ -803,8 +804,8 @@ namespace NanoVGSharp
 
 		public void fonsVertMetrics(float* ascender, float* descender, float* lineh)
 		{
-			FONSfont font;
-			FONSstate state = fons__getState();
+			Font font;
+			FontSystemState state = fons__getState();
 			short isize = 0;
 			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
 				return;
@@ -822,8 +823,8 @@ namespace NanoVGSharp
 
 		public void fonsLineBounds(float y, ref float miny, ref float maxy)
 		{
-			FONSfont font;
-			FONSstate state = fons__getState();
+			Font font;
+			FontSystemState state = fons__getState();
 			short isize = 0;
 			if (((state.font) < (0)) || ((state.font) >= (nfonts)))
 				return;
@@ -872,7 +873,7 @@ namespace NanoVGSharp
 			return (int)(0);
 		}
 
-		public void fonsSetErrorCallback(FONScontext.handleErrorDelegate callback, void* uptr)
+		public void fonsSetErrorCallback(FontSystem.handleErrorDelegate callback, void* uptr)
 		{
 			handleError = callback;
 			errorUptr = uptr;
@@ -944,7 +945,7 @@ namespace NanoVGSharp
 			dirtyRect[3] = (int)(0);
 			for (i = (int)(0); (i) < (nfonts); i++)
 			{
-				FONSfont font = fonts[i];
+				Font font = fonts[i];
 				font.nglyphs = (int)(0);
 				for (j = (int)(0); (j) < (256); j++)
 				{
@@ -959,12 +960,12 @@ namespace NanoVGSharp
 			return (int)(1);
 		}
 
-		public static FONSglyph* fons__allocGlyph(FONSfont font)
+		public static FontGlyph* fons__allocGlyph(Font font)
 		{
 			if ((font.nglyphs + 1) > (font.cglyphs))
 			{
 				font.cglyphs = (int)((font.cglyphs) == (0) ? 8 : font.cglyphs * 2);
-				font.glyphs = (FONSglyph*)(CRuntime.realloc(font.glyphs, (ulong)(sizeof(FONSglyph) * font.cglyphs)));
+				font.glyphs = (FontGlyph*)(CRuntime.realloc(font.glyphs, (ulong)(sizeof(FontGlyph) * font.cglyphs)));
 				if ((font.glyphs) == null)
 					return null;
 			}

@@ -3,7 +3,7 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct NVGcompositeOperationState
+	public struct CompositeOperationState
 	{
 		public int srcRGB;
 		public int dstRGB;

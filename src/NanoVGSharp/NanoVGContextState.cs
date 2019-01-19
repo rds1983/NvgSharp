@@ -4,19 +4,19 @@ using System.Runtime.InteropServices;
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public class NVGstate
+	public class NanoVGContextState
 	{
-		public NVGcompositeOperationState compositeOperation;
+		public CompositeOperationState compositeOperation;
 		public int shapeAntiAlias;
-		public NVGpaint fill;
-		public NVGpaint stroke;
+		public Paint fill;
+		public Paint stroke;
 		public float strokeWidth;
 		public float miterLimit;
 		public int lineJoin;
 		public int lineCap;
 		public float alpha;
 		public Transform xform = new Transform();
-		public NVGscissor scissor;
+		public Scissor scissor;
 		public float fontSize;
 		public float letterSpacing;
 		public float lineHeight;
@@ -24,9 +24,9 @@ namespace NanoVGSharp
 		public int textAlign;
 		public int fontId;
 
-		public NVGstate Clone()
+		public NanoVGContextState Clone()
 		{
-			return new NVGstate
+			return new NanoVGContextState
 			{
 				compositeOperation = compositeOperation,
 				shapeAntiAlias = shapeAntiAlias,

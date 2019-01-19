@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NanoVGSharp
 {
-	public class FONStextIter
+	public class FontTextIterator
 	{
 		public float x;
 		public float y;
@@ -15,7 +15,7 @@ namespace NanoVGSharp
 		public uint codepoint;
 		public short isize;
 		public short iblur;
-		public FONSfont font;
+		public Font font;
 		public int prevGlyphIndex;
 		public StringLocation str, next;
 		public int bitmapOption;

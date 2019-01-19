@@ -3,7 +3,7 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct FONSquad
+	public struct FontGlyphSquad
 	{
 		public float x0;
 		public float y0;

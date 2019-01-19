@@ -1,6 +1,6 @@
 ﻿namespace NanoVGSharp
 {
-	public class FONSstate
+	public class FontSystemState
 	{
 		public int font;
 		public int align;
@@ -9,9 +9,9 @@
 		public float blur;
 		public float spacing;
 
-		public FONSstate Clone()
+		public FontSystemState Clone()
 		{
-			return new FONSstate
+			return new FontSystemState
 			{
 				font = font,
 				align = align,

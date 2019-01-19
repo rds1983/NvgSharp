@@ -3,9 +3,10 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct NVGscissor
+	public struct FontAtlasNode
 	{
-		public Transform xform;
-		public float extent1, extent2;
+		public short x;
+		public short y;
+		public short width;
 	}
 }
