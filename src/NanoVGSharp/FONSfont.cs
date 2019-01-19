@@ -6,7 +6,7 @@ namespace NanoVGSharp
 	{
 		public StbTrueType.stbtt_fontinfo font = new StbTrueType.stbtt_fontinfo();
 		public string name;
-		public byte* data;
+		public byte[] data;
 		public int dataSize;
 		public byte freeData;
 		public float ascender;

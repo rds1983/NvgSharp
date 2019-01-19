@@ -26,7 +26,7 @@ namespace NanoVGSharp
 		public FONSparams _params_ = new FONSparams();
 		public float itw;
 		public float ith;
-		public byte* texData;
+		public byte[] texData;
 		public int[] dirtyRect = new int[4];
 		public FONSfont[] fonts;
 		public FONSatlas atlas;
@@ -54,8 +54,8 @@ namespace NanoVGSharp
 			nfonts = (int)(0);
 			itw = (float)(1.0f / _params_.width);
 			ith = (float)(1.0f / _params_.height);
-			texData = (byte*)(CRuntime.malloc((ulong)(_params_.width * _params_.height)));
-			CRuntime.memset(texData, (int)(0), (ulong)(_params_.width * _params_.height));
+			texData = new byte[_params_.width * _params_.height];
+			Array.Clear(texData, 0, texData.Length);
 			dirtyRect[0] = (int)(_params_.width);
 			dirtyRect[1] = (int)(_params_.height);
 			dirtyRect[2] = (int)(0);
@@ -72,8 +72,7 @@ namespace NanoVGSharp
 			{
 				fons__freeFont(fonts[i]);
 			}
-			if ((texData) != null)
-				CRuntime.free(texData);
+
 			if ((scratch) != null)
 				CRuntime.free(scratch);
 		}
@@ -85,17 +84,19 @@ namespace NanoVGSharp
 			int y = 0;
 			int gx = 0;
 			int gy = 0;
-			byte* dst;
 			if ((atlas.fons__atlasAddRect((int)(w), (int)(h), &gx, &gy)) == (0))
 				return;
-			dst = &texData[gx + gy * _params_.width];
-			for (y = (int)(0); (y) < (h); y++)
+			fixed (byte *dst2 = &texData[gx + gy * _params_.width])
 			{
-				for (x = (int)(0); (x) < (w); x++)
+				var dst = dst2;
+				for (y = (int)(0); (y) < (h); y++)
 				{
-					dst[x] = (byte)(0xff);
+					for (x = (int)(0); (x) < (w); x++)
+					{
+						dst[x] = (byte)(0xff);
+					}
+					dst += _params_.width;
 				}
-				dst += _params_.width;
 			}
 			dirtyRect[0] = (int)(fons__mini((int)(dirtyRect[0]), (int)(gx)));
 			dirtyRect[1] = (int)(fons__mini((int)(dirtyRect[1]), (int)(gy)));
@@ -161,7 +162,11 @@ namespace NanoVGSharp
 
 			if ((nstates) > (0))
 			{
-				states[nstates] = states[nstates - 1];
+				states[nstates] = states[nstates - 1].Clone();
+			}
+			else
+			{
+				states[nstates] = new FONSstate();
 			}
 			nstates++;
 		}
@@ -203,8 +208,6 @@ namespace NanoVGSharp
 				return;
 			if ((font.glyphs) != null)
 				CRuntime.free(font.glyphs);
-			if (((font.freeData) != 0) && ((font.data) != null))
-				CRuntime.free(font.data);
 		}
 
 		public int fons__allocFont()
@@ -234,7 +237,7 @@ namespace NanoVGSharp
 			return (int)(-1);
 		}
 
-		public int fonsAddFontMem(string name, byte* data, int dataSize, int freeData)
+		public int fonsAddFontMem(string name, byte[] data, int freeData)
 		{
 			int i = 0;
 			int ascent = 0;
@@ -251,12 +254,14 @@ namespace NanoVGSharp
 			{
 				font.lut[i] = (int)(-1);
 			}
-			font.dataSize = (int)(dataSize);
 			font.data = data;
 			font.freeData = ((byte)(freeData));
 			nscratch = (int)(0);
-			if (fons__tt_loadFont(font.font, data, (int)(dataSize)) == 0)
-				goto error;
+			fixed (byte* ptr = data)
+			{
+				if (fons__tt_loadFont(font.font, ptr, data.Length) == 0)
+					goto error;
+			}
 			font.font.fons__tt_getFontVMetrics(&ascent, &descent, &lineGap);
 			fh = (int)(ascent - descent);
 			font.ascender = (float)((float)(ascent) / (float)(fh));
@@ -317,8 +322,6 @@ namespace NanoVGSharp
 			float size = (float)(isize / 10.0f);
 			int pad = 0;
 			int added = 0;
-			byte* bdst;
-			byte* dst;
 			FONSfont renderFont = font;
 			if ((isize) < (2))
 				return null;
@@ -402,24 +405,33 @@ namespace NanoVGSharp
 				return glyph;
 			}
 
-			dst = &texData[(glyph->x0 + pad) + (glyph->y0 + pad) * _params_.width];
-			renderFont.font.fons__tt_renderGlyphBitmap(dst, (int)(gw - pad * 2), (int)(gh - pad * 2), (int)(_params_.width), (float)(scale), (float)(scale), (int)(g));
-			dst = &texData[glyph->x0 + glyph->y0 * _params_.width];
-			for (y = (int)(0); (y) < (gh); y++)
+			fixed (byte *dst = &texData[(glyph->x0 + pad) + (glyph->y0 + pad) * _params_.width])
 			{
-				dst[y * _params_.width] = (byte)(0);
-				dst[gw - 1 + y * _params_.width] = (byte)(0);
+				renderFont.font.fons__tt_renderGlyphBitmap(dst, (int)(gw - pad * 2), (int)(gh - pad * 2), (int)(_params_.width), (float)(scale), (float)(scale), (int)(g));
 			}
-			for (x = (int)(0); (x) < (gw); x++)
+			fixed (byte* dst = &texData[glyph->x0 + glyph->y0 * _params_.width])
 			{
-				dst[x] = (byte)(0);
-				dst[x + (gh - 1) * _params_.width] = (byte)(0);
+
+				for (y = (int)(0); (y) < (gh); y++)
+				{
+					dst[y * _params_.width] = (byte)(0);
+					dst[gw - 1 + y * _params_.width] = (byte)(0);
+				}
+				for (x = (int)(0); (x) < (gw); x++)
+				{
+					dst[x] = (byte)(0);
+					dst[x + (gh - 1) * _params_.width] = (byte)(0);
+				}
 			}
+
+
 			if ((iblur) > (0))
 			{
 				nscratch = (int)(0);
-				bdst = &texData[glyph->x0 + glyph->y0 * _params_.width];
-				fons__blur(bdst, (int)(gw), (int)(gh), (int)(_params_.width), (int)(iblur));
+				fixed (byte* bdst = &texData[glyph->x0 + glyph->y0 * _params_.width])
+				{
+					fons__blur(bdst, (int)(gw), (int)(gh), (int)(_params_.width), (int)(iblur));
+				}
 			}
 
 			dirtyRect[0] = (int)(fons__mini((int)(dirtyRect[0]), (int)(glyph->x0)));
@@ -671,7 +683,7 @@ namespace NanoVGSharp
 				fons__getQuad(iter.font, (int)(iter.prevGlyphIndex), glyph, (float)(iter.scale), (float)(iter.spacing), ref iter.nextx, ref iter.nexty, quad);
 			iter.prevGlyphIndex = (int)(glyph != null ? glyph->index : -1);
 
-			++iter.next;
+			++iter.next.Location;
 
 			return true;
 		}
@@ -833,7 +845,7 @@ namespace NanoVGSharp
 
 		}
 
-		public byte* fonsGetTextureData(int* width, int* height)
+		public byte[] fonsGetTextureData(int* width, int* height)
 		{
 			if (width != null)
 				*width = (int)(_params_.width);
@@ -876,27 +888,30 @@ namespace NanoVGSharp
 		{
 			int i = 0;
 			int maxy = (int)(0);
-			byte* data = null;
 			width = (int)(fons__maxi((int)(width), (int)(_params_.width)));
 			height = (int)(fons__maxi((int)(height), (int)(_params_.height)));
 			if (((width) == (_params_.width)) && ((height) == (_params_.height)))
 				return (int)(1);
 			fons__flush();
 
-			data = (byte*)(CRuntime.malloc((ulong)(width * height)));
-			if ((data) == null)
-				return (int)(0);
+			var data = new byte[width * height];
 			for (i = (int)(0); (i) < (_params_.height); i++)
 			{
-				byte* dst = &data[i * width];
-				byte* src = &texData[i * _params_.width];
-				CRuntime.memcpy(dst, src, (ulong)(_params_.width));
-				if ((width) > (_params_.width))
-					CRuntime.memset(dst + _params_.width, (int)(0), (ulong)(width - _params_.width));
+				fixed (byte* dst = &data[i * width])
+				{
+					fixed (byte* src = &texData[i * _params_.width])
+					{
+						CRuntime.memcpy(dst, src, (ulong)(_params_.width));
+						if ((width) > (_params_.width))
+							CRuntime.memset(dst + _params_.width, (int)(0), (ulong)(width - _params_.width));
+					}
+				}
 			}
 			if ((height) > (_params_.height))
-				CRuntime.memset(&data[_params_.height * width], (int)(0), (ulong)((height - _params_.height) * width));
-			CRuntime.free(texData);
+			{
+				Array.Clear(data, _params_.height * width, (height - _params_.height) * width);
+			}
+
 			texData = data;
 			atlas.fons__atlasExpand((int)(width), (int)(height));
 			for (i = (int)(0); (i) < (atlas.nnodes); i++)
@@ -921,10 +936,8 @@ namespace NanoVGSharp
 			fons__flush();
 
 			atlas.fons__atlasReset((int)(width), (int)(height));
-			texData = (byte*)(CRuntime.realloc(texData, (ulong)(width * height)));
-			if ((texData) == null)
-				return (int)(0);
-			CRuntime.memset(texData, (int)(0), (ulong)(width * height));
+			texData = new byte[width * height];
+			Array.Clear(texData, 0, texData.Length);
 			dirtyRect[0] = (int)(width);
 			dirtyRect[1] = (int)(height);
 			dirtyRect[2] = (int)(0);

@@ -1,18 +1,16 @@
-﻿using System.Runtime.InteropServices;
+﻿using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace NanoVGSharp
 {
-	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct NVGpath
+	public unsafe class NVGpath
 	{
 		public int first;
 		public int count;
 		public byte closed;
 		public int nbevel;
-		public NVGvertex* fill;
-		public int nfill;
-		public NVGvertex* stroke;
-		public int nstroke;
+		public ArraySegment<VertexPositionColorTexture>? fill;
+		public ArraySegment<VertexPositionColorTexture>? stroke;
 		public int winding;
 		public int convex;
 	}

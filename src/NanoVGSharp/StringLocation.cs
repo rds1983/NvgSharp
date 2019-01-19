@@ -53,15 +53,6 @@
 			};
 		}
 
-		public static StringLocation operator ++(StringLocation a)
-		{
-			return new StringLocation
-			{
-				String = a.String,
-				Location = a.Location
-			};
-		}
-
 		public static bool operator ==(StringLocation a, StringLocation b)
 		{
 			return object.ReferenceEquals(a.String, b.String) &&
