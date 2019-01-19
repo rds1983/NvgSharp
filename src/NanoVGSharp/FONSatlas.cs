@@ -130,7 +130,7 @@ namespace NanoVGSharp
 			{
 				if ((i) == (nnodes))
 					return (int)(-1);
-				y = (int)(NanoVG.fons__maxi((int)(y), (int)(nodes[i].y)));
+				y = (int)(NVGcontext.fons__maxi((int)(y), (int)(nodes[i].y)));
 				if ((y + h) > (height))
 					return (int)(-1);
 				spaceLeft -= (int)(nodes[i].width);

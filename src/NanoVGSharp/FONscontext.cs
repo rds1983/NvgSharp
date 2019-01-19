@@ -3,8 +3,24 @@ using System;
 
 namespace NanoVGSharp
 {
-	public unsafe class FONScontext
+	public unsafe class FONScontext: IDisposable
 	{
+		public const int FONS_ZERO_TOPLEFT = 1;
+		public const int FONS_ZERO_BOTTOMLEFT = 2;
+		public const int FONS_ALIGN_LEFT = 1 << 0;
+		public const int FONS_ALIGN_CENTER = 1 << 1;
+		public const int FONS_ALIGN_RIGHT = 1 << 2;
+		public const int FONS_ALIGN_TOP = 1 << 3;
+		public const int FONS_ALIGN_MIDDLE = 1 << 4;
+		public const int FONS_ALIGN_BOTTOM = 1 << 5;
+		public const int FONS_ALIGN_BASELINE = 1 << 6;
+		public const int FONS_GLYPH_BITMAP_OPTIONAL = 1;
+		public const int FONS_GLYPH_BITMAP_REQUIRED = 2;
+		public const int FONS_ATLAS_FULL = 1;
+		public const int FONS_SCRATCH_FULL = 2;
+		public const int FONS_STATES_OVERFLOW = 3;
+		public const int FONS_STATES_UNDERFLOW = 4;
+
 		public delegate void handleErrorDelegate(void* uptr, int error, int val);
 
 		public FONSparams _params_ = new FONSparams();
@@ -53,6 +69,22 @@ namespace NanoVGSharp
 			fonsClearState();
 		}
 
+		public void Dispose()
+		{
+			int i = 0;
+			if ((_params_.renderDelete) != null)
+				_params_.renderDelete(_params_.userPtr);
+			for (i = (int)(0); (i) < (nfonts); ++i)
+			{
+				fons__freeFont(fonts[i]);
+			}
+			if ((texData) != null)
+				CRuntime.free(texData);
+			if ((scratch) != null)
+				CRuntime.free(scratch);
+		}
+
+
 		public void fons__addWhiteRect(int w, int h)
 		{
 			int x = 0;
@@ -71,10 +103,10 @@ namespace NanoVGSharp
 				}
 				dst += _params_.width;
 			}
-			dirtyRect[0] = (int)(NanoVG.fons__mini((int)(dirtyRect[0]), (int)(gx)));
-			dirtyRect[1] = (int)(NanoVG.fons__mini((int)(dirtyRect[1]), (int)(gy)));
-			dirtyRect[2] = (int)(NanoVG.fons__maxi((int)(dirtyRect[2]), (int)(gx + w)));
-			dirtyRect[3] = (int)(NanoVG.fons__maxi((int)(dirtyRect[3]), (int)(gy + h)));
+			dirtyRect[0] = (int)(fons__mini((int)(dirtyRect[0]), (int)(gx)));
+			dirtyRect[1] = (int)(fons__mini((int)(dirtyRect[1]), (int)(gy)));
+			dirtyRect[2] = (int)(fons__maxi((int)(dirtyRect[2]), (int)(gx + w)));
+			dirtyRect[3] = (int)(fons__maxi((int)(dirtyRect[3]), (int)(gy + h)));
 		}
 
 		public FONSstate* fons__getState()
@@ -129,7 +161,7 @@ namespace NanoVGSharp
 			if ((nstates) >= (20))
 			{
 				if ((handleError) != null)
-					handleError(errorUptr, (int)(NanoVG.FONS_STATES_OVERFLOW), (int)(0));
+					handleError(errorUptr, (int)(FONS_STATES_OVERFLOW), (int)(0));
 				return;
 			}
 
@@ -145,7 +177,7 @@ namespace NanoVGSharp
 			if (nstates <= 1)
 			{
 				if ((handleError) != null)
-					handleError(errorUptr, (int)(NanoVG.FONS_STATES_UNDERFLOW), (int)(0));
+					handleError(errorUptr, (int)(FONS_STATES_UNDERFLOW), (int)(0));
 				return;
 			}
 
@@ -160,7 +192,7 @@ namespace NanoVGSharp
 			state->font = (int)(0);
 			state->blur = (float)(0);
 			state->spacing = (float)(0);
-			state->align = (int)(NanoVG.FONS_ALIGN_LEFT | NanoVG.FONS_ALIGN_BASELINE);
+			state->align = (int)(FONS_ALIGN_LEFT | FONS_ALIGN_BASELINE);
 		}
 
 		public int fons__tt_loadFont(StbTrueType.stbtt_fontinfo font, byte* data, int dataSize)
@@ -231,7 +263,7 @@ namespace NanoVGSharp
 			nscratch = (int)(0);
 			if (fons__tt_loadFont(font.font, data, (int)(dataSize)) == 0)
 				goto error;
-			fons__tt_getFontVMetrics(&ascent, &descent, &lineGap);
+			font.font.fons__tt_getFontVMetrics(&ascent, &descent, &lineGap);
 			fh = (int)(ascent - descent);
 			font.ascender = (float)((float)(ascent) / (float)(fh));
 			font.descender = (float)((float)(descent) / (float)(fh));
@@ -315,13 +347,13 @@ namespace NanoVGSharp
 				}
 				i = (int)(font.glyphs[i].next);
 			}
-			g = (int)(fons__tt_getGlyphIndex(font, (int)(codepoint)));
+			g = (int)(font.font.fons__tt_getGlyphIndex((int)(codepoint)));
 			if ((g) == (0))
 			{
 				for (i = (int)(0); (i) < (font.nfallbacks); ++i)
 				{
 					FONSfont fallbackFont = fonts[font.fallbacks[i]];
-					int fallbackIndex = (int)(fons__tt_getGlyphIndex(fallbackfont, (int)(codepoint)));
+					int fallbackIndex = (int)(fallbackFont.font.fons__tt_getGlyphIndex((int)(codepoint)));
 					if (fallbackIndex != 0)
 					{
 						g = (int)(fallbackIndex);
@@ -331,17 +363,17 @@ namespace NanoVGSharp
 				}
 			}
 
-			scale = (float)(fons__tt_getPixelHeightScale(renderfont, (float)(size)));
-			fons__tt_buildGlyphBitmap(renderfont, (int)(g), (float)(size), (float)(scale), &advance, &lsb, &x0, &y0, &x1, &y1);
+			scale = (float)(renderFont.font.fons__tt_getPixelHeightScale((float)(size)));
+			renderFont.font.fons__tt_buildGlyphBitmap((int)(g), (float)(size), (float)(scale), &advance, &lsb, &x0, &y0, &x1, &y1);
 			gw = (int)(x1 - x0 + pad * 2);
 			gh = (int)(y1 - y0 + pad * 2);
 			if ((bitmapOption) == (FONS_GLYPH_BITMAP_REQUIRED))
 			{
-				added = (int)(fons__atlasAddRect(atlas, (int)(gw), (int)(gh), &gx, &gy));
+				added = (int)(atlas.fons__atlasAddRect((int)(gw), (int)(gh), &gx, &gy));
 				if (((added) == (0)) && (handleError != null))
 				{
 					handleError(errorUptr, (int)(FONS_ATLAS_FULL), (int)(0));
-					added = (int)(fons__atlasAddRect(atlas, (int)(gw), (int)(gh), &gx, &gy));
+					added = (int)(atlas.fons__atlasAddRect((int)(gw), (int)(gh), &gx, &gy));
 				}
 				if ((added) == (0))
 					return null;
@@ -377,7 +409,7 @@ namespace NanoVGSharp
 			}
 
 			dst = &texData[(glyph->x0 + pad) + (glyph->y0 + pad) * _params_.width];
-			fons__tt_renderGlyphBitmap(renderfont, dst, (int)(gw - pad * 2), (int)(gh - pad * 2), (int)(_params_.width), (float)(scale), (float)(scale), (int)(g));
+			renderFont.font.fons__tt_renderGlyphBitmap(dst, (int)(gw - pad * 2), (int)(gh - pad * 2), (int)(_params_.width), (float)(scale), (float)(scale), (int)(g));
 			dst = &texData[glyph->x0 + glyph->y0 * _params_.width];
 			for (y = (int)(0); (y) < (gh); y++)
 			{
@@ -415,7 +447,7 @@ namespace NanoVGSharp
 			float y1 = 0;
 			if (prevGlyphIndex != -1)
 			{
-				float adv = (float)(fons__tt_getGlyphKernAdvance(font, (int)(prevGlyphIndex), (int)(glyph->index)) * scale);
+				float adv = (float)(font.font.fons__tt_getGlyphKernAdvance((int)(prevGlyphIndex), (int)(glyph->index)) * scale);
 				*x += (float)((int)(adv + spacing + 0.5f));
 			}
 
@@ -548,14 +580,12 @@ namespace NanoVGSharp
 			float scale = 0;
 			FONSfont font;
 			float width = 0;
-			if (() == null)
-				return (float)(x);
 			if (((state->font) < (0)) || ((state->font) >= (nfonts)))
 				return (float)(x);
 			font = fonts[state->font];
 			if ((font.data) == null)
 				return (float)(x);
-			scale = (float)(fons__tt_getPixelHeightScale(font, (float)((float)(isize) / 10.0f)));
+			scale = (float)(font.font.fons__tt_getPixelHeightScale((float)((float)(isize) / 10.0f)));
 
 			if ((state->align & FONS_ALIGN_LEFT) != 0)
 			{
@@ -599,8 +629,6 @@ namespace NanoVGSharp
 			FONSstate* state = fons__getState();
 			float width = 0;
 
-			if (() == null)
-				return (int)(0);
 			if (((state->font) < (0)) || ((state->font) >= (nfonts)))
 				return (int)(0);
 			iter.font = fonts[state->font];
@@ -608,7 +636,7 @@ namespace NanoVGSharp
 				return (int)(0);
 			iter.isize = ((short)(state->size * 10.0f));
 			iter.iblur = ((short)(state->blur));
-			iter.scale = (float)(fons__tt_getPixelHeightScale(iter.font, (float)((float)(iter.isize) / 10.0f)));
+			iter.scale = (float)(iter.font.font.fons__tt_getPixelHeightScale((float)((float)(iter.isize) / 10.0f)));
 			if ((state->align & FONS_ALIGN_LEFT) != 0)
 			{
 			}
@@ -681,9 +709,9 @@ namespace NanoVGSharp
 			fons__vertex((float)(x + 0), (float)(y + 0), (float)(0), (float)(0), (uint)(0xffffffff));
 			fons__vertex((float)(x + 0), (float)(y + h), (float)(0), (float)(1), (uint)(0xffffffff));
 			fons__vertex((float)(x + w), (float)(y + h), (float)(1), (float)(1), (uint)(0xffffffff));
-			for (i = (int)(0); (i) < (atlas->nnodes); i++)
+			for (i = (int)(0); (i) < (atlas.nnodes); i++)
 			{
-				FONSatlasNode* n = &atlas->nodes[i];
+				FONSatlasNode* n = &atlas.nodes[i];
 				if ((nverts + 6) > (1024))
 					fons__flush();
 				fons__vertex((float)(x + n->x + 0), (float)(y + n->y + 0), (float)(u), (float)(v), (uint)(0xc00000ff));
@@ -699,7 +727,6 @@ namespace NanoVGSharp
 		public float fonsTextBounds(float x, float y, string str, float* bounds)
 		{
 			FONSstate* state = fons__getState();
-			uint utf8state = (uint)(0);
 			FONSquad q = new FONSquad();
 			FONSglyph* glyph = null;
 			int prevGlyphIndex = (int)(-1);
@@ -713,14 +740,12 @@ namespace NanoVGSharp
 			float miny = 0;
 			float maxx = 0;
 			float maxy = 0;
-			if (() == null)
-				return (float)(0);
 			if (((state->font) < (0)) || ((state->font) >= (nfonts)))
 				return (float)(0);
 			font = fonts[state->font];
 			if ((font.data) == null)
 				return (float)(0);
-			scale = (float)(fons__tt_getPixelHeightScale(font, (float)((float)(isize) / 10.0f)));
+			scale = (float)(font.font.fons__tt_getPixelHeightScale((float)((float)(isize) / 10.0f)));
 			y += (float)(fons__getVertAlign(font, (int)(state->align), (short)(isize)));
 			minx = (float)(maxx = (float)(x));
 			miny = (float)(maxy = (float)(y));
@@ -784,8 +809,6 @@ namespace NanoVGSharp
 			FONSfont font;
 			FONSstate* state = fons__getState();
 			short isize = 0;
-			if (() == null)
-				return;
 			if (((state->font) < (0)) || ((state->font) >= (nfonts)))
 				return;
 			font = fonts[state->font];
@@ -805,8 +828,6 @@ namespace NanoVGSharp
 			FONSfont font;
 			FONSstate* state = fons__getState();
 			short isize = 0;
-			if (() == null)
-				return;
 			if (((state->font) < (0)) || ((state->font) >= (nfonts)))
 				return;
 			font = fonts[state->font];
@@ -854,38 +875,14 @@ namespace NanoVGSharp
 			return (int)(0);
 		}
 
-		public void fonsDeleteInternal()
-		{
-			int i = 0;
-			if (() == null)
-				return;
-			if ((_params_.renderDelete) != null)
-				_params_.renderDelete(_params_.userPtr);
-			for (i = (int)(0); (i) < (nfonts); ++i)
-			{
-				fons__freeFont(fonts[i]);
-			}
-			if ((atlas) != null)
-				fons__deleteAtlas(atlas);
-			if ((texData) != null)
-				CRuntime.free(texData);
-			if ((scratch) != null)
-				CRuntime.free(scratch);
-			fons__tt_done();
-		}
-
 		public void fonsSetErrorCallback(FONScontext.handleErrorDelegate callback, void* uptr)
 		{
-			if (() == null)
-				return;
 			handleError = callback;
 			errorUptr = uptr;
 		}
 
 		public void fonsGetAtlasSize(int* width, int* height)
 		{
-			if (() == null)
-				return;
 			*width = (int)(_params_.width);
 			*height = (int)(_params_.height);
 		}
@@ -895,8 +892,6 @@ namespace NanoVGSharp
 			int i = 0;
 			int maxy = (int)(0);
 			byte* data = null;
-			if (() == null)
-				return (int)(0);
 			width = (int)(fons__maxi((int)(width), (int)(_params_.width)));
 			height = (int)(fons__maxi((int)(height), (int)(_params_.height)));
 			if (((width) == (_params_.width)) && ((height) == (_params_.height)))
@@ -923,10 +918,10 @@ namespace NanoVGSharp
 				CRuntime.memset(&data[_params_.height * width], (int)(0), (ulong)((height - _params_.height) * width));
 			CRuntime.free(texData);
 			texData = data;
-			fons__atlasExpand(atlas, (int)(width), (int)(height));
-			for (i = (int)(0); (i) < (atlas->nnodes); i++)
+			atlas.fons__atlasExpand((int)(width), (int)(height));
+			for (i = (int)(0); (i) < (atlas.nnodes); i++)
 			{
-				maxy = (int)(fons__maxi((int)(maxy), (int)(atlas->nodes[i].y)));
+				maxy = (int)(fons__maxi((int)(maxy), (int)(atlas.nodes[i].y)));
 			}
 			dirtyRect[0] = (int)(0);
 			dirtyRect[1] = (int)(0);
@@ -943,8 +938,6 @@ namespace NanoVGSharp
 		{
 			int i = 0;
 			int j = 0;
-			if (() == null)
-				return (int)(0);
 			fons__flush();
 			if (_params_.renderResize != null)
 			{
@@ -952,7 +945,7 @@ namespace NanoVGSharp
 					return (int)(0);
 			}
 
-			fons__atlasReset(atlas, (int)(width), (int)(height));
+			atlas.fons__atlasReset((int)(width), (int)(height));
 			texData = (byte*)(CRuntime.realloc(texData, (ulong)(width * height)));
 			if ((texData) == null)
 				return (int)(0);
@@ -1038,6 +1031,27 @@ namespace NanoVGSharp
 				dst[0] = (byte)(0);
 				dst++;
 			}
+		}
+
+		public static uint fons__hashint(uint a)
+		{
+			a += (uint)(~(a << 15));
+			a ^= (uint)(a >> 10);
+			a += (uint)(a << 3);
+			a ^= (uint)(a >> 6);
+			a += (uint)(~(a << 11));
+			a ^= (uint)(a >> 16);
+			return (uint)(a);
+		}
+
+		public static int fons__mini(int a, int b)
+		{
+			return (int)((a) < (b) ? a : b);
+		}
+
+		public static int fons__maxi(int a, int b)
+		{
+			return (int)((a) > (b) ? a : b);
 		}
 	}
 }

@@ -10,9 +10,9 @@
 		public delegate void renderViewportDelegate (void* uptr, float width, float height, float devicePixelRatio);
 		public delegate void renderCancelDelegate(void* uptr);
 		public delegate void renderFlushDelegate(void* uptr);
-		public delegate void renderFillDelegate(void* uptr, NanoVG.NVGpaint* paint, NanoVG.NVGcompositeOperationState compositeOperation, NanoVG.NVGscissor* scissor, float fringe, float* bounds, NanoVG.NVGpath* paths, int npaths);
-		public delegate void renderStrokeDelegate(void* uptr, NanoVG.NVGpaint* paint, NanoVG.NVGcompositeOperationState compositeOperation, NanoVG.NVGscissor* scissor, float fringe, float strokeWidth, NanoVG.NVGpath* paths, int npaths);
-		public delegate void renderTrianglesDelegate(void* uptr, NanoVG.NVGpaint* paint, NanoVG.NVGcompositeOperationState compositeOperation, NanoVG.NVGscissor* scissor, NanoVG.NVGvertex* verts, int nverts);
+		public delegate void renderFillDelegate(void* uptr, NVGpaint* paint, NVGcompositeOperationState compositeOperation, NVGscissor* scissor, float fringe, float* bounds, NVGpath* paths, int npaths);
+		public delegate void renderStrokeDelegate(void* uptr, NVGpaint* paint, NVGcompositeOperationState compositeOperation, NVGscissor* scissor, float fringe, float strokeWidth, NVGpath* paths, int npaths);
+		public delegate void renderTrianglesDelegate(void* uptr, NVGpaint* paint, NVGcompositeOperationState compositeOperation, NVGscissor* scissor, NVGvertex* verts, int nverts);
 		public delegate void renderDeleteDelegate(void* uptr);
 
 
