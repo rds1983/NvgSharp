@@ -160,7 +160,7 @@ namespace NanoVGSharp
 			foreach (var pass in basicEffect.CurrentTechnique.Passes)
 			{
 				pass.Apply();
-				_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verts.Count / 3);
+				_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verts.Count, 0, verts.Count / 3);
 			}
 		}
 
