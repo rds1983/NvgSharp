@@ -1016,9 +1016,9 @@ namespace NanoVGSharp
 					}
 					if ((loop) != 0)
 					{
-						nvg__vset(dst, (float)(verts.Array[verts.Offset].X), (float)(verts.Array[verts.Offset].Y), (float)(u0), (float)(1));
+						nvg__vset(dst, (float)(verts.Array[verts.Offset].Position.X), (float)(verts.Array[verts.Offset].Position.Y), (float)(u0), (float)(1));
 						dst++;
-						nvg__vset(dst, (float)(verts.Array[verts.Offset + 1].X), (float)(verts.Array[verts.Offset + 1].Y), (float)(u1), (float)(1));
+						nvg__vset(dst, (float)(verts.Array[verts.Offset + 1].Position.X), (float)(verts.Array[verts.Offset + 1].Position.Y), (float)(u1), (float)(1));
 						dst++;
 					}
 					else
@@ -1161,12 +1161,12 @@ namespace NanoVGSharp
 							}
 							p0 = p1++;
 						}
-						nvg__vset(dst, (float)(verts.Array[verts.Offset].X),
-							(float)(verts.Array[verts.Offset].Y),
+						nvg__vset(dst, (float)(verts.Array[verts.Offset].Position.X),
+							(float)(verts.Array[verts.Offset].Position.Y),
 							(float)(lu), (float)(1));
 						dst++;
-						nvg__vset(dst, (float)(verts.Array[verts.Offset + 1].X),
-							(float)(verts.Array[verts.Offset + 1].Y),
+						nvg__vset(dst, (float)(verts.Array[verts.Offset + 1].Position.X),
+							(float)(verts.Array[verts.Offset + 1].Position.Y),
 							(float)(ru), (float)(1));
 						dst++;
 
@@ -2514,10 +2514,10 @@ namespace NanoVGSharp
 
 		public static void nvg__vset(ref Vertex vtx, float x, float y, float u, float v)
 		{
-			vtx.X = (float)(x);
-			vtx.Y = (float)(y);
-			vtx.U = (float)(u);
-			vtx.V = (float)(v);
+			vtx.Position.X = (float)(x);
+			vtx.Position.Y = (float)(y);
+			vtx.TextureCoordinate.X = (float)(u);
+			vtx.TextureCoordinate.Y = (float)(v);
 		}
 
 		public static void nvg__isectRects(float* dst, float ax, float ay, float aw, float ah, float bx, float by, float bw, float bh)

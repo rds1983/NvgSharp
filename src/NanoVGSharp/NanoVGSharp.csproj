@@ -44,5 +44,15 @@
   <ItemGroup Condition="$(DefineConstants.Contains('XENKO'))">
     <PackageReference Include="Xenko.Engine" Version="3.1.0.1-beta01-0349" PrivateAssets="contentfiles;analyzers" />
     <PackageReference Include="Xenko.Core" Version="3.1.0.1-beta01-0349" PrivateAssets="contentfiles;analyzers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Effect.dx11.mgfxo" />
+    <None Remove="Resources\Effect.ogl.mgfxo" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Effect.dx11.mgfxo" />
+    <EmbeddedResource Include="Resources\Effect.ogl.mgfxo" />
   </ItemGroup>  
 </Project>
