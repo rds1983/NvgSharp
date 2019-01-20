@@ -20,6 +20,8 @@ namespace NanoVGSharp.Samples.Demo
 		{
 			_graphics = new GraphicsDeviceManager(this)
 			{
+				PreferredBackBufferWidth = 1200,
+				PreferredBackBufferHeight = 800
 			};
 
 			Content.RootDirectory = "Content";
@@ -60,11 +62,23 @@ namespace NanoVGSharp.Samples.Demo
 		{
 			GraphicsDevice.Clear(new Color(0.3f, 0.3f, 0.3f));
 
+			if (_graphics.PreferredBackBufferWidth != Window.ClientBounds.Width ||
+	_graphics.PreferredBackBufferHeight != Window.ClientBounds.Height)
+			{
+				_graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
+				_graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
+				_graphics.ApplyChanges();
+			}
+
 			// TODO: Add your drawing code here
 
-			_context.nvgBeginFrame(800, 600, 1.0f);
+			_context.nvgBeginFrame(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, 1.0f);
 
-			_demo.renderDemo(_context, 0, 0, 800, 600, 0, false);
+			_demo.renderDemo(_context, 0, 0, 
+				_graphics.PreferredBackBufferWidth, 
+				_graphics.PreferredBackBufferHeight, 
+				(float)gameTime.ElapsedGameTime.TotalSeconds, 
+				false);
 
 			_context.nvgEndFrame();
 

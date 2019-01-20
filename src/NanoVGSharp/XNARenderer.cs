@@ -107,7 +107,7 @@ namespace NanoVGSharp
 			ArraySegment<VertexPositionColorTexture> verts, 
 			ushort[] indexes)
 		{
-			if (verts.Count <= 0)
+			if (verts.Count <= 0 || indexes.Length <= 0)
 			{
 				return;
 			}

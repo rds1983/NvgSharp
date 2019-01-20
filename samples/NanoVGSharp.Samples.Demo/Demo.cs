@@ -829,7 +829,6 @@ namespace NanoVGSharp.Samples.Demo
 			GlyphPosition[] glyphs = new GlyphPosition[100];
 			string text = "This is longer chunk of text.\n  \n  Would have used lorem ipsum but she    was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party.";
 			StringLocation start;
-			string end;
 			int nrows, i, nglyphs, j, lnum = 0;
 			float lineh;
 			float caretx, px;
@@ -837,6 +836,11 @@ namespace NanoVGSharp.Samples.Demo
 			float a;
 			float gx = 0, gy = 0;
 			int gutter = 0;
+
+			for (i = 0; i < rows.Length; ++i)
+			{
+				rows[i] = new TextRow();
+			}
 
 			vg.nvgSave();
 
@@ -853,7 +857,7 @@ namespace NanoVGSharp.Samples.Demo
 			start = text;
 			while (true)
 			{
-				nrows = vg.nvgTextBreakLines(start, width);
+				nrows = vg.nvgTextBreakLines(start, width, rows);
 
 				if (nrows <= 0)
 				{
@@ -1048,7 +1052,9 @@ namespace NanoVGSharp.Samples.Demo
 			float x, y, popy;
 
 			drawEyes(vg, width - 250, 50, 150, 100, mx, my, t);
+
 			drawParagraph(vg, width - 450, 50, 150, 100, mx, my);
+
 			drawGraph(vg, 0, height / 2, width, height / 2, t);
 			drawColorwheel(vg, width - 300, height - 300, 250.0f, 250.0f, t);
 

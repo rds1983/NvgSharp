@@ -90,7 +90,7 @@ namespace NanoVGSharp
 		public int fillTriCount;
 		public int strokeTriCount;
 		public int textTriCount;
-		private TextRow[] rows = new TextRow[MaxTextRows];
+		private TextRow[] _rows = new TextRow[MaxTextRows];
 
 		public NanoVGContext(GraphicsDevice device, int edgeAntiAlias)
 		{
@@ -116,6 +116,11 @@ namespace NanoVGSharp
 			fs = new FontSystem(fontParams);
 			fontImages[0] = (int)(_renderer.renderCreateTexture((int)(NVG_TEXTURE_ALPHA), (int)(fontParams.width), (int)(fontParams.height), (int)(0), null));
 			fontImageIdx = (int)(0);
+
+			for (var i = 0; i < _rows.Length; ++i)
+			{
+				_rows[i] = new TextRow();
+			}
 		}
 
 		public void Dispose()
@@ -1857,7 +1862,7 @@ namespace NanoVGSharp
 			state.textAlign = (int)(NVG_ALIGN_LEFT | valign);
 			while (true)
 			{
-				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth)));
+				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth), _rows));
 
 				if (nrows <= 0)
 				{
@@ -1865,7 +1870,7 @@ namespace NanoVGSharp
 				}
 				for (i = (int)(0); (i) < (nrows); i++)
 				{
-					var row = rows[i];
+					var row = _rows[i];
 					if ((haling & NVG_ALIGN_LEFT) != 0)
 						nvgText((float)(x), (float)(y), row.start);
 					else if ((haling & NVG_ALIGN_CENTER) != 0)
@@ -1875,7 +1880,7 @@ namespace NanoVGSharp
 					y += (float)(lineh * state.lineHeight);
 				}
 
-				_string_ = rows[nrows - 1].next;
+				_string_ = _rows[nrows - 1].next;
 			}
 			state.textAlign = (int)(oldAlign);
 		}
@@ -1923,7 +1928,7 @@ namespace NanoVGSharp
 			return (int)(npos);
 		}
 
-		public int nvgTextBreakLines(StringLocation _string_, float breakRowWidth)
+		public int nvgTextBreakLines(StringLocation _string_, float breakRowWidth, TextRow[] rows)
 		{
 			NanoVGContextState state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
@@ -2180,14 +2185,14 @@ namespace NanoVGSharp
 			rmaxy *= (float)(invscale);
 			while (true)
 			{
-				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth)));
+				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth), _rows));
 				if (nrows <= 0)
 				{
 					break;
 				}
 				for (i = (int)(0); (i) < (nrows); i++)
 				{
-					TextRow row = rows[i];
+					TextRow row = _rows[i];
 					float rminx = 0;
 					float rmaxx = 0;
 					float dx = (float)(0);
@@ -2205,7 +2210,7 @@ namespace NanoVGSharp
 					maxy = (float)(nvg__maxf((float)(maxy), (float)(y + rmaxy)));
 					y += (float)(lineh * state.lineHeight);
 				}
-				_string_ = rows[nrows - 1].next;
+				_string_ = _rows[nrows - 1].next;
 			}
 			state.textAlign = (int)(oldAlign);
 			bounds.b1 = (float)(minx);
