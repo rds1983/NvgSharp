@@ -2122,6 +2122,7 @@ namespace NanoVGSharp
 				rows[nrows].width = (float)(rowWidth * invscale);
 				rows[nrows].minx = (float)(rowMinX * invscale);
 				rows[nrows].maxx = (float)(rowMaxX * invscale);
+				remaining = StringSegment.Null;
 
 				nrows++;
 			}

@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using Microsoft.Xna.Framework;
+using System.Runtime.InteropServices;
 
 namespace NanoVGSharp
 {
@@ -130,6 +131,11 @@ namespace NanoVGSharp
 		{
 			dx = (float)(sx * t1 + sy * t3 + t5);
 			dy = (float)(sx * t2 + sy * t4 + t6);
+		}
+
+		public void TransformVector(out Vector2 v, Vector2 s)
+		{
+			TransformPoint(out v.X, out v.Y, s.X, s.Y);
 		}
 	}
 }
