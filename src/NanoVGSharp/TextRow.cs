@@ -2,7 +2,7 @@
 {
 	public class TextRow
 	{
-		public StringLocation start, end, next;
+		public StringSegment str;
 		public float width;
 		public float minx;
 		public float maxx;

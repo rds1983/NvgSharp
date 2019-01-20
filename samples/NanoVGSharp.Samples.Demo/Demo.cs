@@ -828,7 +828,7 @@ namespace NanoVGSharp.Samples.Demo
 			TextRow[] rows = new TextRow[3];
 			GlyphPosition[] glyphs = new GlyphPosition[100];
 			string text = "This is longer chunk of text.\n  \n  Would have used lorem ipsum but she    was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party.";
-			StringLocation start;
+			StringSegment start;
 			int nrows, i, nglyphs, j, lnum = 0;
 			float lineh;
 			float caretx, px;
@@ -857,7 +857,7 @@ namespace NanoVGSharp.Samples.Demo
 			start = text;
 			while (true)
 			{
-				nrows = vg.nvgTextBreakLines(start, width, rows);
+				nrows = vg.nvgTextBreakLines(start, width, rows, out start);
 
 				if (nrows <= 0)
 				{
@@ -874,13 +874,13 @@ namespace NanoVGSharp.Samples.Demo
 					vg.nvgFill();
 
 					vg.nvgFillColor(new Color(255, 255, 255, 255));
-					vg.nvgText(x, y, row.start);
+					vg.nvgText(x, y, row.str);
 
 					if (hit)
 					{
 						caretx = (mx < x + row.width / 2) ? x : x + row.width;
 						px = x;
-						nglyphs = vg.nvgTextGlyphPositions(x, y, row.start, glyphs);
+						nglyphs = vg.nvgTextGlyphPositions(x, y, row.str, glyphs);
 						for (j = 0; j < nglyphs; j++)
 						{
 							float x0 = glyphs[j].x;
@@ -902,8 +902,6 @@ namespace NanoVGSharp.Samples.Demo
 					lnum++;
 					y += lineh;
 				}
-				// Keep going...
-				start = rows[nrows - 1].next;
 			}
 
 			if (gutter > 0)
@@ -1054,7 +1052,6 @@ namespace NanoVGSharp.Samples.Demo
 			drawEyes(vg, width - 250, 50, 150, 100, mx, my, t);
 
 			drawParagraph(vg, width - 450, 50, 150, 100, mx, my);
-
 			drawGraph(vg, 0, height / 2, width, height / 2, t);
 			drawColorwheel(vg, width - 300, height - 300, 250.0f, 250.0f, t);
 

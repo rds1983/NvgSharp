@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using NanoVGSharp;
-using System.IO;
+using Microsoft.Xna.Framework.Input;
 
 namespace NanoVGSharp.Samples.Demo
 {
@@ -20,8 +19,8 @@ namespace NanoVGSharp.Samples.Demo
 		{
 			_graphics = new GraphicsDeviceManager(this)
 			{
-				PreferredBackBufferWidth = 1200,
-				PreferredBackBufferHeight = 800
+				PreferredBackBufferWidth = 1000,
+				PreferredBackBufferHeight = 600
 			};
 
 			Content.RootDirectory = "Content";
@@ -63,7 +62,7 @@ namespace NanoVGSharp.Samples.Demo
 			GraphicsDevice.Clear(new Color(0.3f, 0.3f, 0.3f));
 
 			if (_graphics.PreferredBackBufferWidth != Window.ClientBounds.Width ||
-	_graphics.PreferredBackBufferHeight != Window.ClientBounds.Height)
+				_graphics.PreferredBackBufferHeight != Window.ClientBounds.Height)
 			{
 				_graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
 				_graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
@@ -72,17 +71,22 @@ namespace NanoVGSharp.Samples.Demo
 
 			// TODO: Add your drawing code here
 
+			var mouseState = Mouse.GetState();
+
 			_context.nvgBeginFrame(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, 1.0f);
 
-			_demo.renderDemo(_context, 0, 0, 
+			var t = (float)gameTime.TotalGameTime.TotalSeconds;
+			_demo.renderDemo(_context, 
+				mouseState.X, 
+				mouseState.Y, 
 				_graphics.PreferredBackBufferWidth, 
 				_graphics.PreferredBackBufferHeight, 
-				(float)gameTime.ElapsedGameTime.TotalSeconds, 
+				t, 
 				false);
 
 			_context.nvgEndFrame();
 
-/*			var texture = ((XNARenderer)_context._renderer)._textures[0];
+/*			var texture = ((XNARenderer)_context._renderer)._textures[8];
 
 			_spriteBatch.Begin();
 			_spriteBatch.Draw(texture, Vector2.Zero, Color.White);

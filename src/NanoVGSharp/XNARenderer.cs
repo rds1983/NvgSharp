@@ -8,8 +8,8 @@ namespace NanoVGSharp
 	public class XNARenderer: IRenderer
 	{
 		private readonly GraphicsDevice _device;
-		private DynamicVertexBuffer _vertexBuffer;
-		private DynamicIndexBuffer _indexBuffer;
+		private DynamicVertexBuffer _VertexBuffer;
+		private DynamicIndexBuffer _IndexBuffer;
 		private BasicEffect basicEffect;
 		public readonly List<Texture2D> _textures = new List<Texture2D>();
 		private readonly RasterizerState _rasterizerState = new RasterizerState
@@ -32,8 +32,8 @@ namespace NanoVGSharp
 
 			_device = device;
 
-			_vertexBuffer = new DynamicVertexBuffer(device, VertexPositionColorTexture.VertexDeclaration, 2000, BufferUsage.WriteOnly);
-			_indexBuffer = new DynamicIndexBuffer(device, typeof(ushort), 6000, BufferUsage.WriteOnly);
+			_VertexBuffer = new DynamicVertexBuffer(device, VertexPositionColorTexture.VertexDeclaration, 2000, BufferUsage.WriteOnly);
+			_IndexBuffer = new DynamicIndexBuffer(device, typeof(ushort), 6000, BufferUsage.WriteOnly);
 			basicEffect = new BasicEffect(device);
 		}
 
@@ -77,10 +77,12 @@ namespace NanoVGSharp
 					{
 						var destPos = yy * texture.Width + xx;
 
-						for (var k = 0; k < 4; ++k)
+						for (var k = 0; k < 3; ++k)
 						{
-							b[destPos * 4 + k] = d[destPos];
+							b[destPos * 4 + k] = 255;
 						}
+
+						b[destPos * 4 + 3] = d[destPos];
 					}
 				}
 
@@ -104,7 +106,7 @@ namespace NanoVGSharp
 		private void renderTriangles(ref Paint paint, 
 			CompositeOperationState compositeOperation, 
 			ref Scissor scissor,
-			ArraySegment<VertexPositionColorTexture> verts, 
+			ArraySegment<Vertex> verts, 
 			ushort[] indexes)
 		{
 			if (verts.Count <= 0 || indexes.Length <= 0)
@@ -112,26 +114,33 @@ namespace NanoVGSharp
 				return;
 			}
 
+			var vertexes = new VertexPositionColorTexture[verts.Count];
 			for (var i = 0; i < verts.Count; ++i)
 			{
-				verts.Array[verts.Offset + i].Color = paint.innerColor;
+				var vert = verts.Array[verts.Offset + i];
+
+				vertexes[i].Position.X = vert.X;
+				vertexes[i].Position.Y = vert.Y;
+				vertexes[i].TextureCoordinate.X = vert.U;
+				vertexes[i].TextureCoordinate.Y = vert.V;
+				vertexes[i].Color = paint.innerColor;
 			}
 
-			if (_vertexBuffer.VertexCount < verts.Count)
+			if (_VertexBuffer.VertexCount < verts.Count)
 			{
-				// Resize vertex buffer if data doesnt fit
-				_vertexBuffer = new DynamicVertexBuffer(_device, VertexPositionColorTexture.VertexDeclaration, verts.Count * 2,
+				// Resize vertex ArraySegment if data doesnt fit
+				_VertexBuffer = new DynamicVertexBuffer(_device, VertexPositionColorTexture.VertexDeclaration, verts.Count * 2,
 					BufferUsage.WriteOnly);
 			}
-			_vertexBuffer.SetData(verts.Array, verts.Offset, verts.Count);
+			_VertexBuffer.SetData(vertexes, 0, verts.Count);
 
-			if (_indexBuffer.IndexCount < indexes.Length)
+			if (_IndexBuffer.IndexCount < indexes.Length)
 			{
-				// Resize index buffer if data doesnt fit
-				_indexBuffer = new DynamicIndexBuffer(_device, typeof(ushort), indexes.Length * 2, BufferUsage.WriteOnly);
+				// Resize index ArraySegment if data doesnt fit
+				_IndexBuffer = new DynamicIndexBuffer(_device, typeof(ushort), indexes.Length * 2, BufferUsage.WriteOnly);
 			}
 
-			_indexBuffer.SetData(indexes, 0, indexes.Length);
+			_IndexBuffer.SetData(indexes, 0, indexes.Length);
 
 			if (paint.image > 0)
 			{
@@ -152,14 +161,14 @@ namespace NanoVGSharp
 		}
 
 		public void renderFill(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, 
-			float fringe, Bounds bounds, Buffer<Path> paths)
+			float fringe, Bounds bounds, ArraySegment<Path> paths)
 		{
-			var vertexes = new List<VertexPositionColorTexture>();
+			var vertexes = new List<Vertex>();
 			var indexes = new List<ushort>();
 
 			for (var i = 0; i < paths.Count; ++i)
 			{
-				var path = paths[i];
+				var path = paths.Array[paths.Offset + i];
 
 				if (path.fill != null)
 				{
@@ -182,20 +191,20 @@ namespace NanoVGSharp
 			}
 
 			renderTriangles(ref paint, compositeOperation, ref scissor,
-				new ArraySegment<VertexPositionColorTexture>(vertexes.ToArray()),
+				new ArraySegment<Vertex>(vertexes.ToArray()),
 				indexes.ToArray());
 		}
 
 		public void renderStroke(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, 
-			float fringe, float strokeWidth, Buffer<Path> paths)
+			float fringe, float strokeWidth, ArraySegment<Path> paths)
 		{
-			var vertexes = new List<VertexPositionColorTexture>();
+			var vertexes = new List<Vertex>();
 			var indexes = new List<ushort>();
 			var thickness = 2.0f;
 			var col = paint.innerColor;
 			for (var i = 0; i < paths.Count; ++i)
 			{
-				var path = paths[i];
+				var path = paths.Array[paths.Offset + i];
 				var idx = vertexes.Count;
 				if (path.stroke != null)
 				{
@@ -208,8 +217,8 @@ namespace NanoVGSharp
 						float dy;
 						Vector2 uv = Vector2.Zero;
 						int i2 = (int)(((j + 1) == (stroke.Count)) ? 0 : j + 1);
-						Vector3 p1 = stroke.Array[stroke.Offset + j].Position;
-						Vector3 p2 = stroke.Array[stroke.Offset + i2].Position;
+						var p1 = stroke.Array[stroke.Offset + j];
+						var p2 = stroke.Array[stroke.Offset + i2];
 						Vector2 diff = (Vector2)(new Vector2((float)((p2).X - (p1).X), (float)((p2).Y - (p1).Y)));
 						float len;
 						len = (float)((diff).X * (diff).X + (diff).Y * (diff).Y);
@@ -221,33 +230,10 @@ namespace NanoVGSharp
 						dx = (float)(diff.X * (thickness * 0.5f));
 						dy = (float)(diff.Y * (thickness * 0.5f));
 
-						vertexes.Add(new VertexPositionColorTexture
-						{
-							Position = new Vector3((float)(p1.X + dy), (float)(p1.Y - dx), 1.0f),
-							TextureCoordinate = uv,
-							Color = col
-						});
-
-						vertexes.Add(new VertexPositionColorTexture
-						{
-							Position = new Vector3((float)(p2.X + dy), (float)(p2.Y - dx), 1.0f),
-							TextureCoordinate = uv,
-							Color = col
-						});
-
-						vertexes.Add(new VertexPositionColorTexture
-						{
-							Position = new Vector3((float)(p2.X - dy), (float)(p2.Y + dx), 1.0f),
-							TextureCoordinate = uv,
-							Color = col
-						});
-
-						vertexes.Add(new VertexPositionColorTexture
-						{
-							Position = new Vector3((float)(p1.X - dy), (float)(p1.Y + dx), 1.0f),
-							TextureCoordinate = uv,
-							Color = col
-						});
+						vertexes.Add(new Vertex(p1.X + dy, p1.Y - dx, uv.X, uv.Y));
+						vertexes.Add(new Vertex(p2.X + dy, p2.Y - dx, uv.X, uv.Y));
+						vertexes.Add(new Vertex(p2.X - dy, p2.Y + dx, uv.X, uv.Y));
+						vertexes.Add(new Vertex(p1.X - dy, p1.Y + dx, uv.X, uv.Y));
 
 						indexes.Add((ushort)(idx + 0));
 						indexes.Add((ushort)(idx + 1));
@@ -261,12 +247,12 @@ namespace NanoVGSharp
 			}
 
 			renderTriangles(ref paint, compositeOperation, ref scissor,
-				new ArraySegment<VertexPositionColorTexture>(vertexes.ToArray()),
+				new ArraySegment<Vertex>(vertexes.ToArray()),
 				indexes.ToArray());
 		}
 
 		public void renderTriangles(ref Paint paint, CompositeOperationState compositeOperation, 
-			ref Scissor scissor, ArraySegment<VertexPositionColorTexture> verts)
+			ref Scissor scissor, ArraySegment<Vertex> verts)
 		{
 			if (verts.Count <= 0)
 			{
@@ -302,8 +288,8 @@ namespace NanoVGSharp
 			basicEffect.VertexColorEnabled = true;
 			basicEffect.TextureEnabled = true;
 			basicEffect.LightingEnabled = false;
-			_device.SetVertexBuffer(_vertexBuffer);
-			_device.Indices = _indexBuffer;
+			_device.SetVertexBuffer(_VertexBuffer);
+			_device.Indices = _IndexBuffer;
 
 			_oldSamplerState = _device.SamplerStates[0];
 			_oldBlendState = _device.BlendState;
@@ -311,7 +297,7 @@ namespace NanoVGSharp
 			_oldRasterizerState = _device.RasterizerState;
 
 			_device.SamplerStates[0] = SamplerState.LinearClamp;
-			_device.BlendState = BlendState.AlphaBlend;
+			_device.BlendState = BlendState.NonPremultiplied;
 			_device.DepthStencilState = DepthStencilState.None;
 			_device.RasterizerState = _rasterizerState;
 		}

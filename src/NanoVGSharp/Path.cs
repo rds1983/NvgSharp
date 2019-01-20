@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 
 namespace NanoVGSharp
 {
@@ -9,8 +8,8 @@ namespace NanoVGSharp
 		public int count;
 		public byte closed;
 		public int nbevel;
-		public ArraySegment<VertexPositionColorTexture>? fill;
-		public ArraySegment<VertexPositionColorTexture>? stroke;
+		public ArraySegment<Vertex>? fill;
+		public ArraySegment<Vertex>? stroke;
 		public int winding;
 		public int convex;
 	}

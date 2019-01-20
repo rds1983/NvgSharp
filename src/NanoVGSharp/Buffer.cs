@@ -2,14 +2,14 @@
 
 namespace NanoVGSharp
 {
-	public class Buffer<T>
+	internal class Buffer<T>
 	{
-		private T[] _data;
+		private T[] _array;
 		private int _count = 0;
 
-		public T[] Data
+		public T[] Array
 		{
-			get { return _data; }
+			get { return _array; }
 		}
 
 		public int Count
@@ -20,24 +20,24 @@ namespace NanoVGSharp
 
 		public int Capacity
 		{
-			get { return _data.Length; }
+			get { return _array.Length; }
 		}
 
 		public T this[int index]
 		{
-			get { return _data[index]; }
-			set { _data[index] = value; }
+			get { return _array[index]; }
+			set { _array[index] = value; }
 		}
 
 		public T this[ulong index]
 		{
-			get { return _data[index]; }
-			set { _data[index] = value; }
+			get { return _array[index]; }
+			set { _array[index] = value; }
 		}
 
 		public Buffer(int capacity)
 		{
-			_data = new T[capacity];
+			_array = new T[capacity];
 		}
 
 		public void Clear()
@@ -47,28 +47,33 @@ namespace NanoVGSharp
 
 		public void EnsureSize(int required)
 		{
-			if (_data.Length >= required) return;
+			if (_array.Length >= required) return;
 
 			// Realloc
-			var oldData = _data;
+			var oldData = _array;
 
-			var newSize = _data.Length;
+			var newSize = _array.Length;
 			while (newSize < required)
 			{
 				newSize *= 2;
 			}
 
-			_data = new T[newSize];
+			_array = new T[newSize];
 
-			Array.Copy(oldData, _data, oldData.Length);
+			System.Array.Copy(oldData, _array, oldData.Length);
 		}
 
 		public void Add(T item)
 		{
 			EnsureSize(_count + 1);
 
-			_data[_count] = item;
+			_array[_count] = item;
 			++_count;
+		}
+
+		public ArraySegment<T> ToArraySegment()
+		{
+			return new ArraySegment<T>(Array, 0, Count);
 		}
 	}
 }

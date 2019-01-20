@@ -565,7 +565,7 @@ namespace NanoVGSharp
 			return (float)(0.0);
 		}
 
-		public float fonsDrawText(float x, float y, StringLocation str)
+		public float fonsDrawText(float x, float y, StringSegment str)
 		{
 			if (str.IsNullOrEmpty)
 			{
@@ -605,7 +605,7 @@ namespace NanoVGSharp
 			}
 
 			y += (float)(fons__getVertAlign(font, (int)(state.align), (short)(isize)));
-			for (var i = 0; i < str.Remaining; ++i)
+			for (var i = 0; i < str.Length; ++i)
 			{
 				var codepoint = str[i];
 				glyph = fons__getGlyph(font, (uint)(codepoint), (short)(isize), (short)(iblur), (int)(FONS_GLYPH_BITMAP_REQUIRED));
@@ -627,7 +627,7 @@ namespace NanoVGSharp
 			return (float)(x);
 		}
 
-		public int fonsTextIterInit(FontTextIterator iter, float x, float y, StringLocation str, int bitmapOption)
+		public int fonsTextIterInit(FontTextIterator iter, float x, float y, StringSegment str, int bitmapOption)
 		{
 			FontSystemState state = fons__getState();
 			float width = 0;
@@ -660,7 +660,8 @@ namespace NanoVGSharp
 			iter.x = (float)(iter.nextx = (float)(x));
 			iter.y = (float)(iter.nexty = (float)(y));
 			iter.spacing = (float)(state.spacing);
-			iter.str = iter.next = str;
+			iter.str = str;
+			iter.next = str;
 			iter.codepoint = (uint)(0);
 			iter.prevGlyphIndex = (int)(-1);
 			iter.bitmapOption = (int)(bitmapOption);
@@ -725,7 +726,7 @@ namespace NanoVGSharp
 			fons__flush();
 		}
 
-		public float fonsTextBounds(float x, float y, StringLocation str, ref Bounds bounds)
+		public float fonsTextBounds(float x, float y, StringSegment str, ref Bounds bounds)
 		{
 			FontSystemState state = fons__getState();
 			FontGlyphSquad q = new FontGlyphSquad();
@@ -751,7 +752,7 @@ namespace NanoVGSharp
 			minx = (float)(maxx = (float)(x));
 			miny = (float)(maxy = (float)(y));
 			startx = (float)(x);
-			for (var i = 0; i < str.Remaining; ++i)
+			for (var i = 0; i < str.Length; ++i)
 			{
 				var codepoint = str[i];
 				glyph = fons__getGlyph(font, (uint)(codepoint), (short)(isize), (short)(iblur), (int)(FONS_GLYPH_BITMAP_OPTIONAL));

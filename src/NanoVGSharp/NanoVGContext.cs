@@ -78,7 +78,7 @@ namespace NanoVGSharp
 		public float commandy;
 		public NanoVGContextState[] states = new NanoVGContextState[32];
 		public int nstates;
-		public PathCache cache;
+		private PathCache cache;
 		public float tessTol;
 		public float distTol;
 		public float fringeWidth;
@@ -248,7 +248,7 @@ namespace NanoVGSharp
 			state.lineCap = (int)(NVG_BUTT);
 			state.lineJoin = (int)(NVG_MITER);
 			state.alpha = (float)(1.0f);
-			nvgTransformIdentity(ref state.xform);
+			state.xform.SetIdentity();
 			state.scissor.extent1 = (float)(-1.0f);
 			state.scissor.extent2 = (float)(-1.0f);
 			state.fontSize = (float)(16.0f);
@@ -306,53 +306,53 @@ namespace NanoVGSharp
 			t.t5 = (float)(e);
 			t.t6 = (float)(f);
 
-			nvgTransformPremultiply(ref state.xform, ref t);
+			state.xform.Premultiply(ref t);
 		}
 
 		public void nvgResetTransform()
 		{
 			NanoVGContextState state = nvg__getState();
-			nvgTransformIdentity(ref state.xform);
+			state.xform.SetIdentity();
 		}
 
 		public void nvgTranslate(float x, float y)
 		{
 			NanoVGContextState state = nvg__getState();
 			var t = new Transform();
-			nvgTransformTranslate(ref t, (float)(x), (float)(y));
-			nvgTransformPremultiply(ref state.xform, ref t);
+			t.SetTranslate((float)(x), (float)(y));
+			state.xform.Premultiply(ref t);
 		}
 
 		public void nvgRotate(float angle)
 		{
 			NanoVGContextState state = nvg__getState();
 			var t = new Transform();
-			nvgTransformRotate(ref t, (float)(angle));
-			nvgTransformPremultiply(ref state.xform, ref t);
+			t.SetRotate((float)(angle));
+			state.xform.Premultiply(ref t);
 		}
 
 		public void nvgSkewX(float angle)
 		{
 			NanoVGContextState state = nvg__getState();
 			var t = new Transform();
-			nvgTransformSkewX(ref t, (float)(angle));
-			nvgTransformPremultiply(ref state.xform, ref t);
+			t.SetSkewX((float)(angle));
+			state.xform.Premultiply(ref t);
 		}
 
 		public void nvgSkewY(float angle)
 		{
 			NanoVGContextState state = nvg__getState();
 			var t = new Transform();
-			nvgTransformSkewY(ref t, (float)(angle));
-			nvgTransformPremultiply(ref state.xform, ref t);
+			t.SetSkewY((float)(angle));
+			state.xform.Premultiply(ref t);
 		}
 
 		public void nvgScale(float x, float y)
 		{
 			NanoVGContextState state = nvg__getState();
 			var t = new Transform();
-			nvgTransformScale(ref t, (float)(x), (float)(y));
-			nvgTransformPremultiply(ref state.xform, ref t);
+			t.SetScale((float)(x), (float)(y));
+			state.xform.Premultiply(ref t);
 		}
 
 		public void nvgCurrentTransform(Transform xform)
@@ -372,7 +372,7 @@ namespace NanoVGSharp
 		{
 			NanoVGContextState state = nvg__getState();
 			state.stroke = paint;
-			nvgTransformMultiply(ref state.stroke.xform, ref state.xform);
+			state.stroke.xform.Multiply(ref state.xform);
 		}
 
 		public void nvgFillColor(Color color)
@@ -385,7 +385,7 @@ namespace NanoVGSharp
 		{
 			NanoVGContextState state = nvg__getState();
 			state.fill = (Paint)(paint);
-			nvgTransformMultiply(ref state.fill.xform, ref state.xform);
+			state.fill.xform.Multiply(ref state.xform);
 		}
 
 		public int nvgCreateImageRGBA(int w, int h, int imageFlags, byte[] data)
@@ -452,7 +452,7 @@ namespace NanoVGSharp
 			Paint p = new Paint();
 			float r = (float)((inr + outr) * 0.5f);
 			float f = (float)(outr - inr);
-			nvgTransformIdentity(ref p.xform);
+			p.xform.SetIdentity();
 			p.xform.t5 = (float)(cx);
 			p.xform.t6 = (float)(cy);
 			p.extent1 = (float)(r);
@@ -467,7 +467,7 @@ namespace NanoVGSharp
 		public Paint nvgBoxGradient(float x, float y, float w, float h, float r, float f, Color icol, Color ocol)
 		{
 			Paint p = new Paint();
-			nvgTransformIdentity(ref p.xform);
+			p.xform.SetIdentity();
 			p.xform.t5 = (float)(x + w * 0.5f);
 			p.xform.t6 = (float)(y + h * 0.5f);
 			p.extent1 = (float)(w * 0.5f);
@@ -482,7 +482,7 @@ namespace NanoVGSharp
 		public Paint nvgImagePattern(float cx, float cy, float w, float h, float angle, int image, float alpha)
 		{
 			Paint p = new Paint();
-			nvgTransformRotate(ref p.xform, (float)(angle));
+			p.xform.SetRotate((float)(angle));
 			p.xform.t5 = (float)(cx);
 			p.xform.t6 = (float)(cy);
 			p.extent1 = (float)(w);
@@ -497,10 +497,10 @@ namespace NanoVGSharp
 			NanoVGContextState state = nvg__getState();
 			w = (float)(nvg__maxf((float)(0.0f), (float)(w)));
 			h = (float)(nvg__maxf((float)(0.0f), (float)(h)));
-			nvgTransformIdentity(ref state.scissor.xform);
+			state.scissor.xform.SetIdentity();
 			state.scissor.xform.t5 = (float)(x + w * 0.5f);
 			state.scissor.xform.t6 = (float)(y + h * 0.5f);
-			nvgTransformMultiply(ref state.scissor.xform, ref state.xform);
+			state.scissor.xform.Multiply(ref state.xform);
 			state.scissor.extent1 = (float)(w * 0.5f);
 			state.scissor.extent2 = (float)(h * 0.5f);
 		}
@@ -521,12 +521,11 @@ namespace NanoVGSharp
 				return;
 			}
 
-
 			pxform = state.scissor.xform;
 			ex = (float)(state.scissor.extent1);
 			ey = (float)(state.scissor.extent2);
-			nvgTransformInverse(ref invxorm, ref state.xform);
-			nvgTransformMultiply(ref pxform, ref invxorm);
+			invxorm = state.xform.BuildInverse();
+			pxform.Multiply(ref invxorm);
 			tex = (float)(ex * nvg__absf((float)(pxform.t1)) + ey * nvg__absf((float)(pxform.t3)));
 			tey = (float)(ex * nvg__absf((float)(pxform.t2)) + ey * nvg__absf((float)(pxform.t4)));
 			nvg__isectRects(rect, (float)(pxform.t5 - tex), (float)(pxform.t6 - tey), (float)(tex * 2), (float)(tey * 2), (float)(x), (float)(y), (float)(w), (float)(h));
@@ -591,17 +590,17 @@ namespace NanoVGSharp
 				switch (cmd)
 				{
 					case NVG_MOVETO:
-						nvgTransformPoint(&vals[i + 1], &vals[i + 2], ref state.xform, (float)(vals[i + 1]), (float)(vals[i + 2]));
+						state.xform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
 						i += (int)(3);
 						break;
 					case NVG_LINETO:
-						nvgTransformPoint(&vals[i + 1], &vals[i + 2], ref state.xform, (float)(vals[i + 1]), (float)(vals[i + 2]));
+						state.xform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
 						i += (int)(3);
 						break;
 					case NVG_BEZIERTO:
-						nvgTransformPoint(&vals[i + 1], &vals[i + 2], ref state.xform, (float)(vals[i + 1]), (float)(vals[i + 2]));
-						nvgTransformPoint(&vals[i + 3], &vals[i + 4], ref state.xform, (float)(vals[i + 3]), (float)(vals[i + 4]));
-						nvgTransformPoint(&vals[i + 5], &vals[i + 6], ref state.xform, (float)(vals[i + 5]), (float)(vals[i + 6]));
+						state.xform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
+						state.xform.TransformPoint(out vals[i + 3], out vals[i + 4], (float)(vals[i + 3]), (float)(vals[i + 4]));
+						state.xform.TransformPoint(out vals[i + 5], out vals[i + 6], (float)(vals[i + 5]), (float)(vals[i + 6]));
 						i += (int)(7);
 						break;
 					case NVG_CLOSE:
@@ -701,11 +700,11 @@ namespace NanoVGSharp
 			path.winding = (int)(winding);
 		}
 
-		public ArraySegment<VertexPositionColorTexture> nvg__allocTempVerts(int nverts)
+		public ArraySegment<Vertex> nvg__allocTempVerts(int nverts)
 		{
 			cache.verts.EnsureSize(nverts);
 
-			return new ArraySegment<VertexPositionColorTexture>(cache.verts.Data);
+			return new ArraySegment<Vertex>(cache.verts.Array);
 		}
 
 		public void nvg__tesselateBezier(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int level, int type)
@@ -964,7 +963,7 @@ namespace NanoVGSharp
 				float dy = 0;
 				path.fill = null;
 				loop = (int)(((path.closed) == (0)) ? 0 : 1);
-				fixed (VertexPositionColorTexture* dst2 = &verts.Array[verts.Offset])
+				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
 				{
 					var dst = dst2;
 					if ((loop) != 0)
@@ -1017,9 +1016,9 @@ namespace NanoVGSharp
 					}
 					if ((loop) != 0)
 					{
-						nvg__vset(dst, (float)(verts.Array[verts.Offset].Position.X), (float)(verts.Array[verts.Offset].Position.Y), (float)(u0), (float)(1));
+						nvg__vset(dst, (float)(verts.Array[verts.Offset].X), (float)(verts.Array[verts.Offset].Y), (float)(u0), (float)(1));
 						dst++;
-						nvg__vset(dst, (float)(verts.Array[verts.Offset + 1].Position.X), (float)(verts.Array[verts.Offset + 1].Position.Y), (float)(u1), (float)(1));
+						nvg__vset(dst, (float)(verts.Array[verts.Offset + 1].X), (float)(verts.Array[verts.Offset + 1].Y), (float)(u1), (float)(1));
 						dst++;
 					}
 					else
@@ -1035,10 +1034,10 @@ namespace NanoVGSharp
 							dst = nvg__roundCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1));
 					}
 
-					path.stroke = new ArraySegment<VertexPositionColorTexture>(verts.Array, verts.Offset, (int)(dst - dst2));
+					path.stroke = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
 
 					var newPos = verts.Offset + path.stroke.Value.Count;
-					verts = new ArraySegment<VertexPositionColorTexture>(verts.Array, newPos, verts.Array.Length - newPos);
+					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
 				}
 			}
 			return (int)(1);
@@ -1075,7 +1074,7 @@ namespace NanoVGSharp
 				float ru = 0;
 				float lu = 0;
 				woff = (float)(0.5f * aa);
-				fixed (VertexPositionColorTexture* dst2 = &verts.Array[verts.Offset])
+				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
 				{
 					var dst = dst2;
 					if ((fringe) != 0)
@@ -1126,10 +1125,10 @@ namespace NanoVGSharp
 						}
 					}
 
-					path.fill = new ArraySegment<VertexPositionColorTexture>(verts.Array, verts.Offset, (int)(dst - dst2));
+					path.fill = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
 
 					var newPos = verts.Offset + path.fill.Value.Count;
-					verts = new ArraySegment<VertexPositionColorTexture>(verts.Array, newPos, verts.Array.Length - newPos);
+					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
 				}
 				if ((fringe) != 0)
 				{
@@ -1137,7 +1136,7 @@ namespace NanoVGSharp
 					rw = (float)(w - woff);
 					lu = (float)(0);
 					ru = (float)(1);
-					fixed (VertexPositionColorTexture* dst2 = &verts.Array[verts.Offset])
+					fixed (Vertex* dst2 = &verts.Array[verts.Offset])
 					{
 						var dst = dst2;
 						if ((convex) != 0)
@@ -1162,19 +1161,19 @@ namespace NanoVGSharp
 							}
 							p0 = p1++;
 						}
-						nvg__vset(dst, (float)(verts.Array[verts.Offset].Position.X),
-							(float)(verts.Array[verts.Offset].Position.Y),
+						nvg__vset(dst, (float)(verts.Array[verts.Offset].X),
+							(float)(verts.Array[verts.Offset].Y),
 							(float)(lu), (float)(1));
 						dst++;
-						nvg__vset(dst, (float)(verts.Array[verts.Offset + 1].Position.X), 
-							(float)(verts.Array[verts.Offset + 1].Position.Y), 
+						nvg__vset(dst, (float)(verts.Array[verts.Offset + 1].X),
+							(float)(verts.Array[verts.Offset + 1].Y),
 							(float)(ru), (float)(1));
 						dst++;
 
-						path.stroke = new ArraySegment<VertexPositionColorTexture>(verts.Array, verts.Offset, (int)(dst - dst2));
+						path.stroke = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
 
 						var newPos = verts.Offset + path.stroke.Value.Count;
-						verts = new ArraySegment<VertexPositionColorTexture>(verts.Array, newPos, verts.Array.Length - newPos);
+						verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
 					}
 				}
 				else
@@ -1596,7 +1595,8 @@ namespace NanoVGSharp
 				nvg__expandFill((float)(0.0f), (int)(NVG_MITER), (float)(2.4f));
 			MultiplyAlpha(ref fillPaint.innerColor, state.alpha);
 			MultiplyAlpha(ref fillPaint.outerColor, state.alpha);
-			_renderer.renderFill(ref fillPaint, (CompositeOperationState)(state.compositeOperation), ref state.scissor, (float)(fringeWidth), cache.bounds, cache.paths);
+			_renderer.renderFill(ref fillPaint, (CompositeOperationState)(state.compositeOperation),
+				ref state.scissor, (float)(fringeWidth), cache.bounds, cache.paths.ToArraySegment());
 
 			for (i = (int)(0); (i) < (cache.paths.Count); i++)
 			{
@@ -1613,7 +1613,7 @@ namespace NanoVGSharp
 				drawCallCount += (int)(2);
 			}
 		}
-		
+
 		public void nvgStroke()
 		{
 			NanoVGContextState state = nvg__getState();
@@ -1625,7 +1625,7 @@ namespace NanoVGSharp
 			if ((strokeWidth) < (fringeWidth))
 			{
 				float alpha = (float)(nvg__clampf((float)(strokeWidth / fringeWidth), (float)(0.0f), (float)(1.0f)));
-				
+
 				MultiplyAlpha(ref strokePaint.innerColor, alpha * alpha);
 				MultiplyAlpha(ref strokePaint.outerColor, alpha * alpha);
 				strokeWidth = fringeWidth;
@@ -1639,7 +1639,8 @@ namespace NanoVGSharp
 				nvg__expandStroke((float)(strokeWidth * 0.5f), (float)(fringeWidth), (int)(state.lineCap), (int)(state.lineJoin), (float)(state.miterLimit));
 			else
 				nvg__expandStroke((float)(strokeWidth * 0.5f), (float)(0.0f), (int)(state.lineCap), (int)(state.lineJoin), (float)(state.miterLimit));
-			_renderer.renderStroke(ref strokePaint, (CompositeOperationState)(state.compositeOperation), ref state.scissor, (float)(fringeWidth), (float)(strokeWidth), cache.paths);
+			_renderer.renderStroke(ref strokePaint, (CompositeOperationState)(state.compositeOperation), ref state.scissor,
+				(float)(fringeWidth), (float)(strokeWidth), cache.paths.ToArraySegment());
 			for (i = (int)(0); (i) < (cache.paths.Count); i++)
 			{
 				path = cache.paths[i];
@@ -1760,7 +1761,7 @@ namespace NanoVGSharp
 			return (int)(1);
 		}
 
-		public void nvg__renderText(ArraySegment<VertexPositionColorTexture> verts)
+		public void nvg__renderText(ArraySegment<Vertex> verts)
 		{
 			NanoVGContextState state = nvg__getState();
 			Paint paint = (Paint)(state.fill);
@@ -1774,8 +1775,7 @@ namespace NanoVGSharp
 			textTriCount += (int)(verts.Count / 3);
 		}
 
-		private int count = 0;
-		public float nvgText(float x, float y, StringLocation _string_)
+		public float nvgText(float x, float y, StringSegment _string_)
 		{
 			NanoVGContextState state = nvg__getState();
 			FontTextIterator iter = new FontTextIterator();
@@ -1792,7 +1792,7 @@ namespace NanoVGSharp
 			fs.fonsSetBlur((float)(state.fontBlur * scale));
 			fs.fonsSetAlign((int)(state.textAlign));
 			fs.fonsSetFont((int)(state.fontId));
-			cverts = (int)(nvg__maxi((int)(2), (int)(_string_.Remaining)) * 6);
+			cverts = (int)(nvg__maxi((int)(2), (int)(_string_.Length)) * 6);
 			var verts = nvg__allocTempVerts((int)(cverts));
 
 			fs.fonsTextIterInit(iter, (float)(x * scale), (float)(y * scale), _string_, (int)(FontSystem.FONS_GLYPH_BITMAP_REQUIRED));
@@ -1805,7 +1805,7 @@ namespace NanoVGSharp
 				{
 					if (nverts != 0)
 					{
-						var segment = new ArraySegment<VertexPositionColorTexture>(verts.Array, verts.Offset, nverts);
+						var segment = new ArraySegment<Vertex>(verts.Array, verts.Offset, nverts);
 						nvg__renderText(segment);
 						nverts = (int)(0);
 					}
@@ -1817,10 +1817,10 @@ namespace NanoVGSharp
 						break;
 				}
 				prevIter = (FontTextIterator)(iter);
-				nvgTransformPoint(&c[0], &c[1], ref state.xform, (float)(q.x0 * invscale), (float)(q.y0 * invscale));
-				nvgTransformPoint(&c[2], &c[3], ref state.xform, (float)(q.x1 * invscale), (float)(q.y0 * invscale));
-				nvgTransformPoint(&c[4], &c[5], ref state.xform, (float)(q.x1 * invscale), (float)(q.y1 * invscale));
-				nvgTransformPoint(&c[6], &c[7], ref state.xform, (float)(q.x0 * invscale), (float)(q.y1 * invscale));
+				state.xform.TransformPoint(out c[0], out c[1], (float)(q.x0 * invscale), (float)(q.y0 * invscale));
+				state.xform.TransformPoint(out c[2], out c[3], (float)(q.x1 * invscale), (float)(q.y0 * invscale));
+				state.xform.TransformPoint(out c[4], out c[5], (float)(q.x1 * invscale), (float)(q.y1 * invscale));
+				state.xform.TransformPoint(out c[6], out c[7], (float)(q.x0 * invscale), (float)(q.y1 * invscale));
 				if (nverts + 6 <= cverts)
 				{
 					nvg__vset(ref verts.Array[verts.Offset + nverts], (float)(c[0]), (float)(c[1]), (float)(q.s0), (float)(q.t0));
@@ -1840,14 +1840,13 @@ namespace NanoVGSharp
 
 			nvg__flushTextTexture();
 
-			var segment2 = new ArraySegment<VertexPositionColorTexture>(verts.Array, verts.Offset, nverts);
+			var segment2 = new ArraySegment<Vertex>(verts.Array, verts.Offset, nverts);
 			nvg__renderText(segment2);
-			++count;
 
 			return (float)(iter.nextx / scale);
 		}
 
-		public void nvgTextBox(float x, float y, float breakRowWidth, StringLocation _string_)
+		public void nvgTextBox(float x, float y, float breakRowWidth, StringSegment _string_)
 		{
 			NanoVGContextState state = nvg__getState();
 			int i = 0;
@@ -1862,7 +1861,7 @@ namespace NanoVGSharp
 			state.textAlign = (int)(NVG_ALIGN_LEFT | valign);
 			while (true)
 			{
-				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth), _rows));
+				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth), _rows, out _string_));
 
 				if (nrows <= 0)
 				{
@@ -1872,20 +1871,18 @@ namespace NanoVGSharp
 				{
 					var row = _rows[i];
 					if ((haling & NVG_ALIGN_LEFT) != 0)
-						nvgText((float)(x), (float)(y), row.start);
+						nvgText((float)(x), (float)(y), row.str);
 					else if ((haling & NVG_ALIGN_CENTER) != 0)
-						nvgText((float)(x + breakRowWidth * 0.5f - row.width * 0.5f), (float)(y), row.start);
+						nvgText((float)(x + breakRowWidth * 0.5f - row.width * 0.5f), (float)(y), row.str);
 					else if ((haling & NVG_ALIGN_RIGHT) != 0)
-						nvgText((float)(x + breakRowWidth - row.width), (float)(y), row.start);
+						nvgText((float)(x + breakRowWidth - row.width), (float)(y), row.str);
 					y += (float)(lineh * state.lineHeight);
 				}
-
-				_string_ = _rows[nrows - 1].next;
 			}
 			state.textAlign = (int)(oldAlign);
 		}
 
-		public int nvgTextGlyphPositions(float x, float y, StringLocation _string_, GlyphPosition[] positions)
+		public int nvgTextGlyphPositions(float x, float y, StringSegment _string_, GlyphPosition[] positions)
 		{
 			NanoVGContextState state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
@@ -1928,8 +1925,10 @@ namespace NanoVGSharp
 			return (int)(npos);
 		}
 
-		public int nvgTextBreakLines(StringLocation _string_, float breakRowWidth, TextRow[] rows)
+		public int nvgTextBreakLines(StringSegment _string_, float breakRowWidth, TextRow[] rows, out StringSegment remaining)
 		{
+			remaining = StringSegment.Null;
+
 			NanoVGContextState state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
 			float invscale = (float)(1.0f / scale);
@@ -1941,12 +1940,12 @@ namespace NanoVGSharp
 			float rowWidth = (float)(0);
 			float rowMinX = (float)(0);
 			float rowMaxX = (float)(0);
-			StringLocation rowStart = new StringLocation();
-			StringLocation rowEnd = new StringLocation();
-			StringLocation wordStart = new StringLocation();
+			int? rowStart = null;
+			int? rowEnd = null;
+			int? wordStart = null;
+			int? breakEnd = null;
 			float wordStartX = (float)(0);
 			float wordMinX = (float)(0);
-			StringLocation breakEnd = new StringLocation();
 			float breakWidth = (float)(0);
 			float breakMaxX = (float)(0);
 			int type = (int)(NVG_SPACE);
@@ -2003,12 +2002,19 @@ namespace NanoVGSharp
 				}
 				if ((type) == (NVG_NEWLINE))
 				{
-					rows[nrows].start = rowStart.IsNullOrEmpty ? iter.str : rowStart;
-					rows[nrows].end = rowEnd.IsNullOrEmpty ? iter.str : rowEnd;
+					rows[nrows].str = rowStart == null ? iter.str : new StringSegment(iter.str, rowStart.Value);
+					if (rowEnd != null)
+					{
+						rows[nrows].str.Length = rowEnd.Value - rows[nrows].str.Location;
+					}
+					else
+					{
+						rows[nrows].str.Length = 0;
+					}
 					rows[nrows].width = (float)(rowWidth * invscale);
 					rows[nrows].minx = (float)(rowMinX * invscale);
 					rows[nrows].maxx = (float)(rowMaxX * invscale);
-					rows[nrows].next = iter.next;
+					remaining = iter.next;
 					nrows++;
 					if ((nrows) >= (rows.Length))
 						return (int)(nrows);
@@ -2022,17 +2028,17 @@ namespace NanoVGSharp
 				}
 				else
 				{
-					if (rowStart.IsNullOrEmpty)
+					if (rowStart == null)
 					{
 						if (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR)))
 						{
 							rowStartX = (float)(iter.x);
-							rowStart = iter.str;
-							rowEnd = iter.next;
+							rowStart = iter.str.Location;
+							rowEnd = iter.str.Location + 1;
 							rowWidth = (float)(iter.nextx - rowStartX);
 							rowMinX = (float)(q.x0 - rowStartX);
 							rowMaxX = (float)(q.x1 - rowStartX);
-							wordStart = iter.str;
+							wordStart = iter.str.Location;
 							wordStartX = (float)(iter.x);
 							wordMinX = (float)(q.x0 - rowStartX);
 							breakEnd = rowStart;
@@ -2045,19 +2051,19 @@ namespace NanoVGSharp
 						float nextWidth = (float)(iter.nextx - rowStartX);
 						if (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR)))
 						{
-							rowEnd = iter.next;
+							rowEnd = iter.str.Location + 1;
 							rowWidth = (float)(iter.nextx - rowStartX);
 							rowMaxX = (float)(q.x1 - rowStartX);
 						}
 						if (((((ptype) == (NVG_CHAR)) || ((ptype) == (NVG_CJK_CHAR))) && ((type) == (NVG_SPACE))) || ((type) == (NVG_CJK_CHAR)))
 						{
-							breakEnd = iter.str;
+							breakEnd = iter.str.Location;
 							breakWidth = (float)(rowWidth);
 							breakMaxX = (float)(rowMaxX);
 						}
 						if ((((ptype) == (NVG_SPACE)) && (((type) == (NVG_CHAR)) || ((type) == (NVG_CJK_CHAR)))) || ((type) == (NVG_CJK_CHAR)))
 						{
-							wordStart = iter.str;
+							wordStart = iter.str.Location;
 							wordStartX = (float)(iter.x);
 							wordMinX = (float)(q.x0 - rowStartX);
 						}
@@ -2065,39 +2071,38 @@ namespace NanoVGSharp
 						{
 							if ((breakEnd) == (rowStart))
 							{
-								rows[nrows].start = rowStart;
-								rows[nrows].end = iter.str;
+								rows[nrows].str = new StringSegment(_string_, rowStart.Value, iter.str.Location);
 								rows[nrows].width = (float)(rowWidth * invscale);
 								rows[nrows].minx = (float)(rowMinX * invscale);
 								rows[nrows].maxx = (float)(rowMaxX * invscale);
-								rows[nrows].next = iter.str;
+								remaining = iter.str;
 								nrows++;
 								if ((nrows) >= (rows.Length))
 									return (int)(nrows);
 								rowStartX = (float)(iter.x);
-								rowStart = iter.str;
-								rowEnd = iter.next;
+								rowStart = iter.str.Location;
+								rowEnd = iter.str.Location + 1;
 								rowWidth = (float)(iter.nextx - rowStartX);
 								rowMinX = (float)(q.x0 - rowStartX);
 								rowMaxX = (float)(q.x1 - rowStartX);
-								wordStart = iter.str;
+								wordStart = iter.str.Location;
 								wordStartX = (float)(iter.x);
 								wordMinX = (float)(q.x0 - rowStartX);
 							}
 							else
 							{
-								rows[nrows].start = rowStart;
-								rows[nrows].end = breakEnd;
+								rows[nrows].str = new StringSegment(_string_, rowStart.Value, breakEnd.Value - rowStart.Value);
 								rows[nrows].width = (float)(breakWidth * invscale);
 								rows[nrows].minx = (float)(rowMinX * invscale);
 								rows[nrows].maxx = (float)(breakMaxX * invscale);
-								rows[nrows].next = wordStart;
+								remaining = new StringSegment(_string_, wordStart.Value);
+
 								nrows++;
 								if ((nrows) >= rows.Length)
 									return (int)(nrows);
 								rowStartX = (float)(wordStartX);
 								rowStart = wordStart;
-								rowEnd = iter.next;
+								rowEnd = iter.str.Location + 1;
 								rowWidth = (float)(iter.nextx - rowStartX);
 								rowMinX = (float)(wordMinX);
 								rowMaxX = (float)(q.x1 - rowStartX);
@@ -2113,12 +2118,11 @@ namespace NanoVGSharp
 			}
 			if (rowStart != null)
 			{
-				rows[nrows].start = rowStart;
-				rows[nrows].end = rowEnd;
+				rows[nrows].str = new StringSegment(_string_, rowStart.Value, rowEnd.Value - rowStart.Value);
 				rows[nrows].width = (float)(rowWidth * invscale);
 				rows[nrows].minx = (float)(rowMinX * invscale);
 				rows[nrows].maxx = (float)(rowMaxX * invscale);
-				rows[nrows].next = null;
+
 				nrows++;
 			}
 
@@ -2148,7 +2152,7 @@ namespace NanoVGSharp
 			return (float)(width * invscale);
 		}
 
-		public void nvgTextBoxBounds(float x, float y, float breakRowWidth, StringLocation _string_, Bounds bounds)
+		public void nvgTextBoxBounds(float x, float y, float breakRowWidth, StringSegment _string_, Bounds bounds)
 		{
 			NanoVGContextState state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
@@ -2185,7 +2189,7 @@ namespace NanoVGSharp
 			rmaxy *= (float)(invscale);
 			while (true)
 			{
-				var nrows = (int)(nvgTextBreakLines(_string_, (float)(breakRowWidth), _rows));
+				var nrows = nvgTextBreakLines(_string_, (float)(breakRowWidth), _rows, out _string_);
 				if (nrows <= 0)
 				{
 					break;
@@ -2210,7 +2214,6 @@ namespace NanoVGSharp
 					maxy = (float)(nvg__maxf((float)(maxy), (float)(y + rmaxy)));
 					y += (float)(lineh * state.lineHeight);
 				}
-				_string_ = _rows[nrows - 1].next;
 			}
 			state.textAlign = (int)(oldAlign);
 			bounds.b1 = (float)(minx);
@@ -2436,121 +2439,13 @@ namespace NanoVGSharp
 			l = (float)(nvg__clampf((float)(l), (float)(0.0f), (float)(1.0f)));
 			m2 = (float)(l <= 0.5f ? (l * (1 + s)) : (l + s - l * s));
 			m1 = (float)(2 * l - m2);
-			
+
 			float fr = (float)(nvg__clampf((float)(nvg__hue((float)(h + 1.0f / 3.0f), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
 			float fg = (float)(nvg__clampf((float)(nvg__hue((float)(h), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
 			float fb = (float)(nvg__clampf((float)(nvg__hue((float)(h - 1.0f / 3.0f), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
 			float fa = (float)(a / 255.0f);
 
 			return new Color(fr, fg, fb, fa);
-		}
-
-		public static void nvgTransformIdentity(ref Transform t)
-		{
-			t.t1 = (float)(1.0f);
-			t.t2 = (float)(0.0f);
-			t.t3 = (float)(0.0f);
-			t.t4 = (float)(1.0f);
-			t.t5 = (float)(0.0f);
-			t.t6 = (float)(0.0f);
-		}
-
-		public static void nvgTransformTranslate(ref Transform t, float tx, float ty)
-		{
-			t.t1 = (float)(1.0f);
-			t.t2 = (float)(0.0f);
-			t.t3 = (float)(0.0f);
-			t.t4 = (float)(1.0f);
-			t.t5 = (float)(tx);
-			t.t6 = (float)(ty);
-		}
-
-		public static void nvgTransformScale(ref Transform t, float sx, float sy)
-		{
-			t.t1 = (float)(sx);
-			t.t2 = (float)(0.0f);
-			t.t3 = (float)(0.0f);
-			t.t4 = (float)(sy);
-			t.t5 = (float)(0.0f);
-			t.t6 = (float)(0.0f);
-		}
-
-		public static void nvgTransformRotate(ref Transform t, float a)
-		{
-			float cs = (float)(cosf((float)(a)));
-			float sn = (float)(sinf((float)(a)));
-			t.t1 = (float)(cs);
-			t.t2 = (float)(sn);
-			t.t3 = (float)(-sn);
-			t.t4 = (float)(cs);
-			t.t5 = (float)(0.0f);
-			t.t6 = (float)(0.0f);
-		}
-
-		public static void nvgTransformSkewX(ref Transform t, float a)
-		{
-			t.t1 = (float)(1.0f);
-			t.t2 = (float)(0.0f);
-			t.t3 = (float)(tanf((float)(a)));
-			t.t4 = (float)(1.0f);
-			t.t5 = (float)(0.0f);
-			t.t6 = (float)(0.0f);
-		}
-
-		public static void nvgTransformSkewY(ref Transform t, float a)
-		{
-			t.t1 = (float)(1.0f);
-			t.t2 = (float)(tanf((float)(a)));
-			t.t3 = (float)(0.0f);
-			t.t4 = (float)(1.0f);
-			t.t5 = (float)(0.0f);
-			t.t6 = (float)(0.0f);
-		}
-
-		public static void nvgTransformMultiply(ref Transform t, ref Transform s)
-		{
-			float t0 = (float)(t.t1 * s.t1 + t.t2 * s.t3);
-			float t2 = (float)(t.t3 * s.t1 + t.t4 * s.t3);
-			float t4 = (float)(t.t5 * s.t1 + t.t6 * s.t3 + s.t5);
-			t.t2 = (float)(t.t1 * s.t2 + t.t2 * s.t4);
-			t.t4 = (float)(t.t3 * s.t2 + t.t4 * s.t4);
-			t.t6 = (float)(t.t5 * s.t2 + t.t6 * s.t4 + s.t6);
-			t.t1 = (float)(t0);
-			t.t3 = (float)(t2);
-			t.t5 = (float)(t4);
-		}
-
-		public static void nvgTransformPremultiply(ref Transform t, ref Transform s)
-		{
-			Transform s2 = s;
-			nvgTransformMultiply(ref s2, ref t);
-			t = s2;
-		}
-
-		public static int nvgTransformInverse(ref Transform inv, ref Transform t)
-		{
-			double invdet = 0;
-			double det = (double)((double)(t.t1) * t.t4 - (double)(t.t3) * t.t2);
-			if (((det) > (-1e-6)) && ((det) < (1e-6)))
-			{
-				nvgTransformIdentity(ref inv);
-				return (int)(0);
-			}
-
-			invdet = (double)(1.0 / det);
-			inv.t1 = ((float)(t.t4 * invdet));
-			inv.t3 = ((float)(-t.t3 * invdet));
-			inv.t5 = ((float)(((double)(t.t3) * t.t6 - (double)(t.t4) * t.t5) * invdet));
-			inv.t2 = ((float)(-t.t2 * invdet));
-			inv.t4 = ((float)(t.t1 * invdet));
-			inv.t6 = ((float)(((double)(t.t2) * t.t5 - (double)(t.t1) * t.t6) * invdet));
-			return (int)(1);
-		}
-
-		public static void nvgTransformPoint(float* dx, float* dy, ref Transform t, float sx, float sy)
-		{
-			*dx = (float)(sx * t.t1 + sy * t.t3 + t.t5);
-			*dy = (float)(sx * t.t2 + sy * t.t4 + t.t6);
 		}
 
 		public static float nvgDegToRad(float deg)
@@ -2566,7 +2461,7 @@ namespace NanoVGSharp
 		public static void nvg__setPaintColor(ref Paint p, Color color)
 		{
 			p.Zero();
-			nvgTransformIdentity(ref p.xform);
+			p.xform.SetIdentity();
 			p.radius = 0.0f;
 			p.feather = 1.0f;
 			p.innerColor = color;
@@ -2611,17 +2506,17 @@ namespace NanoVGSharp
 			}
 		}
 
-		public static void nvg__vset(VertexPositionColorTexture* vtx, float x, float y, float u, float v)
+		public static void nvg__vset(Vertex* vtx, float x, float y, float u, float v)
 		{
 			nvg__vset(ref *vtx, x, y, u, v);
 		}
 
-		public static void nvg__vset(ref VertexPositionColorTexture vtx, float x, float y, float u, float v)
+		public static void nvg__vset(ref Vertex vtx, float x, float y, float u, float v)
 		{
-			vtx.Position.X = (float)(x);
-			vtx.Position.Y = (float)(y);
-			vtx.TextureCoordinate.X = (float)(u);
-			vtx.TextureCoordinate.Y = (float)(v);
+			vtx.X = (float)(x);
+			vtx.Y = (float)(y);
+			vtx.U = (float)(u);
+			vtx.V = (float)(v);
 		}
 
 		public static void nvg__isectRects(float* dst, float ax, float ay, float aw, float ah, float bx, float by, float bw, float bh)
@@ -2677,7 +2572,7 @@ namespace NanoVGSharp
 			return (float)(nvg__minf((float)(nvg__quantize((float)(nvg__getAverageScale(ref state.xform)), (float)(0.01f))), (float)(4.0f)));
 		}
 
-		public static VertexPositionColorTexture* nvg__roundJoin(VertexPositionColorTexture* dst, NVGpoint* p0, NVGpoint* p1, float lw, float rw, float lu, float ru, int ncap, float fringe)
+		public static Vertex* nvg__roundJoin(Vertex* dst, NVGpoint* p0, NVGpoint* p1, float lw, float rw, float lu, float ru, int ncap, float fringe)
 		{
 			int i = 0;
 			int n = 0;
@@ -2757,7 +2652,7 @@ namespace NanoVGSharp
 			return dst;
 		}
 
-		public static VertexPositionColorTexture* nvg__bevelJoin(VertexPositionColorTexture* dst, NVGpoint* p0, NVGpoint* p1, float lw, float rw, float lu, float ru, float fringe)
+		public static Vertex* nvg__bevelJoin(Vertex* dst, NVGpoint* p0, NVGpoint* p1, float lw, float rw, float lu, float ru, float fringe)
 		{
 			float rx0 = 0;
 			float ry0 = 0;
@@ -2855,7 +2750,7 @@ namespace NanoVGSharp
 			return dst;
 		}
 
-		public static VertexPositionColorTexture* nvg__buttCapStart(VertexPositionColorTexture* dst, NVGpoint* p, float dx, float dy, float w, float d, float aa, float u0, float u1)
+		public static Vertex* nvg__buttCapStart(Vertex* dst, NVGpoint* p, float dx, float dy, float w, float d, float aa, float u0, float u1)
 		{
 			float px = (float)(p->x - dx * d);
 			float py = (float)(p->y - dy * d);
@@ -2872,7 +2767,7 @@ namespace NanoVGSharp
 			return dst;
 		}
 
-		public static VertexPositionColorTexture* nvg__buttCapEnd(VertexPositionColorTexture* dst, NVGpoint* p, float dx, float dy, float w, float d, float aa, float u0, float u1)
+		public static Vertex* nvg__buttCapEnd(Vertex* dst, NVGpoint* p, float dx, float dy, float w, float d, float aa, float u0, float u1)
 		{
 			float px = (float)(p->x + dx * d);
 			float py = (float)(p->y + dy * d);
@@ -2889,7 +2784,7 @@ namespace NanoVGSharp
 			return dst;
 		}
 
-		public static VertexPositionColorTexture* nvg__roundCapStart(VertexPositionColorTexture* dst, NVGpoint* p, float dx, float dy, float w, int ncap, float aa, float u0, float u1)
+		public static Vertex* nvg__roundCapStart(Vertex* dst, NVGpoint* p, float dx, float dy, float w, int ncap, float aa, float u0, float u1)
 		{
 			int i = 0;
 			float px = (float)(p->x);
@@ -2913,7 +2808,7 @@ namespace NanoVGSharp
 			return dst;
 		}
 
-		public static VertexPositionColorTexture* nvg__roundCapEnd(VertexPositionColorTexture* dst, NVGpoint* p, float dx, float dy, float w, int ncap, float aa, float u0, float u1)
+		public static Vertex* nvg__roundCapEnd(Vertex* dst, NVGpoint* p, float dx, float dy, float w, int ncap, float aa, float u0, float u1)
 		{
 			int i = 0;
 			float px = (float)(p->x);
