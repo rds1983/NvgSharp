@@ -101,24 +101,11 @@ namespace NanoVGSharp
 			// TO DO
 		}
 
-		public void renderFill(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, 
-			float fringe, Bounds bounds, Buffer<Path> paths)
-		{
-			for (var i = 0; i < paths.Count; ++i)
-			{
-				var path = paths[i];
-
-				var k = 5;
-			}
-		}
-
-		public void renderStroke(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, 
-			float fringe, float strokeWidth, Buffer<Path> paths)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void renderTriangles(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, ArraySegment<VertexPositionColorTexture> verts)
+		private void renderTriangles(ref Paint paint, 
+			CompositeOperationState compositeOperation, 
+			ref Scissor scissor,
+			ArraySegment<VertexPositionColorTexture> verts, 
+			ushort[] indexes)
 		{
 			if (verts.Count <= 0)
 			{
@@ -127,7 +114,7 @@ namespace NanoVGSharp
 
 			for (var i = 0; i < verts.Count; ++i)
 			{
-				verts.Array[verts.Offset + i].Color = Color.White;
+				verts.Array[verts.Offset + i].Color = paint.innerColor;
 			}
 
 			if (_vertexBuffer.VertexCount < verts.Count)
@@ -138,12 +125,6 @@ namespace NanoVGSharp
 			}
 			_vertexBuffer.SetData(verts.Array, verts.Offset, verts.Count);
 
-			var indexes = new ushort[verts.Count];
-			for (var i = 0; i < indexes.Length; ++i)
-			{
-				indexes[i] = (ushort)i;
-			}
-
 			if (_indexBuffer.IndexCount < indexes.Length)
 			{
 				// Resize index buffer if data doesnt fit
@@ -152,16 +133,153 @@ namespace NanoVGSharp
 
 			_indexBuffer.SetData(indexes, 0, indexes.Length);
 
-			var texture = GetTextureById(paint.image);
-
-			basicEffect.TextureEnabled = true;
-			basicEffect.Texture = texture;
+			if (paint.image > 0)
+			{
+				var texture = GetTextureById(paint.image);
+				basicEffect.TextureEnabled = true;
+				basicEffect.Texture = texture;
+			}
+			else
+			{
+				basicEffect.TextureEnabled = false;
+			}
 
 			foreach (var pass in basicEffect.CurrentTechnique.Passes)
 			{
 				pass.Apply();
-				_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verts.Count, 0, verts.Count / 3);
+				_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verts.Count, 0, indexes.Length / 3);
 			}
+		}
+
+		public void renderFill(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, 
+			float fringe, Bounds bounds, Buffer<Path> paths)
+		{
+			var vertexes = new List<VertexPositionColorTexture>();
+			var indexes = new List<ushort>();
+
+			for (var i = 0; i < paths.Count; ++i)
+			{
+				var path = paths[i];
+
+				if (path.fill != null)
+				{
+					var index = vertexes.Count;
+
+					var fill = path.fill.Value;
+					for (var j = 0; j < fill.Count; ++j)
+					{
+						var v = fill.Array[fill.Offset + j];
+						vertexes.Add(v);
+					}
+
+					for (var j = 2; j < fill.Count; ++j)
+					{
+						indexes.Add((ushort)index);
+						indexes.Add((ushort)(index + j - 1));
+						indexes.Add((ushort)(index + j));
+					}
+				}
+			}
+
+			renderTriangles(ref paint, compositeOperation, ref scissor,
+				new ArraySegment<VertexPositionColorTexture>(vertexes.ToArray()),
+				indexes.ToArray());
+		}
+
+		public void renderStroke(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor, 
+			float fringe, float strokeWidth, Buffer<Path> paths)
+		{
+			var vertexes = new List<VertexPositionColorTexture>();
+			var indexes = new List<ushort>();
+			var thickness = 2.0f;
+			var col = paint.innerColor;
+			for (var i = 0; i < paths.Count; ++i)
+			{
+				var path = paths[i];
+				var idx = vertexes.Count;
+				if (path.stroke != null)
+				{
+					var index = vertexes.Count;
+
+					var stroke = path.stroke.Value;
+					for (var j = 0; j < stroke.Count; ++j)
+					{
+						float dx;
+						float dy;
+						Vector2 uv = Vector2.Zero;
+						int i2 = (int)(((j + 1) == (stroke.Count)) ? 0 : j + 1);
+						Vector3 p1 = stroke.Array[stroke.Offset + j].Position;
+						Vector3 p2 = stroke.Array[stroke.Offset + i2].Position;
+						Vector2 diff = (Vector2)(new Vector2((float)((p2).X - (p1).X), (float)((p2).Y - (p1).Y)));
+						float len;
+						len = (float)((diff).X * (diff).X + (diff).Y * (diff).Y);
+						if (len != 0.0f)
+							len = (float)(1.0f / Math.Sqrt(len));
+						else
+							len = (float)(1.0f);
+						diff = (Vector2)(new Vector2((float)((diff).X * (len)), (float)((diff).Y * (len))));
+						dx = (float)(diff.X * (thickness * 0.5f));
+						dy = (float)(diff.Y * (thickness * 0.5f));
+
+						vertexes.Add(new VertexPositionColorTexture
+						{
+							Position = new Vector3((float)(p1.X + dy), (float)(p1.Y - dx), 1.0f),
+							TextureCoordinate = uv,
+							Color = col
+						});
+
+						vertexes.Add(new VertexPositionColorTexture
+						{
+							Position = new Vector3((float)(p2.X + dy), (float)(p2.Y - dx), 1.0f),
+							TextureCoordinate = uv,
+							Color = col
+						});
+
+						vertexes.Add(new VertexPositionColorTexture
+						{
+							Position = new Vector3((float)(p2.X - dy), (float)(p2.Y + dx), 1.0f),
+							TextureCoordinate = uv,
+							Color = col
+						});
+
+						vertexes.Add(new VertexPositionColorTexture
+						{
+							Position = new Vector3((float)(p1.X - dy), (float)(p1.Y + dx), 1.0f),
+							TextureCoordinate = uv,
+							Color = col
+						});
+
+						indexes.Add((ushort)(idx + 0));
+						indexes.Add((ushort)(idx + 1));
+						indexes.Add((ushort)(idx + 2));
+						indexes.Add((ushort)(idx + 0));
+						indexes.Add((ushort)(idx + 2));
+						indexes.Add((ushort)(idx + 3));
+						idx += (int)(4);
+					}
+				}
+			}
+
+			renderTriangles(ref paint, compositeOperation, ref scissor,
+				new ArraySegment<VertexPositionColorTexture>(vertexes.ToArray()),
+				indexes.ToArray());
+		}
+
+		public void renderTriangles(ref Paint paint, CompositeOperationState compositeOperation, 
+			ref Scissor scissor, ArraySegment<VertexPositionColorTexture> verts)
+		{
+			if (verts.Count <= 0)
+			{
+				return;
+			}
+
+			var indexes = new ushort[verts.Count];
+			for (var i = 0; i < indexes.Length; ++i)
+			{
+				indexes[i] = (ushort)i;
+			}
+
+			renderTriangles(ref paint, compositeOperation, ref scissor, verts, indexes);
 		}
 
 		private static void GetProjectionMatrix(int width, int height, out Matrix mtx)

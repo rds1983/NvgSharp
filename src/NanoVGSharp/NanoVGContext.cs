@@ -1852,7 +1852,8 @@ namespace NanoVGSharp
 			float lineh = (float)(0);
 			if ((state.fontId) == (-1))
 				return;
-			nvgTextMetrics(null, null, &lineh);
+			float ascender, descender;
+			nvgTextMetrics(out ascender, out descender, out lineh);
 			state.textAlign = (int)(NVG_ALIGN_LEFT | valign);
 			while (true)
 			{
@@ -2164,7 +2165,8 @@ namespace NanoVGSharp
 				return;
 			}
 
-			nvgTextMetrics(null, null, &lineh);
+			float ascender, descender;
+			nvgTextMetrics(out ascender, out descender, out lineh);
 			state.textAlign = (int)(NVG_ALIGN_LEFT | valign);
 			minx = (float)(maxx = (float)(x));
 			miny = (float)(maxy = (float)(y));
@@ -2212,8 +2214,10 @@ namespace NanoVGSharp
 			bounds.b4 = (float)(maxy);
 		}
 
-		public void nvgTextMetrics(float* ascender, float* descender, float* lineh)
+		public void nvgTextMetrics(out float ascender, out float descender, out float lineh)
 		{
+			ascender = descender = lineh = 0;
+
 			NanoVGContextState state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
 			float invscale = (float)(1.0f / scale);
@@ -2224,13 +2228,10 @@ namespace NanoVGSharp
 			fs.fonsSetBlur((float)(state.fontBlur * scale));
 			fs.fonsSetAlign((int)(state.textAlign));
 			fs.fonsSetFont((int)(state.fontId));
-			fs.fonsVertMetrics(ascender, descender, lineh);
-			if (ascender != null)
-				*ascender *= (float)(invscale);
-			if (descender != null)
-				*descender *= (float)(invscale);
-			if (lineh != null)
-				*lineh *= (float)(invscale);
+			fs.fonsVertMetrics(out ascender, out descender, out lineh);
+			ascender *= (float)(invscale);
+			descender *= (float)(invscale);
+			lineh *= (float)(invscale);
 		}
 
 		public static float sqrtf(float a)

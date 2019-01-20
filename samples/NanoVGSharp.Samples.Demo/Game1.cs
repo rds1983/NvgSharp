@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using NanoVGSharp;
 using System.IO;
 
-namespace SpriteFontPlus.Samples.TtfBaking
+namespace NanoVGSharp.Samples.Demo
 {
 	/// <summary>
 	/// This is the main type for your game.
@@ -14,6 +14,7 @@ namespace SpriteFontPlus.Samples.TtfBaking
 
 		private NanoVGContext _context;
 		private SpriteBatch _spriteBatch;
+		private Demo _demo;
 
 		public Game1()
 		{
@@ -36,18 +37,8 @@ namespace SpriteFontPlus.Samples.TtfBaking
 
 			_context = new NanoVGContext(GraphicsDevice, 0);
 
-			byte[] bytes;
-			using (var ms = new MemoryStream())
-			{
-				using (var stream = TitleContainer.OpenStream("Fonts/Roboto-Regular.ttf"))
-				{
-					stream.CopyTo(ms);
-				}
-
-				bytes = ms.ToArray();
-			}
-
-			_context.nvgCreateFontMem("Roboto Regular", bytes, 0);
+			_demo = new Demo();
+			_demo.loadDemoData(GraphicsDevice, _context);
 
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 		}
@@ -72,14 +63,9 @@ namespace SpriteFontPlus.Samples.TtfBaking
 			// TODO: Add your drawing code here
 
 			_context.nvgBeginFrame(800, 600, 1.0f);
-			_context.nvgFontSize(32);
 
-			_context.nvgBeginPath();
-			_context.nvgRect(0, 20, 200, 100);
-			_context.nvgFillColor(Color.BlueViolet);
-			_context.nvgFill();
+			_demo.renderDemo(_context, 0, 0, 800, 600, 0, false);
 
-			_context.nvgText(0, 50, "The quick brown fox jumps over the lazy dog");
 			_context.nvgEndFrame();
 
 /*			var texture = ((XNARenderer)_context._renderer)._textures[0];

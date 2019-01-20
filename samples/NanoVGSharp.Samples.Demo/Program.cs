@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SpriteFontPlus.Samples.TtfBaking
+namespace NanoVGSharp.Samples.Demo
 {
     /// <summary>
     /// The main class.

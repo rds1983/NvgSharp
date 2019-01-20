@@ -802,8 +802,9 @@ namespace NanoVGSharp
 			return (float)(advance);
 		}
 
-		public void fonsVertMetrics(float* ascender, float* descender, float* lineh)
+		public void fonsVertMetrics(out float ascender, out float descender, out float lineh)
 		{
+			ascender = descender = lineh = 0;
 			Font font;
 			FontSystemState state = fons__getState();
 			short isize = 0;
@@ -813,12 +814,10 @@ namespace NanoVGSharp
 			isize = ((short)(state.size * 10.0f));
 			if ((font.data) == null)
 				return;
-			if ((ascender) != null)
-				*ascender = (float)(font.ascender * isize / 10.0f);
-			if ((descender) != null)
-				*descender = (float)(font.descender * isize / 10.0f);
-			if ((lineh) != null)
-				*lineh = (float)(font.lineh * isize / 10.0f);
+
+			ascender = (float)(font.ascender * isize / 10.0f);
+			descender = (float)(font.descender * isize / 10.0f);
+			lineh = (float)(font.lineh * isize / 10.0f);
 		}
 
 		public void fonsLineBounds(float y, ref float miny, ref float maxy)
