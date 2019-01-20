@@ -1,2 +1,2 @@
 # NanoVGSharp
-![](/images/nanovg.gif)
+
