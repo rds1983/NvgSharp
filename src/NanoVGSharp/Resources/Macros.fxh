@@ -49,13 +49,14 @@
 #define _cb(r)
 
 #define DECLARE_TEXTURE(Name, index) \
-    sampler2D Name : register(s##index);
+    texture2D Name; \
+    sampler Name##Sampler : register(s##index) = sampler_state { Texture = (Name); };
 
 #define DECLARE_CUBEMAP(Name, index) \
-    samplerCUBE Name : register(s##index);
+    textureCUBE Name; \
+    sampler Name##Sampler : register(s##index) = sampler_state { Texture = (Name); };
 
-#define SAMPLE_TEXTURE(Name, texCoord)  tex2D(Name, texCoord)
-#define SAMPLE_CUBEMAP(Name, texCoord)  texCUBE(Name, texCoord)
-
+#define SAMPLE_TEXTURE(Name, texCoord)  tex2D(Name##Sampler, texCoord)
+#define SAMPLE_CUBEMAP(Name, texCoord)  texCUBE(Name##Sampler, texCoord)
 
 #endif

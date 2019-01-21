@@ -48,11 +48,13 @@
 
   <ItemGroup>
     <None Remove="Resources\Effect.dx11.mgfxo" />
+    <None Remove="Resources\Effect.fxb" />
     <None Remove="Resources\Effect.ogl.mgfxo" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\Effect.dx11.mgfxo" />
+    <EmbeddedResource Include="Resources\Effect.fxb" />
     <EmbeddedResource Include="Resources\Effect.ogl.mgfxo" />
   </ItemGroup>  
 </Project>

@@ -17,8 +17,14 @@ namespace NanoVGSharp
 
 				var assembly = typeof(Resources).Assembly;
 
+#if MONOGAME
+				var path = "NanoVGSharp.Resources.Effect.ogl.mgfxo";
+#elif FNA
+				var path = "NanoVGSharp.Resources.Effect.fxb";
+#endif
+
 				var ms = new MemoryStream();
-				using (var stream = assembly.GetManifestResourceStream("NanoVGSharp.Resources.Effect.ogl.mgfxo"))
+				using (var stream = assembly.GetManifestResourceStream(path))
 				{
 					stream.CopyTo(ms);
 					_nvgEffectSource = ms.ToArray();

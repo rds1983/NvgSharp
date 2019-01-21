@@ -1,11 +1,27 @@
 #include "Macros.fxh"
 
-cbuffer VS_CONSTANTS
-{
+DECLARE_TEXTURE(g_texture, 0);
+
+BEGIN_CONSTANTS
+
+    float2 viewSize;    
+    float4 scissorExt;
+    float4 scissorScale;
+    float4 extent;
+    float4 radius;
+    float4 feather;
+    float4 innerCol;
+    float4 outerCol;
+    float4 strokeMult;
+
+MATRIX_CONSTANTS
+
     float4x4 dummy;
-    float2 viewSize;
-    
-};
+    float4x4 scissorMat;
+    float4x4 paintMat;
+
+END_CONSTANTS
+
 
 struct VS_OUTPUT
 {
@@ -14,6 +30,13 @@ struct VS_OUTPUT
     float2 fpos       : TEXCOORD1;      // float 2 position 
 };
   
+struct PS_INPUT
+{
+    float4 position   : SV_Position;    // vertex position
+    float2 ftcoord    : TEXCOORD0;      // float 2 tex coord
+    float2 fpos       : TEXCOORD1;      // float 2 position 
+};
+
 VS_OUTPUT VSMain(float2 pt : POSITION, float2 tex : TEXCOORD0)
 {
     VS_OUTPUT Output;
@@ -24,30 +47,6 @@ VS_OUTPUT VSMain(float2 pt : POSITION, float2 tex : TEXCOORD0)
     return Output;
 }
 
-Texture2D    g_texture                    : register(t0);
-SamplerState g_sampler                 : register(s0);
-
-struct PS_INPUT
-{
-    float4 position   : SV_Position;    // vertex position
-    float2 ftcoord    : TEXCOORD0;      // float 2 tex coord
-    float2 fpos       : TEXCOORD1;      // float 2 position 
-};
-
-cbuffer PS_CONSTANTS 
-{
-    float4x4 scissorMat;
-    float4 scissorExt;
-    float4 scissorScale;
-    float4x4 paintMat;
-    float4 extent;
-    float4 radius;
-    float4 feather;
-    float4 innerCol;
-    float4 outerCol;
-    float4 strokeMult;
-};
- 
 float sdroundrect(float2 pt, float2 ext, float rad) 
 {
     float2 ext2 = ext - float2(rad,rad);
@@ -108,7 +107,7 @@ float4 PSMainFillImage(PS_INPUT input) : SV_TARGET
 #endif
 	// Calculate color fron texture
 	float2 pt = (mul((float3x3)paintMat, float3(input.fpos,1.0))).xy / extent.xy;
-	float4 color = g_texture.Sample(g_sampler, pt);
+	float4 color = SAMPLE_TEXTURE(g_texture, pt);
 	color = float4(color.xyz*color.w,color.w);
 	
 	// Apply color tint and alpha.
@@ -159,6 +158,8 @@ float4 PSMainTriangles(PS_INPUT input) : SV_TARGET
 	color = float4(color.xyz*color.w,color.w);
 	color *= scissor;
 	result = (color * innerCol);
+	
+	result = float4(1.0, 0.0, 0.0, 1.0);
 #ifdef EDGE_AA
     if (strokeAlpha < strokeMult.y)
         discard;
