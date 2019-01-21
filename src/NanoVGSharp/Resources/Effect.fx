@@ -135,7 +135,6 @@ float4 PSMainSimple(PS_INPUT input) : SV_TARGET
 #endif
 	// Stencil fill
 	result = float4(1,1,1,1);
-
 #ifdef EDGE_AA
     if (strokeAlpha < strokeMult.y)
         discard;
@@ -154,12 +153,10 @@ float4 PSMainTriangles(PS_INPUT input) : SV_TARGET
     float strokeAlpha = 1.0f;
 #endif
 	// Textured tris
-	float4 color = g_texture.Sample(g_sampler, input.ftcoord);
+	float4 color = SAMPLE_TEXTURE(g_texture, input.ftcoord);
 	color = float4(color.xyz*color.w,color.w);
 	color *= scissor;
 	result = (color * innerCol);
-	
-	result = float4(1.0, 0.0, 0.0, 1.0);
 #ifdef EDGE_AA
     if (strokeAlpha < strokeMult.y)
         discard;

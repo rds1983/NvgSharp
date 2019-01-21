@@ -135,7 +135,7 @@ namespace NanoVGSharp
 
 						for (var k = 0; k < 3; ++k)
 						{
-							b[destPos * 4 + k] = d[destPos];
+							b[destPos * 4 + k] = 255;
 						}
 
 						b[destPos * 4 + 3] = d[destPos];
@@ -225,7 +225,6 @@ namespace NanoVGSharp
 
 			var transformMatrix = transform.ToMatrix();
 
-			var technique = _effect.Techniques[renderingType.ToString()];
 			_effect.Parameters["viewSize"].SetValue(new Vector2(_device.PresentationParameters.Bounds.Width, _device.PresentationParameters.Bounds.Height));
 			_effect.Parameters["scissorMat"].SetValue(_scissorTransform.ToMatrix());
 			_effect.Parameters["scissorExt"].SetValue(_scissorExt);
@@ -244,7 +243,8 @@ namespace NanoVGSharp
 				_effect.Parameters["g_texture"].SetValue(texture);
 			}
 
-			foreach (var pass in technique.Passes)
+			_effect.CurrentTechnique = _effect.Techniques[renderingType.ToString()];
+			foreach (var pass in _effect.CurrentTechnique.Passes)
 			{
 				pass.Apply();
 				_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verts.Count, 0, _indexes.Count / 3);
@@ -291,18 +291,19 @@ namespace NanoVGSharp
 		public void renderFill(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor,
 			float fringe, Bounds bounds, ArraySegment<Path> paths)
 		{
-			return;
 			var isConvex = paths.Count == 1 && paths.Array[paths.Offset].convex == 1;
 
-			_device.BlendState = _blendStateNoDraw;
-			_device.DepthStencilState = _stencilStateFill1;
-
 			var renderingType = RenderingType.Simple;
-
 			if (isConvex)
 			{
 				renderingType = paint.image != 0 ? RenderingType.FillImage : RenderingType.FillGradient;
 			}
+			else
+			{
+				_device.BlendState = _blendStateNoDraw;
+				_device.DepthStencilState = _stencilStateFill1;
+			}
+
 
 			for (var i = 0; i < paths.Count; ++i)
 			{
@@ -334,18 +335,21 @@ namespace NanoVGSharp
 				}
 			}
 
-			_device.BlendState = BlendState.AlphaBlend;
-			_device.DepthStencilState = _stencilStateFill2;
+			if (!isConvex)
+			{
+				_device.BlendState = BlendState.AlphaBlend;
+				_device.DepthStencilState = _stencilStateFill2;
 
-			_vertexes.Add(new Vertex(bounds.b1, bounds.b2, 0.5f, 1.0f));
-			_vertexes.Add(new Vertex(bounds.b3, bounds.b2, 0.5f, 1.0f));
-			_vertexes.Add(new Vertex(bounds.b1, bounds.b4, 0.5f, 1.0f));
-			_vertexes.Add(new Vertex(bounds.b3, bounds.b4, 0.5f, 1.0f));
+				_vertexes.Add(new Vertex(bounds.b1, bounds.b2, 0.5f, 1.0f));
+				_vertexes.Add(new Vertex(bounds.b3, bounds.b2, 0.5f, 1.0f));
+				_vertexes.Add(new Vertex(bounds.b1, bounds.b4, 0.5f, 1.0f));
+				_vertexes.Add(new Vertex(bounds.b3, bounds.b4, 0.5f, 1.0f));
 
-			simpleIndexes();
-			DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, RenderingType.FillGradient, PrimitiveType.TriangleList);
+				simpleIndexes();
+				DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, RenderingType.FillGradient, PrimitiveType.TriangleList);
 
-			_device.DepthStencilState = DepthStencilState.None;
+				_device.DepthStencilState = DepthStencilState.None;
+			}
 		}
 
 		public void renderStroke(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor,
@@ -400,7 +404,7 @@ namespace NanoVGSharp
 			_oldRasterizerState = _device.RasterizerState;
 
 			_device.SamplerStates[0] = SamplerState.LinearClamp;
-			_device.BlendState = BlendState.NonPremultiplied;
+			_device.BlendState = BlendState.AlphaBlend;
 			_device.DepthStencilState = DepthStencilState.None;
 			_device.RasterizerState = _rasterizerState;
 		}
