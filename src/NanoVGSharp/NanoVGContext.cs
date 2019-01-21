@@ -2130,7 +2130,7 @@ namespace NanoVGSharp
 			return (int)(nrows);
 		}
 
-		public float nvgTextBounds(float x, float y, string _string_, Bounds bounds)
+		public float nvgTextBounds(float x, float y, string _string_, ref Bounds bounds)
 		{
 			NanoVGContextState state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);
@@ -2153,7 +2153,7 @@ namespace NanoVGSharp
 			return (float)(width * invscale);
 		}
 
-		public void nvgTextBoxBounds(float x, float y, float breakRowWidth, StringSegment _string_, Bounds bounds)
+		public void nvgTextBoxBounds(float x, float y, float breakRowWidth, StringSegment _string_, ref Bounds bounds)
 		{
 			NanoVGContextState state = nvg__getState();
 			float scale = (float)(nvg__getFontScale(state) * devicePxRatio);

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace NanoVGSharp
 {
-	[StructLayout(LayoutKind.Sequential)]
+	[StructLayout(LayoutKind.Sequential, Pack =1)]
 	public struct Vertex: IVertexType
 	{
 		public Vector2 Position;

@@ -193,7 +193,8 @@ namespace NanoVGSharp.Samples.Demo
 
 			drawEditBoxBase(vg, x, y, w, h);
 
-			uw = vg.nvgTextBounds(0, 0, units, new Bounds());
+			Bounds bounds = new Bounds();
+			uw = vg.nvgTextBounds(0, 0, units, ref bounds);
 
 			vg.nvgFontSize(18.0f);
 			vg.nvgFontFace("sans");
@@ -255,7 +256,8 @@ namespace NanoVGSharp.Samples.Demo
 
 			vg.nvgFontSize(20.0f);
 			vg.nvgFontFace("sans-bold");
-			tw = vg.nvgTextBounds(0, 0, text, new Bounds());
+			Bounds bounds = new Bounds();
+			tw = vg.nvgTextBounds(0, 0, text, ref bounds);
 			if (preicon != 0)
 			{
 				vg.nvgFontSize(h * 1.3f);
@@ -910,7 +912,7 @@ namespace NanoVGSharp.Samples.Demo
 				vg.nvgFontSize(13.0f);
 				vg.nvgTextAlign(NanoVGContext.NVG_ALIGN_RIGHT | NanoVGContext.NVG_ALIGN_MIDDLE);
 
-				vg.nvgTextBounds(gx, gy, txt, bounds);
+				vg.nvgTextBounds(gx, gy, txt, ref bounds);
 
 				vg.nvgBeginPath();
 				vg.nvgFillColor(new Color(255, 192, 0, 255));
@@ -930,7 +932,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.nvgTextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_TOP);
 			vg.nvgTextLineHeight(1.2f);
 
-			vg.nvgTextBoxBounds(x, y, 150, "Hover your mouse over the text to see calculated caret position.", bounds);
+			vg.nvgTextBoxBounds(x, y, 150, "Hover your mouse over the text to see calculated caret position.", ref bounds);
 
 			// Fade the tooltip out when close to it.
 			gx = (float)Math.Abs((mx - (bounds.b1 + bounds.b3) * 0.5f) / (bounds.b1 - bounds.b3));
@@ -1050,6 +1052,7 @@ namespace NanoVGSharp.Samples.Demo
 			float x, y, popy;
 
 			drawEyes(vg, width - 250, 50, 150, 100, mx, my, t);
+
 
 			drawParagraph(vg, width - 450, 50, 150, 100, mx, my);
 			drawGraph(vg, 0, height / 2, width, height / 2, t);

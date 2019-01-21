@@ -346,7 +346,8 @@ namespace NanoVGSharp
 				_vertexes.Add(new Vertex(bounds.b3, bounds.b4, 0.5f, 1.0f));
 
 				simpleIndexes();
-				DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, RenderingType.FillGradient, PrimitiveType.TriangleList);
+				DrawBuffers(ref paint, compositeOperation, ref scissor, 
+					fringe, fringe, -1.0f, RenderingType.FillGradient, PrimitiveType.TriangleList);
 
 				_device.DepthStencilState = DepthStencilState.None;
 			}
@@ -355,7 +356,7 @@ namespace NanoVGSharp
 		public void renderStroke(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor,
 			float fringe, float strokeWidth, ArraySegment<Path> paths)
 		{
-/*			for (var i = 0; i < paths.Count; ++i)
+			for (var i = 0; i < paths.Count; ++i)
 			{
 				var path = paths.Array[paths.Offset + i];
 
@@ -368,9 +369,14 @@ namespace NanoVGSharp
 						_vertexes.Add(stroke.Array[stroke.Offset + j]);
 					}
 
-					DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, PrimitiveType.TriangleList);
+					simpleIndexes();
+
+					DrawBuffers(ref paint, compositeOperation, ref scissor, 
+						strokeWidth, fringe, -1.0f, 
+						paint.image != 0? RenderingType.FillImage:RenderingType.FillGradient,
+						PrimitiveType.TriangleList);
 				}
-			}*/
+			}
 		}
 
 		public void renderTriangles(ref Paint paint, CompositeOperationState compositeOperation,

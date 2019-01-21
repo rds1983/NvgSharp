@@ -14,6 +14,7 @@ namespace NanoVGSharp.Samples.Demo
 		private NanoVGContext _context;
 		private SpriteBatch _spriteBatch;
 		private Demo _demo;
+		private readonly PerfGraph _perfGraph = new PerfGraph(PerfGraph.Style.GRAPH_RENDER_FPS, "Frame Time");
 
 		public Game1()
 		{
@@ -26,6 +27,7 @@ namespace NanoVGSharp.Samples.Demo
 			Content.RootDirectory = "Content";
 			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
+			IsFixedTimeStep = false;
 		}
 
 		/// <summary>
@@ -51,6 +53,13 @@ namespace NanoVGSharp.Samples.Demo
 		protected override void UnloadContent()
 		{
 			// TODO: Unload any non ContentManager content here
+		}
+
+		protected override void Update(GameTime gameTime)
+		{
+			base.Update(gameTime);
+
+			_perfGraph.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 		}
 
 		/// <summary>
@@ -83,6 +92,8 @@ namespace NanoVGSharp.Samples.Demo
 				_graphics.PreferredBackBufferHeight, 
 				t, 
 				false);
+
+			_perfGraph.Render(_context, 5, 5);
 
 			_context.nvgEndFrame();
 
