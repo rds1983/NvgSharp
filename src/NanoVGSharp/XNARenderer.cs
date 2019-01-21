@@ -9,8 +9,9 @@ namespace NanoVGSharp
 	{
 		private readonly GraphicsDevice _device;
 		private DynamicVertexBuffer _vertexBuffer;
-		private DynamicIndexBuffer _indexBuffer;
+		private IndexBuffer _indexBufferFill, _indexBufferSimple, _indexBufferTriangles;
 		private Effect _effect;
+		private int _indexesCount = 0;
 		public readonly List<Texture2D> _textures = new List<Texture2D>();
 		private readonly RasterizerState _rasterizerState = new RasterizerState
 		{
@@ -58,7 +59,6 @@ namespace NanoVGSharp
 		private SamplerState _oldSamplerState;
 		private DepthStencilState _oldDepthStencilState;
 		private readonly Buffer<Vertex> _vertexes = new Buffer<Vertex>(1024);
-		private readonly Buffer<ushort> _indexes = new Buffer<ushort>(2048);
 		Transform _scissorTransform;
 		Vector2 _scissorExt, _scissorScale;
 		float _strokeMult;
@@ -86,7 +86,6 @@ namespace NanoVGSharp
 			_device = device;
 
 			_vertexBuffer = new DynamicVertexBuffer(device, Vertex.VertexDeclaration, 2000, BufferUsage.WriteOnly);
-			_indexBuffer = new DynamicIndexBuffer(device, typeof(ushort), 6000, BufferUsage.WriteOnly);
 
 			_effect = new Effect(device, Resources.NvgEffectSource);
 
@@ -174,10 +173,9 @@ namespace NanoVGSharp
 			ref Scissor scissor,
 			float width, float fringe, float strokeThr,
 			RenderingType renderingType,
-			PrimitiveType primitiveType,
 			ArraySegment<Vertex> verts)
 		{
-			if (verts.Count <= 0 || _indexes.Count <= 0)
+			if (verts.Count <= 0)
 			{
 				return;
 			}
@@ -215,14 +213,6 @@ namespace NanoVGSharp
 			}
 			_vertexBuffer.SetData(verts.Array, verts.Offset, verts.Count);
 
-			if (_indexBuffer.IndexCount < _indexes.Count)
-			{
-				// Resize index ArraySegment if data doesnt fit
-				_indexBuffer = new DynamicIndexBuffer(_device, typeof(ushort), _indexes.Count * 2, BufferUsage.WriteOnly);
-			}
-
-			_indexBuffer.SetData(_indexes.Array, 0, _indexes.Count);
-
 			var transformMatrix = transform.ToMatrix();
 
 			_effect.Parameters["viewSize"].SetValue(new Vector2(_device.PresentationParameters.Bounds.Width, _device.PresentationParameters.Bounds.Height));
@@ -247,45 +237,79 @@ namespace NanoVGSharp
 			foreach (var pass in _effect.CurrentTechnique.Passes)
 			{
 				pass.Apply();
-				_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verts.Count, 0, _indexes.Count / 3);
+				_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verts.Count, 0, _indexesCount / 3);
 			}
 		}
 
 		private void DrawBuffers(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor,
-			float width, float fringe, float strokeThr, RenderingType renderingType,
-			PrimitiveType primitiveType)
+			float width, float fringe, float strokeThr, RenderingType renderingType)
 		{
 			renderTriangles(ref paint, compositeOperation, ref scissor,
 				width, fringe, strokeThr,
 				renderingType,
-				primitiveType,
 				_vertexes.ToArraySegment());
 
 			_vertexes.Clear();
 		}
 
-		private void fillIndexes()
+		private void SetIndexBuffer(ref IndexBuffer indexBuffer, int vertexesCount, int indexesCount, Func<int, ushort[]> indexGenerator)
 		{
-			_indexes.Clear();
-
-			for (var j = 2; j < _vertexes.Count; ++j)
+			if (indexBuffer == null || indexBuffer.IndexCount < indexesCount)
 			{
-				_indexes.Add(0);
-				_indexes.Add((ushort)(j - 1));
-				_indexes.Add((ushort)(j));
+				// Reallocate index buffer
+				indexBuffer = new DynamicIndexBuffer(_device, typeof(ushort), indexesCount, BufferUsage.WriteOnly);
+				var indexes = indexGenerator(vertexesCount);
+				indexBuffer.SetData<ushort>(indexes);
 			}
+
+			_device.Indices = indexBuffer;
+			_indexesCount = indexesCount;
 		}
 
-		private void simpleIndexes()
+		private void SetIndexBufferFill(int vertexesCount, int indexesCount)
 		{
-			_indexes.Clear();
-
-			for (var j = 2; j < _vertexes.Count; ++j)
+			SetIndexBuffer(ref _indexBufferFill, vertexesCount, indexesCount, i =>
 			{
-				_indexes.Add((ushort)(j - 2));
-				_indexes.Add((ushort)(j - 1));
-				_indexes.Add((ushort)(j));
-			}
+				var result = new List<ushort>();
+				for (var j = 2; j < i; ++j)
+				{
+					result.Add(0);
+					result.Add((ushort)(j - 1));
+					result.Add((ushort)(j));
+				}
+
+				return result.ToArray();
+			});
+		}
+
+		private void SetIndexBufferSimple(int vertexesCount, int indexesCount)
+		{
+			SetIndexBuffer(ref _indexBufferSimple, vertexesCount, indexesCount, i =>
+			{
+				var result = new List<ushort>();
+				for (var j = 2; j < i; ++j)
+				{
+					result.Add((ushort)(j - 2));
+					result.Add((ushort)(j - 1));
+					result.Add((ushort)(j));
+				}
+
+				return result.ToArray();
+			});
+		}
+
+		private void SetIndexBufferTriangles(int vertexesCount)
+		{
+			SetIndexBuffer(ref _indexBufferTriangles, vertexesCount, vertexesCount, i =>
+			{
+				var result = new List<ushort>();
+				for (var j = 0; j < i; ++j)
+				{
+					result.Add((ushort)(j));
+				}
+
+				return result.ToArray();
+			});
 		}
 
 		public void renderFill(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor,
@@ -317,8 +341,8 @@ namespace NanoVGSharp
 						_vertexes.Add(fill.Array[fill.Offset + j]);
 					}
 
-					fillIndexes();
-					DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, renderingType, PrimitiveType.TriangleList);
+					SetIndexBufferFill(fill.Count, (fill.Count - 2) * 3);
+					DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, renderingType);
 				}
 
 				if (path.stroke != null && AntiAliasingOn)
@@ -330,8 +354,8 @@ namespace NanoVGSharp
 						_vertexes.Add(stroke.Array[stroke.Offset + j]);
 					}
 
-					fillIndexes();
-					DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, renderingType, PrimitiveType.TriangleList);
+					SetIndexBufferFill(stroke.Count, (stroke.Count - 2) * 3);
+					DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, renderingType);
 				}
 			}
 
@@ -345,9 +369,8 @@ namespace NanoVGSharp
 				_vertexes.Add(new Vertex(bounds.b1, bounds.b4, 0.5f, 1.0f));
 				_vertexes.Add(new Vertex(bounds.b3, bounds.b4, 0.5f, 1.0f));
 
-				simpleIndexes();
-				DrawBuffers(ref paint, compositeOperation, ref scissor, 
-					fringe, fringe, -1.0f, RenderingType.FillGradient, PrimitiveType.TriangleList);
+				SetIndexBufferSimple(4, 6);
+				DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, RenderingType.FillGradient);
 
 				_device.DepthStencilState = DepthStencilState.None;
 			}
@@ -369,12 +392,10 @@ namespace NanoVGSharp
 						_vertexes.Add(stroke.Array[stroke.Offset + j]);
 					}
 
-					simpleIndexes();
-
+					SetIndexBufferSimple(stroke.Count, (stroke.Count - 2) * 3);
 					DrawBuffers(ref paint, compositeOperation, ref scissor, 
 						strokeWidth, fringe, -1.0f, 
-						paint.image != 0? RenderingType.FillImage:RenderingType.FillGradient,
-						PrimitiveType.TriangleList);
+						paint.image != 0? RenderingType.FillImage:RenderingType.FillGradient);
 				}
 			}
 		}
@@ -387,22 +408,17 @@ namespace NanoVGSharp
 				return;
 			}
 
-			_indexes.Clear();
-			for (var i = 0; i < verts.Count; ++i)
-			{
-				_indexes.Add((ushort)i);
-			}
+			SetIndexBufferTriangles(verts.Count);
 
 			renderTriangles(ref paint, compositeOperation, ref scissor,
 				1.0f, 1.0f, -1.0f,
 				RenderingType.Triangles,
-				PrimitiveType.TriangleList, verts);
+				verts);
 		}
 
 		public void Begin()
 		{
 			_device.SetVertexBuffer(_vertexBuffer);
-			_device.Indices = _indexBuffer;
 
 			_oldSamplerState = _device.SamplerStates[0];
 			_oldBlendState = _device.BlendState;

@@ -28,6 +28,7 @@ namespace NanoVGSharp.Samples.Demo
 			IsMouseVisible = true;
 			Window.AllowUserResizing = true;
 			IsFixedTimeStep = false;
+			_graphics.SynchronizeWithVerticalRetrace = false;
 		}
 
 		/// <summary>

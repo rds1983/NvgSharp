@@ -621,6 +621,7 @@ namespace NanoVGSharp
 		public void nvg__clearPathCache()
 		{
 			cache.paths.Clear();
+			cache.npoints = 0;
 		}
 
 		public Path nvg__lastPath()
