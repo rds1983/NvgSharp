@@ -175,7 +175,7 @@ namespace NanoVGSharp
 			RenderingType renderingType,
 			ArraySegment<Vertex> verts)
 		{
-			if (verts.Count <= 0)
+			if (verts.Count <= 0 || _indexesCount <= 0)
 			{
 				return;
 			}
