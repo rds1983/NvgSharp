@@ -7,7 +7,7 @@ namespace NanoVGSharp.Samples.Demo
 	/// <summary>
 	/// This is the main type for your game.
 	/// </summary>
-	public unsafe class Game1 : Game
+	public class Game1 : Game
 	{
 		GraphicsDeviceManager _graphics;
 
@@ -21,7 +21,8 @@ namespace NanoVGSharp.Samples.Demo
 			_graphics = new GraphicsDeviceManager(this)
 			{
 				PreferredBackBufferWidth = 1000,
-				PreferredBackBufferHeight = 600
+				PreferredBackBufferHeight = 600,
+				PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8
 			};
 
 			Content.RootDirectory = "Content";
