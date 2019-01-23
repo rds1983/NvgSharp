@@ -241,7 +241,6 @@ namespace NanoVGSharp
 			NanoVGContextState state = nvg__getState();
 			nvg__setPaintColor(ref state.fill, Color.White);
 			nvg__setPaintColor(ref state.stroke, Color.Black);
-			state.compositeOperation = nvg__compositeOperationState((int)(NVG_SOURCE_OVER));
 			state.shapeAntiAlias = (int)(1);
 			state.strokeWidth = (float)(1.0f);
 			state.miterLimit = (float)(10.0f);
@@ -538,28 +537,6 @@ namespace NanoVGSharp
 			state.scissor.xform.Zero();
 			state.scissor.extent1 = (float)(-1.0f);
 			state.scissor.extent2 = (float)(-1.0f);
-		}
-
-		public void nvgGlobalCompositeOperation(int op)
-		{
-			NanoVGContextState state = nvg__getState();
-			state.compositeOperation = (CompositeOperationState)(nvg__compositeOperationState((int)(op)));
-		}
-
-		public void nvgGlobalCompositeBlendFunc(int sfactor, int dfactor)
-		{
-			nvgGlobalCompositeBlendFuncSeparate((int)(sfactor), (int)(dfactor), (int)(sfactor), (int)(dfactor));
-		}
-
-		public void nvgGlobalCompositeBlendFuncSeparate(int srcRGB, int dstRGB, int srcAlpha, int dstAlpha)
-		{
-			CompositeOperationState op = new CompositeOperationState();
-			op.srcRGB = (int)(srcRGB);
-			op.dstRGB = (int)(dstRGB);
-			op.srcAlpha = (int)(srcAlpha);
-			op.dstAlpha = (int)(dstAlpha);
-			NanoVGContextState state = nvg__getState();
-			state.compositeOperation = (CompositeOperationState)(op);
 		}
 
 		public void nvg__appendCommands(float* vals, int nvals)
@@ -1596,8 +1573,7 @@ namespace NanoVGSharp
 				nvg__expandFill((float)(0.0f), (int)(NVG_MITER), (float)(2.4f));
 			MultiplyAlpha(ref fillPaint.innerColor, state.alpha);
 			MultiplyAlpha(ref fillPaint.outerColor, state.alpha);
-			_renderer.renderFill(ref fillPaint, (CompositeOperationState)(state.compositeOperation),
-				ref state.scissor, (float)(fringeWidth), cache.bounds, cache.paths.ToArraySegment());
+			_renderer.renderFill(ref fillPaint, ref state.scissor, (float)(fringeWidth), cache.bounds, cache.paths.ToArraySegment());
 
 			for (i = (int)(0); (i) < (cache.paths.Count); i++)
 			{
@@ -1640,7 +1616,7 @@ namespace NanoVGSharp
 				nvg__expandStroke((float)(strokeWidth * 0.5f), (float)(fringeWidth), (int)(state.lineCap), (int)(state.lineJoin), (float)(state.miterLimit));
 			else
 				nvg__expandStroke((float)(strokeWidth * 0.5f), (float)(0.0f), (int)(state.lineCap), (int)(state.lineJoin), (float)(state.miterLimit));
-			_renderer.renderStroke(ref strokePaint, (CompositeOperationState)(state.compositeOperation), ref state.scissor,
+			_renderer.renderStroke(ref strokePaint, ref state.scissor, 
 				(float)(fringeWidth), (float)(strokeWidth), cache.paths.ToArraySegment());
 			for (i = (int)(0); (i) < (cache.paths.Count); i++)
 			{
@@ -1771,7 +1747,7 @@ namespace NanoVGSharp
 			MultiplyAlpha(ref paint.innerColor, state.alpha);
 			MultiplyAlpha(ref paint.outerColor, state.alpha);
 
-			_renderer.renderTriangles(ref paint, state.compositeOperation, ref state.scissor, verts);
+			_renderer.renderTriangles(ref paint, ref state.scissor, verts);
 			drawCallCount++;
 			textTriCount += (int)(verts.Count / 3);
 		}
@@ -2340,79 +2316,6 @@ namespace NanoVGSharp
 			}
 
 			return (float)(d);
-		}
-
-		public static CompositeOperationState nvg__compositeOperationState(int op)
-		{
-			int sfactor = 0;
-			int dfactor = 0;
-			if ((op) == (NVG_SOURCE_OVER))
-			{
-				sfactor = (int)(NVG_ONE);
-				dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA);
-			}
-			else if ((op) == (NVG_SOURCE_IN))
-			{
-				sfactor = (int)(NVG_DST_ALPHA);
-				dfactor = (int)(NVG_ZERO);
-			}
-			else if ((op) == (NVG_SOURCE_OUT))
-			{
-				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA);
-				dfactor = (int)(NVG_ZERO);
-			}
-			else if ((op) == (NVG_ATOP))
-			{
-				sfactor = (int)(NVG_DST_ALPHA);
-				dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA);
-			}
-			else if ((op) == (NVG_DESTINATION_OVER))
-			{
-				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA);
-				dfactor = (int)(NVG_ONE);
-			}
-			else if ((op) == (NVG_DESTINATION_IN))
-			{
-				sfactor = (int)(NVG_ZERO);
-				dfactor = (int)(NVG_SRC_ALPHA);
-			}
-			else if ((op) == (NVG_DESTINATION_OUT))
-			{
-				sfactor = (int)(NVG_ZERO);
-				dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA);
-			}
-			else if ((op) == (NVG_DESTINATION_ATOP))
-			{
-				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA);
-				dfactor = (int)(NVG_SRC_ALPHA);
-			}
-			else if ((op) == (NVG_LIGHTER))
-			{
-				sfactor = (int)(NVG_ONE);
-				dfactor = (int)(NVG_ONE);
-			}
-			else if ((op) == (NVG_COPY))
-			{
-				sfactor = (int)(NVG_ONE);
-				dfactor = (int)(NVG_ZERO);
-			}
-			else if ((op) == (NVG_XOR))
-			{
-				sfactor = (int)(NVG_ONE_MINUS_DST_ALPHA);
-				dfactor = (int)(NVG_ONE_MINUS_SRC_ALPHA);
-			}
-			else
-			{
-				sfactor = (int)(NVG_ONE);
-				dfactor = (int)(NVG_ZERO);
-			}
-
-			CompositeOperationState state = new CompositeOperationState();
-			state.srcRGB = (int)(sfactor);
-			state.dstRGB = (int)(dfactor);
-			state.srcAlpha = (int)(sfactor);
-			state.dstAlpha = (int)(dfactor);
-			return (CompositeOperationState)(state);
 		}
 
 		public static float nvg__hue(float h, float m1, float m2)

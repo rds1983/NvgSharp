@@ -178,7 +178,6 @@ namespace NanoVGSharp
 		}
 
 		private void renderTriangles(ref Paint paint,
-			CompositeOperationState compositeOperation,
 			ref Scissor scissor,
 			float width, float fringe, float strokeThr,
 			RenderingType renderingType,
@@ -186,7 +185,8 @@ namespace NanoVGSharp
 			PrimitiveType primitiveType,
 			bool indexed)
 		{
-			if (verts.Count <= 0 || _indexesCount <= 0)
+			if (verts.Count <= 0 || 
+				(indexed && _indexesCount <= 0))
 			{
 				return;
 			}
@@ -294,7 +294,7 @@ namespace NanoVGSharp
 			});
 		}
 
-		public void renderFill(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor,
+		public void renderFill(ref Paint paint, ref Scissor scissor,
 			float fringe, Bounds bounds, ArraySegment<Path> paths)
 		{
 			var isConvex = paths.Count == 1 && paths.Array[paths.Offset].convex == 1;
@@ -324,7 +324,7 @@ namespace NanoVGSharp
 					}
 
 					SetIndexBufferFill(fill.Count, (fill.Count - 2) * 3);
-					renderTriangles(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, 
+					renderTriangles(ref paint, ref scissor, fringe, fringe, -1.0f,
 						renderingType, _vertexes.ToArraySegment(), PrimitiveType.TriangleList, true);
 				}
 			}
@@ -339,14 +339,14 @@ namespace NanoVGSharp
 				_vertexes.Add(new Vertex(bounds.b1, bounds.b4, 0.5f, 1.0f));
 				_vertexes.Add(new Vertex(bounds.b3, bounds.b4, 0.5f, 1.0f));
 
-				renderTriangles(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, 
+				renderTriangles(ref paint, ref scissor, fringe, fringe, -1.0f,
 					RenderingType.FillGradient, _vertexes.ToArraySegment(), PrimitiveType.TriangleStrip, false);
 
 				_device.DepthStencilState = DepthStencilState.None;
 			}
 		}
 
-		public void renderStroke(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor,
+		public void renderStroke(ref Paint paint, ref Scissor scissor,
 			float fringe, float strokeWidth, ArraySegment<Path> paths)
 		{
 			for (var i = 0; i < paths.Count; ++i)
@@ -362,9 +362,9 @@ namespace NanoVGSharp
 						_vertexes.Add(stroke.Array[stroke.Offset + j]);
 					}
 
-					renderTriangles(ref paint, compositeOperation, ref scissor, 
-						strokeWidth, fringe, -1.0f, 
-						paint.image != 0? RenderingType.FillImage:RenderingType.FillGradient,
+					renderTriangles(ref paint, ref scissor,
+						strokeWidth, fringe, -1.0f,
+						paint.image != 0 ? RenderingType.FillImage : RenderingType.FillGradient,
 						_vertexes.ToArraySegment(),
 						PrimitiveType.TriangleStrip,
 						false);
@@ -372,15 +372,9 @@ namespace NanoVGSharp
 			}
 		}
 
-		public void renderTriangles(ref Paint paint, CompositeOperationState compositeOperation,
-			ref Scissor scissor, ArraySegment<Vertex> verts)
+		public void renderTriangles(ref Paint paint, ref Scissor scissor, ArraySegment<Vertex> verts)
 		{
-			if (verts.Count <= 0)
-			{
-				return;
-			}
-
-			renderTriangles(ref paint, compositeOperation, ref scissor,
+			renderTriangles(ref paint, ref scissor,
 				1.0f, 1.0f, -1.0f,
 				RenderingType.Triangles,
 				verts,

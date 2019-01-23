@@ -1,12 +1,10 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
 	public class NanoVGContextState
 	{
-		public CompositeOperationState compositeOperation;
 		public int shapeAntiAlias;
 		public Paint fill;
 		public Paint stroke;
@@ -28,7 +26,6 @@ namespace NanoVGSharp
 		{
 			return new NanoVGContextState
 			{
-				compositeOperation = compositeOperation,
 				shapeAntiAlias = shapeAntiAlias,
 				fill = fill,
 				stroke = stroke,
