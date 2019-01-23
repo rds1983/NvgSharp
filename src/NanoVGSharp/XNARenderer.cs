@@ -9,7 +9,7 @@ namespace NanoVGSharp
 	{
 		private readonly GraphicsDevice _device;
 		private DynamicVertexBuffer _vertexBuffer;
-		private IndexBuffer _indexBufferFill, _indexBufferSimple, _indexBufferTriangles;
+		private IndexBuffer _indexBufferFill;
 		private readonly Effect _effect;
 		private int _indexesCount = 0;
 		private readonly List<Texture2D> _textures = new List<Texture2D>();
@@ -66,6 +66,10 @@ namespace NanoVGSharp
 			Triangles
 		}
 
+		private EffectParameter _viewSizeParam, _scissorMatParam, _scissorExtParam, _scissorScaleParam, _paintMatParam;
+		private EffectParameter _extentParam, _radiusParam, _featherParam, _innerColParam, _outerColParam, _textureParam;
+		private readonly EffectTechnique[] _techniques = new EffectTechnique[4];
+
 		public XNARenderer(GraphicsDevice device)
 		{
 			if (device == null)
@@ -78,6 +82,23 @@ namespace NanoVGSharp
 			_vertexBuffer = new DynamicVertexBuffer(device, Vertex.VertexDeclaration, 2000, BufferUsage.WriteOnly);
 
 			_effect = new Effect(device, Resources.NvgEffectSource);
+
+			_viewSizeParam = _effect.Parameters["viewSize"];
+			_scissorMatParam = _effect.Parameters["scissorMat"];
+			_scissorExtParam = _effect.Parameters["scissorExt"];
+			_scissorScaleParam = _effect.Parameters["scissorScale"];
+			_paintMatParam = _effect.Parameters["paintMat"];
+			_extentParam = _effect.Parameters["extent"];
+			_radiusParam = _effect.Parameters["radius"];
+			_featherParam = _effect.Parameters["feather"];
+			_innerColParam = _effect.Parameters["innerCol"];
+			_outerColParam = _effect.Parameters["outerCol"];
+			_textureParam = _effect.Parameters["g_texture"];
+
+			foreach (RenderingType param in Enum.GetValues(typeof(RenderingType)))
+			{
+				_techniques[(int)param] = _effect.Techniques[param.ToString()];
+			}
 		}
 
 		private Texture2D GetTextureById(int id)
@@ -161,7 +182,9 @@ namespace NanoVGSharp
 			ref Scissor scissor,
 			float width, float fringe, float strokeThr,
 			RenderingType renderingType,
-			ArraySegment<Vertex> verts)
+			ArraySegment<Vertex> verts,
+			PrimitiveType primitiveType,
+			bool indexed)
 		{
 			if (verts.Count <= 0 || _indexesCount <= 0)
 			{
@@ -199,43 +222,44 @@ namespace NanoVGSharp
 				_vertexBuffer = new DynamicVertexBuffer(_device, Vertex.VertexDeclaration, verts.Count * 2,
 					BufferUsage.WriteOnly);
 			}
-			_vertexBuffer.SetData(verts.Array, verts.Offset, verts.Count);
+			_vertexBuffer.SetData(verts.Array, 0, verts.Count);
 
 			var transformMatrix = transform.ToMatrix();
 
-			_effect.Parameters["viewSize"].SetValue(new Vector2(_device.PresentationParameters.Bounds.Width, _device.PresentationParameters.Bounds.Height));
-			_effect.Parameters["scissorMat"].SetValue(_scissorTransform.ToMatrix());
-			_effect.Parameters["scissorExt"].SetValue(_scissorExt);
-			_effect.Parameters["scissorScale"].SetValue(_scissorScale);
-			_effect.Parameters["paintMat"].SetValue(transformMatrix);
-			_effect.Parameters["extent"].SetValue(new Vector4(paint.extent1, paint.extent2, 0.0f, 0.0f));
-			_effect.Parameters["radius"].SetValue(new Vector4(paint.radius, 0.0f, 0.0f, 0.0f));
-			_effect.Parameters["feather"].SetValue(new Vector4(paint.feather, 0.0f, 0.0f, 0.0f));
-			_effect.Parameters["innerCol"].SetValue(innerColor.ToVector4());
-			_effect.Parameters["outerCol"].SetValue(outerColor.ToVector4());
+			_viewSizeParam.SetValue(new Vector2(_device.PresentationParameters.Bounds.Width, _device.PresentationParameters.Bounds.Height));
+			_scissorMatParam.SetValue(_scissorTransform.ToMatrix());
+			_scissorExtParam.SetValue(_scissorExt);
+			_scissorScaleParam.SetValue(_scissorScale);
+			_paintMatParam.SetValue(transformMatrix);
+			_extentParam.SetValue(new Vector4(paint.extent1, paint.extent2, 0.0f, 0.0f));
+			_radiusParam.SetValue(new Vector4(paint.radius, 0.0f, 0.0f, 0.0f));
+			_featherParam.SetValue(new Vector4(paint.feather, 0.0f, 0.0f, 0.0f));
+			_innerColParam.SetValue(innerColor.ToVector4());
+			_outerColParam.SetValue(outerColor.ToVector4());
 			// _effect.Parameters["strokeMult"].SetValue(new Vector4(_strokeMult, 0.0f, 0.0f, 0.0f));
 
 			if (paint.image > 0)
 			{
 				var texture = GetTextureById(paint.image);
-				_effect.Parameters["g_texture"].SetValue(texture);
+				_textureParam.SetValue(texture);
 			}
 
-			_effect.CurrentTechnique = _effect.Techniques[renderingType.ToString()];
+			var technique = _techniques[(int)renderingType];
+			_effect.CurrentTechnique = technique;
 			foreach (var pass in _effect.CurrentTechnique.Passes)
 			{
 				pass.Apply();
-				_device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, verts.Count, 0, _indexesCount / 3);
-			}
-		}
 
-		private void DrawBuffers(ref Paint paint, CompositeOperationState compositeOperation, ref Scissor scissor,
-			float width, float fringe, float strokeThr, RenderingType renderingType)
-		{
-			renderTriangles(ref paint, compositeOperation, ref scissor,
-				width, fringe, strokeThr,
-				renderingType,
-				_vertexes.ToArraySegment());
+				if (indexed)
+				{
+					_device.DrawIndexedPrimitives(primitiveType, 0, 0, verts.Count, 0, _indexesCount / 3);
+				}
+				else
+				{
+					int count = primitiveType == PrimitiveType.TriangleList ? verts.Count / 3 : (verts.Count - 2);
+					_device.DrawPrimitives(primitiveType, 0, count);
+				}
+			}
 
 			_vertexes.Clear();
 		}
@@ -263,36 +287,6 @@ namespace NanoVGSharp
 				{
 					result.Add(0);
 					result.Add((ushort)(j - 1));
-					result.Add((ushort)(j));
-				}
-
-				return result.ToArray();
-			});
-		}
-
-		private void SetIndexBufferSimple(int vertexesCount, int indexesCount)
-		{
-			SetIndexBuffer(ref _indexBufferSimple, vertexesCount, indexesCount, i =>
-			{
-				var result = new List<ushort>();
-				for (var j = 2; j < i; ++j)
-				{
-					result.Add((ushort)(j - 2));
-					result.Add((ushort)(j - 1));
-					result.Add((ushort)(j));
-				}
-
-				return result.ToArray();
-			});
-		}
-
-		private void SetIndexBufferTriangles(int vertexesCount)
-		{
-			SetIndexBuffer(ref _indexBufferTriangles, vertexesCount, vertexesCount, i =>
-			{
-				var result = new List<ushort>();
-				for (var j = 0; j < i; ++j)
-				{
 					result.Add((ushort)(j));
 				}
 
@@ -330,7 +324,8 @@ namespace NanoVGSharp
 					}
 
 					SetIndexBufferFill(fill.Count, (fill.Count - 2) * 3);
-					DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, renderingType);
+					renderTriangles(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, 
+						renderingType, _vertexes.ToArraySegment(), PrimitiveType.TriangleList, true);
 				}
 			}
 
@@ -344,8 +339,8 @@ namespace NanoVGSharp
 				_vertexes.Add(new Vertex(bounds.b1, bounds.b4, 0.5f, 1.0f));
 				_vertexes.Add(new Vertex(bounds.b3, bounds.b4, 0.5f, 1.0f));
 
-				SetIndexBufferSimple(4, 6);
-				DrawBuffers(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, RenderingType.FillGradient);
+				renderTriangles(ref paint, compositeOperation, ref scissor, fringe, fringe, -1.0f, 
+					RenderingType.FillGradient, _vertexes.ToArraySegment(), PrimitiveType.TriangleStrip, false);
 
 				_device.DepthStencilState = DepthStencilState.None;
 			}
@@ -367,10 +362,12 @@ namespace NanoVGSharp
 						_vertexes.Add(stroke.Array[stroke.Offset + j]);
 					}
 
-					SetIndexBufferSimple(stroke.Count, (stroke.Count - 2) * 3);
-					DrawBuffers(ref paint, compositeOperation, ref scissor, 
+					renderTriangles(ref paint, compositeOperation, ref scissor, 
 						strokeWidth, fringe, -1.0f, 
-						paint.image != 0? RenderingType.FillImage:RenderingType.FillGradient);
+						paint.image != 0? RenderingType.FillImage:RenderingType.FillGradient,
+						_vertexes.ToArraySegment(),
+						PrimitiveType.TriangleStrip,
+						false);
 				}
 			}
 		}
@@ -383,12 +380,12 @@ namespace NanoVGSharp
 				return;
 			}
 
-			SetIndexBufferTriangles(verts.Count);
-
 			renderTriangles(ref paint, compositeOperation, ref scissor,
 				1.0f, 1.0f, -1.0f,
 				RenderingType.Triangles,
-				verts);
+				verts,
+				PrimitiveType.TriangleList,
+				false);
 		}
 
 		public void Begin()

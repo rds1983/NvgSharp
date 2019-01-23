@@ -1052,8 +1052,6 @@ namespace NanoVGSharp.Samples.Demo
 			float x, y, popy;
 
 			drawEyes(vg, width - 250, 50, 150, 100, mx, my, t);
-
-
 			drawParagraph(vg, width - 450, 50, 150, 100, mx, my);
 			drawGraph(vg, 0, height / 2, width, height / 2, t);
 			drawColorwheel(vg, width - 300, height - 300, 250.0f, 250.0f, t);
