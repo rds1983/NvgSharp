@@ -98,7 +98,7 @@ namespace NanoVGSharp.Samples.Demo
 
 			var mouseState = Mouse.GetState();
 
-			_context.nvgBeginFrame(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, 1.0f);
+			_context.BeginFrame(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, 1.0f);
 
 			var t = (float)gameTime.TotalGameTime.TotalSeconds;
 			_demo.renderDemo(_context, 
@@ -111,7 +111,7 @@ namespace NanoVGSharp.Samples.Demo
 
 			_perfGraph.Render(_context, 5, 5);
 
-			_context.nvgEndFrame();
+			_context.EndFrame();
 
 /*			var texture = ((XNARenderer)_context._renderer)._textures[8];
 

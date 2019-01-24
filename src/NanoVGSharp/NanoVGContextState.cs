@@ -3,45 +3,45 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public class NanoVGContextState
+	internal class NanoVGContextState
 	{
-		public int shapeAntiAlias;
-		public Paint fill;
-		public Paint stroke;
-		public float strokeWidth;
-		public float miterLimit;
-		public int lineJoin;
-		public int lineCap;
-		public float alpha;
-		public Transform xform = new Transform();
-		public Scissor scissor;
-		public float fontSize;
-		public float letterSpacing;
-		public float lineHeight;
-		public float fontBlur;
-		public int textAlign;
-		public int fontId;
+		public int ShapeAntiAlias;
+		public Paint Fill;
+		public Paint Stroke;
+		public float StrokeWidth;
+		public float MiterLimit;
+		public int LineJoin;
+		public int LineCap;
+		public float Alpha;
+		public Transform Transform = new Transform();
+		public Scissor Scissor;
+		public float FontSize;
+		public float LetterSpacing;
+		public float LineHeight;
+		public float FontBlur;
+		public int TextAlign;
+		public int FontId;
 
 		public NanoVGContextState Clone()
 		{
 			return new NanoVGContextState
 			{
-				shapeAntiAlias = shapeAntiAlias,
-				fill = fill,
-				stroke = stroke,
-				strokeWidth = strokeWidth,
-				miterLimit = miterLimit,
-				lineJoin = lineJoin,
-				lineCap = lineCap,
-				alpha = alpha,
-				xform = xform,
-				scissor = scissor,
-				fontSize = fontSize,
-				letterSpacing = letterSpacing,
-				lineHeight = lineHeight,
-				fontBlur = fontBlur,
-				textAlign = textAlign,
-				fontId = fontId
+				ShapeAntiAlias = ShapeAntiAlias,
+				Fill = Fill,
+				Stroke = Stroke,
+				StrokeWidth = StrokeWidth,
+				MiterLimit = MiterLimit,
+				LineJoin = LineJoin,
+				LineCap = LineCap,
+				Alpha = Alpha,
+				Transform = Transform,
+				Scissor = Scissor,
+				FontSize = FontSize,
+				LetterSpacing = LetterSpacing,
+				LineHeight = LineHeight,
+				FontBlur = FontBlur,
+				TextAlign = TextAlign,
+				FontId = FontId
 			};
 		}
 	}

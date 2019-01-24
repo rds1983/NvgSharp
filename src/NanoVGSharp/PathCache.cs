@@ -1,32 +1,30 @@
 ﻿using System;
+using FontStashSharp;
 using StbSharp;
 
 namespace NanoVGSharp
 {
-	internal unsafe class PathCache : IDisposable
-	{
-		public Bounds bounds = new Bounds();
-		public int npoints, cpoints;
-		public Buffer<Path> paths;
-		public NVGpoint* points;
-		public Buffer<Vertex> verts;
+    internal unsafe class PathCache : IDisposable
+    {
+        public readonly Buffer<Path> Paths = new Buffer<Path>(16);
+        public readonly Buffer<Vertex> Vertexes = new Buffer<Vertex>(256);
+        public Bounds Bounds = new Bounds();
+        public NvgPoint* Points = (NvgPoint*) CRuntime.malloc((ulong) (sizeof(NvgPoint) * 128));
+        public int PointsNumber, PointsCount;
 
-		public PathCache()
-		{
-			points = (NVGpoint*)CRuntime.malloc((ulong)(sizeof(NVGpoint) * 128));
-			npoints = 0;
-			cpoints = 128;
-			paths = new Buffer<Path>(16);
-			verts = new Buffer<Vertex>(256);
-		}
+        public PathCache()
+        {
+            PointsNumber = 0;
+            PointsCount = 128;
+        }
 
-		public void Dispose()
-		{
-			if (points != null)
-			{
-				CRuntime.free(points);
-				points = null;
-			}
-		}
-	}
+        public void Dispose()
+        {
+            if (Points != null)
+            {
+                CRuntime.free(Points);
+                Points = null;
+            }
+        }
+    }
 }

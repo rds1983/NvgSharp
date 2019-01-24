@@ -1,136 +1,135 @@
-﻿using Microsoft.Xna.Framework;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+using Microsoft.Xna.Framework;
 
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Transform
 	{
-		public float t1, t2, t3, t4, t5, t6;
+		public float T1, T2, T3, T4, T5, T6;
 
 		public void Zero()
 		{
-			t1 = t2 = t3 = t4 = t5 = t6 = 0;
+			T1 = T2 = T3 = T4 = T5 = T6 = 0;
 		}
 
 		public void Set(Transform src)
 		{
-			t1 = src.t1;
-			t2 = src.t2;
-			t3 = src.t3;
-			t4 = src.t4;
-			t5 = src.t5;
-			t6 = src.t6;
+			T1 = src.T1;
+			T2 = src.T2;
+			T3 = src.T3;
+			T4 = src.T4;
+			T5 = src.T5;
+			T6 = src.T6;
 		}
 
 		public void SetIdentity()
 		{
-			t1 = (float)(1.0f);
-			t2 = (float)(0.0f);
-			t3 = (float)(0.0f);
-			t4 = (float)(1.0f);
-			t5 = (float)(0.0f);
-			t6 = (float)(0.0f);
+			T1 = 1.0f;
+			T2 = 0.0f;
+			T3 = 0.0f;
+			T4 = 1.0f;
+			T5 = 0.0f;
+			T6 = 0.0f;
 		}
 
 		public void SetTranslate(float tx, float ty)
 		{
-			t1 = (float)(1.0f);
-			t2 = (float)(0.0f);
-			t3 = (float)(0.0f);
-			t4 = (float)(1.0f);
-			t5 = (float)(tx);
-			t6 = (float)(ty);
+			T1 = 1.0f;
+			T2 = 0.0f;
+			T3 = 0.0f;
+			T4 = 1.0f;
+			T5 = tx;
+			T6 = ty;
 		}
 
 		public void SetScale(float sx, float sy)
 		{
-			t1 = (float)(sx);
-			t2 = (float)(0.0f);
-			t3 = (float)(0.0f);
-			t4 = (float)(sy);
-			t5 = (float)(0.0f);
-			t6 = (float)(0.0f);
+			T1 = sx;
+			T2 = 0.0f;
+			T3 = 0.0f;
+			T4 = sy;
+			T5 = 0.0f;
+			T6 = 0.0f;
 		}
 
 		public void SetRotate(float a)
 		{
-			float cs = (float)(NanoVGContext.cosf((float)(a)));
-			float sn = (float)(NanoVGContext.sinf((float)(a)));
-			t1 = (float)(cs);
-			t2 = (float)(sn);
-			t3 = (float)(-sn);
-			t4 = (float)(cs);
-			t5 = (float)(0.0f);
-			t6 = (float)(0.0f);
+			var cs = NvgUtility.cosf(a);
+			var sn = NvgUtility.sinf(a);
+			T1 = cs;
+			T2 = sn;
+			T3 = -sn;
+			T4 = cs;
+			T5 = 0.0f;
+			T6 = 0.0f;
 		}
 
 		public void SetSkewX(float a)
 		{
-			t1 = (float)(1.0f);
-			t2 = (float)(0.0f);
-			t3 = (float)(NanoVGContext.tanf((float)(a)));
-			t4 = (float)(1.0f);
-			t5 = (float)(0.0f);
-			t6 = (float)(0.0f);
+			T1 = 1.0f;
+			T2 = 0.0f;
+			T3 = NvgUtility.tanf(a);
+			T4 = 1.0f;
+			T5 = 0.0f;
+			T6 = 0.0f;
 		}
 
 		public void SetSkewY(float a)
 		{
-			t1 = (float)(1.0f);
-			t2 = (float)(NanoVGContext.tanf((float)(a)));
-			t3 = (float)(0.0f);
-			t4 = (float)(1.0f);
-			t5 = (float)(0.0f);
-			t6 = (float)(0.0f);
+			T1 = 1.0f;
+			T2 = NvgUtility.tanf(a);
+			T3 = 0.0f;
+			T4 = 1.0f;
+			T5 = 0.0f;
+			T6 = 0.0f;
 		}
 
 		public void Multiply(ref Transform s)
 		{
-			float _t0 = (float)(t1 * s.t1 + t2 * s.t3);
-			float _t2 = (float)(t3 * s.t1 + t4 * s.t3);
-			float _t4 = (float)(t5 * s.t1 + t6 * s.t3 + s.t5);
-			t2 = (float)(t1 * s.t2 + t2 * s.t4);
-			t4 = (float)(t3 * s.t2 + t4 * s.t4);
-			t6 = (float)(t5 * s.t2 + t6 * s.t4 + s.t6);
-			t1 = (float)(_t0);
-			t3 = (float)(_t2);
-			t5 = (float)(_t4);
+			var t0 = T1 * s.T1 + T2 * s.T3;
+			var t2 = T3 * s.T1 + T4 * s.T3;
+			var t4 = T5 * s.T1 + T6 * s.T3 + s.T5;
+			T2 = T1 * s.T2 + T2 * s.T4;
+			T4 = T3 * s.T2 + T4 * s.T4;
+			T6 = T5 * s.T2 + T6 * s.T4 + s.T6;
+			T1 = t0;
+			T3 = t2;
+			T5 = t4;
 		}
 
 		public void Premultiply(ref Transform s)
 		{
-			Transform s2 = s;
+			var s2 = s;
 			s2.Multiply(ref this);
 			Set(s2);
 		}
 
 		public Transform BuildInverse()
 		{
-			double invdet = 0;
-			double det = (double)((double)(t1) * t4 - (double)(t3) * t2);
-			Transform inv = new Transform();
-			if (((det) > (-1e-6)) && ((det) < (1e-6)))
+			var det = T1 * T4 - T3 * T2;
+			var inv = new Transform();
+			if (det > -1e-6 && det < 1e-6)
 			{
 				inv.SetIdentity();
 				return inv;
 			}
 
-			invdet = (double)(1.0 / det);
-			inv.t1 = ((float)(t4 * invdet));
-			inv.t3 = ((float)(-t3 * invdet));
-			inv.t5 = ((float)(((double)(t3) * t6 - (double)(t4) * t5) * invdet));
-			inv.t2 = ((float)(-t2 * invdet));
-			inv.t4 = ((float)(t1 * invdet));
-			inv.t6 = ((float)(((double)(t2) * t5 - (double)(t1) * t6) * invdet));
+			var inverseDeterminant = 1.0f / det;
+			inv.T1 = T4 * inverseDeterminant;
+			inv.T3 = -T3 * inverseDeterminant;
+			inv.T5 = (T3 * T6 - T4 * T5) * inverseDeterminant;
+			inv.T2 = -T2 * inverseDeterminant;
+			inv.T4 = T1 * inverseDeterminant;
+			inv.T6 = (T2 * T5 - T1 * T6) * inverseDeterminant;
 
 			return inv;
 		}
 
 		public void TransformPoint(out float dx, out float dy, float sx, float sy)
 		{
-			dx = (float)(sx * t1 + sy * t3 + t5);
-			dy = (float)(sx * t2 + sy * t4 + t6);
+			dx = sx * T1 + sy * T3 + T5;
+			dy = sx * T2 + sy * T4 + T6;
 		}
 
 		public void TransformVector(out Vector2 v, Vector2 s)
@@ -142,16 +141,16 @@ namespace NanoVGSharp
 		{
 			var m3 = Matrix.Identity;
 
-			m3.M11 = t1;
-			m3.M21 = t2;
+			m3.M11 = T1;
+			m3.M21 = T2;
 			m3.M31 = 0.0f;
 			m3.M41 = 0.0f;
-			m3.M12 = t3;
-			m3.M22 = t4;
+			m3.M12 = T3;
+			m3.M22 = T4;
 			m3.M32 = 0.0f;
 			m3.M42 = 0.0f;
-			m3.M13 = t5;
-			m3.M23 = t6;
+			m3.M13 = T5;
+			m3.M23 = T6;
 			m3.M33 = 1.0f;
 			m3.M43 = 0.0f;
 

@@ -1,11 +1,12 @@
 ﻿using System.Runtime.InteropServices;
+using Microsoft.Xna.Framework;
 
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct Scissor
+	internal struct Scissor
 	{
-		public Transform xform;
-		public float extent1, extent2;
+		public Transform Transform;
+		public Vector2 Extent;
 	}
 }

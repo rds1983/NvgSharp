@@ -2,15 +2,15 @@
 
 namespace NanoVGSharp
 {
-	public class Path
+	internal class Path
 	{
-		public int first;
-		public int count;
-		public byte closed;
-		public int nbevel;
-		public ArraySegment<Vertex>? fill;
-		public ArraySegment<Vertex>? stroke;
-		public int winding;
-		public int convex;
+		public int First;
+		public int Count;
+		public byte Closed;
+		public int BevelCount;
+		public ArraySegment<Vertex>? Fill;
+		public ArraySegment<Vertex>? Stroke;
+		public int Winding;
+		public int Convex;
 	}
 }

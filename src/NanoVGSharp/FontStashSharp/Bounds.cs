@@ -1,4 +1,4 @@
-﻿namespace NanoVGSharp
+﻿namespace FontStashSharp
 {
 	public struct Bounds
 	{

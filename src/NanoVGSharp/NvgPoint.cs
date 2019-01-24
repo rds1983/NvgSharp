@@ -3,20 +3,20 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct NVGpoint
+	internal struct NvgPoint
 	{
-		public float x;
-		public float y;
-		public float dx;
-		public float dy;
-		public float len;
+		public float X;
+		public float Y;
+		public float DeltaX;
+		public float DeltaY;
+		public float Length;
 		public float dmx;
 		public float dmy;
 		public byte flags;
 
 		public void Reset()
 		{
-			x = y = dx = dy = len = dmx = dmy = 0;
+			X = Y = DeltaX = DeltaY = Length = dmx = dmy = 0;
 			flags = 0;
 		}
 	}

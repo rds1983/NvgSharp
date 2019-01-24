@@ -4,15 +4,15 @@ namespace NanoVGSharp
 {
 	internal static class Resources
 	{
-		private static byte[] _nvgEffectSource = null;
+		private static byte[] _effectSource = null;
 
 		public static byte[] NvgEffectSource
 		{
 			get
 			{
-				if (_nvgEffectSource != null)
+				if (_effectSource != null)
 				{
-					return _nvgEffectSource;
+					return _effectSource;
 				}
 
 				var assembly = typeof(Resources).Assembly;
@@ -27,10 +27,10 @@ namespace NanoVGSharp
 				using (var stream = assembly.GetManifestResourceStream(path))
 				{
 					stream.CopyTo(ms);
-					_nvgEffectSource = ms.ToArray();
+					_effectSource = ms.ToArray();
 				}
 
-				return _nvgEffectSource;
+				return _effectSource;
 			}
 		}
 	}

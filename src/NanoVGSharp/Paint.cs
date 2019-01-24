@@ -6,23 +6,35 @@ namespace NanoVGSharp
 	[StructLayout(LayoutKind.Sequential)]
 	public struct Paint
 	{
-		public Transform xform;
-		public float extent1, extent2;
-		public float radius;
-		public float feather;
-		public Color innerColor;
-		public Color outerColor;
-		public int image;
+		public Transform Transform;
+		public Vector2 Extent;
+		public float Radius;
+		public float Feather;
+		public Color InnerColor;
+		public Color OuterColor;
+		public int Image;
+		
+		public Paint(Color color)
+		{
+			Transform = new Transform();
+			Extent = new Vector2();
+			Transform.SetIdentity();
+			Radius = 0.0f;
+			Feather = 1.0f;
+			InnerColor = color;
+			OuterColor = color;
+			Image = 0;
+		}
 
 		public void Zero()
 		{
-			xform.Zero();
-			extent1 = extent2 = 0;
-			radius = 0;
-			feather = 0;
-			innerColor = Color.Transparent;
-			outerColor = Color.Transparent;
-			image = 0;
+			Transform.Zero();
+			Extent = Vector2.Zero;
+			Radius = 0;
+			Feather = 0;
+			InnerColor = Color.Transparent;
+			OuterColor = Color.Transparent;
+			Image = 0;
 		}
 	}
 }
