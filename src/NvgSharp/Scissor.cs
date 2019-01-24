@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct Scissor

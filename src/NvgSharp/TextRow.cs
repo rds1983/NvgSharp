@@ -1,6 +1,6 @@
 ﻿using FontStashSharp;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	public class TextRow
 	{

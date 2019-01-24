@@ -2,7 +2,7 @@
 using FontStashSharp;
 using StbSharp;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	internal unsafe class PathCache : IDisposable
 	{

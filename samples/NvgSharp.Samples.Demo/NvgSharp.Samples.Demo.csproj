@@ -5,8 +5,8 @@
     <OutputType>WinExe</OutputType>
     <ApplicationIcon />
     <StartupObject />
-    <AssemblyName>NanoVGSharp.Samples.Demo</AssemblyName>
-    <RootNamespace>NanoVGSharp.Samples.Demo</RootNamespace>
+    <AssemblyName>NvgSharp.Samples.Demo</AssemblyName>
+    <RootNamespace>NvgSharp.Samples.Demo</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\NanoVGSharp\NanoVGSharp.csproj" />
+    <ProjectReference Include="..\..\src\NvgSharp\NvgSharp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

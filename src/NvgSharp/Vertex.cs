@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System.Runtime.InteropServices;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
 	internal struct Vertex : IVertexType

@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
 
-namespace NanoVGSharp.Samples.Demo
+namespace NvgSharp.Samples.Demo
 {
 	/// <summary>
 	/// This is the main type for your game.

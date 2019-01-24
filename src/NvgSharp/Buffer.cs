@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	internal class Buffer<T>
 	{

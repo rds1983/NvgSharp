@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace NanoVGSharp.Samples.Demo
+namespace NvgSharp.Samples.Demo
 {
 	public class PerfGraph
 	{

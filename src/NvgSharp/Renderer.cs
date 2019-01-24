@@ -4,7 +4,7 @@ using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	internal class XNARenderer : IRenderer
 	{

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	internal static class Resources
 	{
@@ -18,9 +18,9 @@ namespace NanoVGSharp
 				var assembly = typeof(Resources).Assembly;
 
 #if MONOGAME
-				var path = "NanoVGSharp.Resources.Effect.ogl.mgfxo";
+				var path = "NvgSharp.Resources.Effect.ogl.mgfxo";
 #elif FNA
-				var path = "NanoVGSharp.Resources.Effect.fxb";
+				var path = "NvgSharp.Resources.Effect.fxb";
 #endif
 
 				var ms = new MemoryStream();

@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using FontStashSharp;
 
-namespace NanoVGSharp.Samples.Demo
+namespace NvgSharp.Samples.Demo
 {
 	public class Demo
 	{

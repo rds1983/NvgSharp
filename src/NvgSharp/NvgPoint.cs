@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct NvgPoint

@@ -4,7 +4,7 @@ using System;
 using Microsoft.Xna.Framework;
 using FontStashSharp;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	public unsafe class NvgContext : IDisposable
 	{

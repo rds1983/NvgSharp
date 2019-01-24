@@ -1,7 +1,7 @@
 ﻿using System;
 using FontStashSharp;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	internal interface IRenderer
 	{

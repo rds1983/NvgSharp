@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NanoVGSharp.Samples.Demo
+namespace NvgSharp.Samples.Demo
 {
     /// <summary>
     /// The main class.

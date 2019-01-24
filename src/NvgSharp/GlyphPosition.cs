@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using FontStashSharp;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
 	public struct GlyphPosition

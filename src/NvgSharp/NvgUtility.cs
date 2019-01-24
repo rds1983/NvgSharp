@@ -2,7 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using StbSharp;
 
-namespace NanoVGSharp
+namespace NvgSharp
 {
 	public static unsafe class NvgUtility
 	{
