@@ -110,7 +110,7 @@ namespace NanoVGSharp
 			_cache = new PathCache();
 			Save();
 			Reset();
-			__setDevicePixelRatio((float)(1.0f));
+			SetDevicePixelRatio((float)(1.0f));
 			fontParams.Width = (int)(512);
 			fontParams.Height = (int)(512);
 			fontParams.Flags = (byte)(FontSystem.FONS_ZERO_TOPLEFT);
@@ -149,25 +149,12 @@ namespace NanoVGSharp
 			}
 		}
 
-		public void __setDevicePixelRatio(float ratio)
-		{
-			_tessTol = (float)(0.25f / ratio);
-			_distTol = (float)(0.01f / ratio);
-			_fringeWidth = (float)(1.0f / ratio);
-			_devicePxRatio = (float)(ratio);
-		}
-
-		private NanoVGContextState GetState()
-		{
-			return _states[_statesNumber - 1];
-		}
-
 		public void BeginFrame(float windowWidth, float windowHeight, float devicePixelRatio)
 		{
 			_statesNumber = (int)(0);
 			Save();
 			Reset();
-			__setDevicePixelRatio((float)(devicePixelRatio));
+			SetDevicePixelRatio((float)(devicePixelRatio));
 
 			_renderer.Begin();
 
@@ -240,8 +227,8 @@ namespace NanoVGSharp
 		public void Reset()
 		{
 			NanoVGContextState state = GetState();
-			__setPaintColor(ref state.Fill, Color.White);
-			__setPaintColor(ref state.Stroke, Color.Black);
+			state.Fill = new Paint(Color.White);
+			state.Stroke = new Paint(Color.Black);
 			state.ShapeAntiAlias = (int)(1);
 			state.StrokeWidth = (float)(1.0f);
 			state.MiterLimit = (float)(10.0f);
@@ -365,7 +352,7 @@ namespace NanoVGSharp
 		public void StrokeColor(Color color)
 		{
 			NanoVGContextState state = GetState();
-			__setPaintColor(ref state.Stroke, (Color)(color));
+			state.Stroke = new Paint(color);
 		}
 
 		public void StrokePaint(Paint paint)
@@ -378,7 +365,7 @@ namespace NanoVGSharp
 		public void FillColor(Color color)
 		{
 			NanoVGContextState state = GetState();
-			__setPaintColor(ref state.Fill, (Color)(color));
+			state.Fill = new Paint(color);
 		}
 
 		public void FillPaint(Paint paint)
@@ -441,7 +428,7 @@ namespace NanoVGSharp
 			p.Extent.X = (float)(large);
 			p.Extent.Y = (float)(large + d * 0.5f);
 			p.Radius = (float)(0.0f);
-			p.Feather = (float)(__maxf((float)(1.0f), (float)(d)));
+			p.Feather = (float)(NvgUtility.__maxf((float)(1.0f), (float)(d)));
 			p.InnerColor = (Color)(icol);
 			p.OuterColor = (Color)(ocol);
 			return (Paint)(p);
@@ -458,7 +445,7 @@ namespace NanoVGSharp
 			p.Extent.X = (float)(r);
 			p.Extent.Y = (float)(r);
 			p.Radius = (float)(r);
-			p.Feather = (float)(__maxf((float)(1.0f), (float)(f)));
+			p.Feather = (float)(NvgUtility.__maxf((float)(1.0f), (float)(f)));
 			p.InnerColor = (Color)(icol);
 			p.OuterColor = (Color)(ocol);
 			return (Paint)(p);
@@ -473,7 +460,7 @@ namespace NanoVGSharp
 			p.Extent.X = (float)(w * 0.5f);
 			p.Extent.Y = (float)(h * 0.5f);
 			p.Radius = (float)(r);
-			p.Feather = (float)(__maxf((float)(1.0f), (float)(f)));
+			p.Feather = (float)(NvgUtility.__maxf((float)(1.0f), (float)(f)));
 			p.InnerColor = (Color)(icol);
 			p.OuterColor = (Color)(ocol);
 			return (Paint)(p);
@@ -495,8 +482,8 @@ namespace NanoVGSharp
 		public void Scissor(float x, float y, float w, float h)
 		{
 			NanoVGContextState state = GetState();
-			w = (float)(__maxf((float)(0.0f), (float)(w)));
-			h = (float)(__maxf((float)(0.0f), (float)(h)));
+			w = (float)(NvgUtility.__maxf((float)(0.0f), (float)(w)));
+			h = (float)(NvgUtility.__maxf((float)(0.0f), (float)(h)));
 			state.Scissor.Transform.SetIdentity();
 			state.Scissor.Transform.T5 = (float)(x + w * 0.5f);
 			state.Scissor.Transform.T6 = (float)(y + h * 0.5f);
@@ -526,8 +513,8 @@ namespace NanoVGSharp
 			ey = (float)(state.Scissor.Extent.Y);
 			invxorm = state.Transform.BuildInverse();
 			pxform.Multiply(ref invxorm);
-			tex = (float)(ex * __absf((float)(pxform.T1)) + ey * __absf((float)(pxform.T3)));
-			tey = (float)(ex * __absf((float)(pxform.T2)) + ey * __absf((float)(pxform.T4)));
+			tex = (float)(ex * NvgUtility.__absf((float)(pxform.T1)) + ey * NvgUtility.__absf((float)(pxform.T3)));
+			tey = (float)(ex * NvgUtility.__absf((float)(pxform.T2)) + ey * NvgUtility.__absf((float)(pxform.T4)));
 			__isectRects(rect, (float)(pxform.T5 - tex), (float)(pxform.T6 - tey), (float)(tex * 2), (float)(tey * 2), (float)(x), (float)(y), (float)(w), (float)(h));
 			Scissor((float)(rect[0]), (float)(rect[1]), (float)(rect[2]), (float)(rect[3]));
 		}
@@ -538,630 +525,6 @@ namespace NanoVGSharp
 			state.Scissor.Transform.Zero();
 			state.Scissor.Extent.X = (float)(-1.0f);
 			state.Scissor.Extent.Y = (float)(-1.0f);
-		}
-
-		public void __appendCommands(float* vals, int nvals)
-		{
-			NanoVGContextState state = GetState();
-			int i = 0;
-			if ((_commandsNumber + nvals) > (_commandsCount))
-			{
-				float* commands;
-				int ccommands = (int)(_commandsNumber + nvals + this._commandsCount / 2);
-				commands = (float*)(CRuntime.realloc(this._commands, (ulong)(sizeof(float) * ccommands)));
-				if ((commands) == null)
-					return;
-				this._commands = commands;
-				this._commandsCount = (int)(ccommands);
-			}
-
-			if (((int)(vals[0]) != NVG_CLOSE) && ((int)(vals[0]) != NVG_WINDING))
-			{
-				_commandX = (float)(vals[nvals - 2]);
-				_commandY = (float)(vals[nvals - 1]);
-			}
-
-			i = (int)(0);
-			while ((i) < (nvals))
-			{
-				int cmd = (int)(vals[i]);
-				switch (cmd)
-				{
-					case NVG_MOVETO:
-						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
-						i += (int)(3);
-						break;
-					case NVG_LINETO:
-						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
-						i += (int)(3);
-						break;
-					case NVG_BEZIERTO:
-						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
-						state.Transform.TransformPoint(out vals[i + 3], out vals[i + 4], (float)(vals[i + 3]), (float)(vals[i + 4]));
-						state.Transform.TransformPoint(out vals[i + 5], out vals[i + 6], (float)(vals[i + 5]), (float)(vals[i + 6]));
-						i += (int)(7);
-						break;
-					case NVG_CLOSE:
-						i++;
-						break;
-					case NVG_WINDING:
-						i += (int)(2);
-						break;
-					default:
-						i++;
-						break;
-				}
-			}
-			CRuntime.memcpy(&_commands[_commandsNumber], vals, (ulong)(nvals * sizeof(float)));
-			_commandsNumber += (int)(nvals);
-		}
-
-		public void __clearPathCache()
-		{
-			_cache.Paths.Clear();
-			_cache.PointsNumber = 0;
-		}
-
-		private Path __lastPath()
-		{
-			if ((_cache.Paths.Count) > (0))
-				return _cache.Paths[_cache.Paths.Count - 1];
-			return null;
-		}
-
-		private void __addPath()
-		{
-			var newPath = new Path
-			{
-				First = _cache.PointsNumber,
-				Winding = NVG_CCW
-			};
-
-			_cache.Paths.Add(newPath);
-		}
-
-		private NvgPoint* __lastPoint()
-		{
-			if ((_cache.PointsNumber) > (0))
-				return &_cache.Points[_cache.PointsNumber - 1];
-			return null;
-		}
-
-		public void __addPoint(float x, float y, int flags)
-		{
-			Path path = __lastPath();
-			NvgPoint* pt;
-			if ((path) == null)
-				return;
-			if (((path.Count) > (0)) && ((_cache.PointsNumber) > (0)))
-			{
-				pt = __lastPoint();
-				if ((__ptEquals((float)(pt->X), (float)(pt->Y), (float)(x), (float)(y), (float)(_distTol))) != 0)
-				{
-					pt->flags |= (byte)(flags);
-					return;
-				}
-			}
-
-			if ((_cache.PointsNumber + 1) > (_cache.PointsCount))
-			{
-				NvgPoint* points;
-				int cpoints = (int)(_cache.PointsNumber + 1 + _cache.PointsCount / 2);
-				points = (NvgPoint*)(CRuntime.realloc(_cache.Points, (ulong)(sizeof(NvgPoint) * cpoints)));
-				if ((points) == null)
-					return;
-				_cache.Points = points;
-				_cache.PointsCount = (int)(cpoints);
-			}
-
-			pt = &_cache.Points[_cache.PointsNumber];
-			pt->Reset();
-			pt->X = (float)(x);
-			pt->Y = (float)(y);
-			pt->flags = ((byte)(flags));
-			_cache.PointsNumber++;
-			path.Count++;
-		}
-
-		public void __closePath()
-		{
-			Path path = __lastPath();
-			if ((path) == null)
-				return;
-			path.Closed = (byte)(1);
-		}
-
-		public void __pathWinding(int winding)
-		{
-			Path path = __lastPath();
-			if ((path) == null)
-				return;
-			path.Winding = (int)(winding);
-		}
-
-		private ArraySegment<Vertex> __allocTempVerts(int nverts)
-		{
-			_cache.Vertexes.EnsureSize(nverts);
-
-			return new ArraySegment<Vertex>(_cache.Vertexes.Array);
-		}
-
-		public void __tesselateBezier(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int level, int type)
-		{
-			float x12 = 0;
-			float y12 = 0;
-			float x23 = 0;
-			float y23 = 0;
-			float x34 = 0;
-			float y34 = 0;
-			float x123 = 0;
-			float y123 = 0;
-			float x234 = 0;
-			float y234 = 0;
-			float x1234 = 0;
-			float y1234 = 0;
-			float dx = 0;
-			float dy = 0;
-			float d2 = 0;
-			float d3 = 0;
-			if ((level) > (10))
-				return;
-			x12 = (float)((x1 + x2) * 0.5f);
-			y12 = (float)((y1 + y2) * 0.5f);
-			x23 = (float)((x2 + x3) * 0.5f);
-			y23 = (float)((y2 + y3) * 0.5f);
-			x34 = (float)((x3 + x4) * 0.5f);
-			y34 = (float)((y3 + y4) * 0.5f);
-			x123 = (float)((x12 + x23) * 0.5f);
-			y123 = (float)((y12 + y23) * 0.5f);
-			dx = (float)(x4 - x1);
-			dy = (float)(y4 - y1);
-			d2 = (float)(__absf((float)((x2 - x4) * dy - (y2 - y4) * dx)));
-			d3 = (float)(__absf((float)((x3 - x4) * dy - (y3 - y4) * dx)));
-			if (((d2 + d3) * (d2 + d3)) < (_tessTol * (dx * dx + dy * dy)))
-			{
-				__addPoint((float)(x4), (float)(y4), (int)(type));
-				return;
-			}
-
-			x234 = (float)((x23 + x34) * 0.5f);
-			y234 = (float)((y23 + y34) * 0.5f);
-			x1234 = (float)((x123 + x234) * 0.5f);
-			y1234 = (float)((y123 + y234) * 0.5f);
-			__tesselateBezier((float)(x1), (float)(y1), (float)(x12), (float)(y12), (float)(x123), (float)(y123), (float)(x1234), (float)(y1234), (int)(level + 1), (int)(0));
-			__tesselateBezier((float)(x1234), (float)(y1234), (float)(x234), (float)(y234), (float)(x34), (float)(y34), (float)(x4), (float)(y4), (int)(level + 1), (int)(type));
-		}
-
-		public void __flattenPaths()
-		{
-			NvgPoint* last;
-			NvgPoint* p0;
-			NvgPoint* p1;
-			NvgPoint* pts;
-			Path path;
-			int i = 0;
-			int j = 0;
-			float* cp1;
-			float* cp2;
-			float* p;
-			float area = 0;
-			if ((_cache.Paths.Count) > (0))
-				return;
-			i = (int)(0);
-			while ((i) < (_commandsNumber))
-			{
-				int cmd = (int)(_commands[i]);
-				switch (cmd)
-				{
-					case NVG_MOVETO:
-						__addPath();
-						p = &_commands[i + 1];
-						__addPoint((float)(p[0]), (float)(p[1]), (int)(NVG_PT_CORNER));
-						i += (int)(3);
-						break;
-					case NVG_LINETO:
-						p = &_commands[i + 1];
-						__addPoint((float)(p[0]), (float)(p[1]), (int)(NVG_PT_CORNER));
-						i += (int)(3);
-						break;
-					case NVG_BEZIERTO:
-						last = __lastPoint();
-						if (last != null)
-						{
-							cp1 = &_commands[i + 1];
-							cp2 = &_commands[i + 3];
-							p = &_commands[i + 5];
-							__tesselateBezier((float)(last->X), (float)(last->Y), (float)(cp1[0]), (float)(cp1[1]), (float)(cp2[0]), (float)(cp2[1]), (float)(p[0]), (float)(p[1]), (int)(0), (int)(NVG_PT_CORNER));
-						}
-						i += (int)(7);
-						break;
-					case NVG_CLOSE:
-						__closePath();
-						i++;
-						break;
-					case NVG_WINDING:
-						__pathWinding((int)(_commands[i + 1]));
-						i += (int)(2);
-						break;
-					default:
-						i++;
-						break;
-				}
-			}
-			_cache.Bounds.b1 = (float)(_cache.Bounds.b2 = (float)(1e6f));
-			_cache.Bounds.b3 = (float)(_cache.Bounds.b4 = (float)(-1e6f));
-			for (j = (int)(0); (j) < (_cache.Paths.Count); j++)
-			{
-				path = _cache.Paths[j];
-				pts = &_cache.Points[path.First];
-				p0 = &pts[path.Count - 1];
-				p1 = &pts[0];
-				if ((__ptEquals((float)(p0->X), (float)(p0->Y), (float)(p1->X), (float)(p1->Y), (float)(_distTol))) != 0)
-				{
-					path.Count--;
-					p0 = &pts[path.Count - 1];
-					path.Closed = (byte)(1);
-				}
-				if ((path.Count) > (2))
-				{
-					area = (float)(__polyArea(pts, (int)(path.Count)));
-					if (((path.Winding) == (NVG_CCW)) && ((area) < (0.0f)))
-						__polyReverse(pts, (int)(path.Count));
-					if (((path.Winding) == (NVG_CW)) && ((area) > (0.0f)))
-						__polyReverse(pts, (int)(path.Count));
-				}
-				for (i = (int)(0); (i) < (path.Count); i++)
-				{
-					p0->DeltaX = (float)(p1->X - p0->X);
-					p0->DeltaY = (float)(p1->Y - p0->Y);
-					p0->Length = (float)(__normalize(&p0->DeltaX, &p0->DeltaY));
-					_cache.Bounds.b1 = (float)(__minf((float)(_cache.Bounds.b1), (float)(p0->X)));
-					_cache.Bounds.b2 = (float)(__minf((float)(_cache.Bounds.b2), (float)(p0->Y)));
-					_cache.Bounds.b3 = (float)(__maxf((float)(_cache.Bounds.b3), (float)(p0->X)));
-					_cache.Bounds.b4 = (float)(__maxf((float)(_cache.Bounds.b4), (float)(p0->Y)));
-					p0 = p1++;
-				}
-			}
-		}
-
-		public void __calculateJoins(float w, int lineJoin, float miterLimit)
-		{
-			int i = 0;
-			int j = 0;
-			float iw = (float)(0.0f);
-			if ((w) > (0.0f))
-				iw = (float)(1.0f / w);
-			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
-			{
-				Path path = _cache.Paths[i];
-				NvgPoint* pts = &_cache.Points[path.First];
-				NvgPoint* p0 = &pts[path.Count - 1];
-				NvgPoint* p1 = &pts[0];
-				int nleft = (int)(0);
-				path.BevelCount = (int)(0);
-				for (j = (int)(0); (j) < (path.Count); j++)
-				{
-					float dlx0 = 0;
-					float dly0 = 0;
-					float dlx1 = 0;
-					float dly1 = 0;
-					float dmr2 = 0;
-					float cross = 0;
-					float limit = 0;
-					dlx0 = (float)(p0->DeltaY);
-					dly0 = (float)(-p0->DeltaX);
-					dlx1 = (float)(p1->DeltaY);
-					dly1 = (float)(-p1->DeltaX);
-					p1->dmx = (float)((dlx0 + dlx1) * 0.5f);
-					p1->dmy = (float)((dly0 + dly1) * 0.5f);
-					dmr2 = (float)(p1->dmx * p1->dmx + p1->dmy * p1->dmy);
-					if ((dmr2) > (0.000001f))
-					{
-						float scale = (float)(1.0f / dmr2);
-						if ((scale) > (600.0f))
-						{
-							scale = (float)(600.0f);
-						}
-						p1->dmx *= (float)(scale);
-						p1->dmy *= (float)(scale);
-					}
-					p1->flags = (byte)(((p1->flags & NVG_PT_CORNER) != 0) ? NVG_PT_CORNER : 0);
-					cross = (float)(p1->DeltaX * p0->DeltaY - p0->DeltaX * p1->DeltaY);
-					if ((cross) > (0.0f))
-					{
-						nleft++;
-						p1->flags |= (byte)(NVG_PT_LEFT);
-					}
-					limit = (float)(__maxf((float)(1.01f), (float)(__minf((float)(p0->Length), (float)(p1->Length)) * iw)));
-					if ((dmr2 * limit * limit) < (1.0f))
-						p1->flags |= (byte)(NVG_PR_INNERBEVEL);
-					if ((p1->flags & NVG_PT_CORNER) != 0)
-					{
-						if ((((dmr2 * miterLimit * miterLimit) < (1.0f)) || ((lineJoin) == (NVG_BEVEL))) || ((lineJoin) == (NVG_ROUND)))
-						{
-							p1->flags |= (byte)(NVG_PT_BEVEL);
-						}
-					}
-					if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
-						path.BevelCount++;
-					p0 = p1++;
-				}
-				path.Convex = (int)(((nleft) == (path.Count)) ? 1 : 0);
-			}
-		}
-
-		public int __expandStroke(float w, float fringe, int lineCap, int lineJoin, float miterLimit)
-		{
-			int cverts = 0;
-			int i = 0;
-			int j = 0;
-			float aa = (float)(fringe);
-			float u0 = (float)(0.0f);
-			float u1 = (float)(1.0f);
-			int ncap = (int)(__curveDivs((float)(w), (float)(3.14159274), (float)(_tessTol)));
-			w += (float)(aa * 0.5f);
-			if ((aa) == (0.0f))
-			{
-				u0 = (float)(0.5f);
-				u1 = (float)(0.5f);
-			}
-
-			__calculateJoins((float)(w), (int)(lineJoin), (float)(miterLimit));
-			cverts = (int)(0);
-			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
-			{
-				Path path = _cache.Paths[i];
-				int loop = (int)(((path.Closed) == (0)) ? 0 : 1);
-				if ((lineJoin) == (NVG_ROUND))
-					cverts += (int)((path.Count + path.BevelCount * (ncap + 2) + 1) * 2);
-				else
-					cverts += (int)((path.Count + path.BevelCount * 5 + 1) * 2);
-				if ((loop) == (0))
-				{
-					if ((lineCap) == (NVG_ROUND))
-					{
-						cverts += (int)((ncap * 2 + 2) * 2);
-					}
-					else
-					{
-						cverts += (int)((3 + 3) * 2);
-					}
-				}
-			}
-			var verts = __allocTempVerts((int)(cverts));
-			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
-			{
-				Path path = _cache.Paths[i];
-				NvgPoint* pts = &_cache.Points[path.First];
-				NvgPoint* p0;
-				NvgPoint* p1;
-				int s = 0;
-				int e = 0;
-				int loop = 0;
-				float dx = 0;
-				float dy = 0;
-				path.Fill = null;
-				loop = (int)(((path.Closed) == (0)) ? 0 : 1);
-				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
-				{
-					var dst = dst2;
-					if ((loop) != 0)
-					{
-						p0 = &pts[path.Count - 1];
-						p1 = &pts[0];
-						s = (int)(0);
-						e = (int)(path.Count);
-					}
-					else
-					{
-						p0 = &pts[0];
-						p1 = &pts[1];
-						s = (int)(1);
-						e = (int)(path.Count - 1);
-					}
-					if ((loop) == (0))
-					{
-						dx = (float)(p1->X - p0->X);
-						dy = (float)(p1->Y - p0->Y);
-						__normalize(&dx, &dy);
-						if ((lineCap) == (NVG_BUTT))
-							dst = __buttCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (float)(-aa * 0.5f), (float)(aa), (float)(u0), (float)(u1));
-						else if (((lineCap) == (NVG_BUTT)) || ((lineCap) == (NVG_SQUARE)))
-							dst = __buttCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (float)(w - aa), (float)(aa), (float)(u0), (float)(u1));
-						else if ((lineCap) == (NVG_ROUND))
-							dst = __roundCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1));
-					}
-					for (j = (int)(s); (j) < (e); ++j)
-					{
-						if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
-						{
-							if ((lineJoin) == (NVG_ROUND))
-							{
-								dst = __roundJoin(dst, p0, p1, (float)(w), (float)(w), (float)(u0), (float)(u1), (int)(ncap), (float)(aa));
-							}
-							else
-							{
-								dst = __bevelJoin(dst, p0, p1, (float)(w), (float)(w), (float)(u0), (float)(u1), (float)(aa));
-							}
-						}
-						else
-						{
-							__vset(dst, (float)(p1->X + (p1->dmx * w)), (float)(p1->Y + (p1->dmy * w)), (float)(u0), (float)(1));
-							dst++;
-							__vset(dst, (float)(p1->X - (p1->dmx * w)), (float)(p1->Y - (p1->dmy * w)), (float)(u1), (float)(1));
-							dst++;
-						}
-						p0 = p1++;
-					}
-					if ((loop) != 0)
-					{
-						__vset(dst, (float)(verts.Array[verts.Offset].Position.X), (float)(verts.Array[verts.Offset].Position.Y), (float)(u0), (float)(1));
-						dst++;
-						__vset(dst, (float)(verts.Array[verts.Offset + 1].Position.X), (float)(verts.Array[verts.Offset + 1].Position.Y), (float)(u1), (float)(1));
-						dst++;
-					}
-					else
-					{
-						dx = (float)(p1->X - p0->X);
-						dy = (float)(p1->Y - p0->Y);
-						__normalize(&dx, &dy);
-						if ((lineCap) == (NVG_BUTT))
-							dst = __buttCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (float)(-aa * 0.5f), (float)(aa), (float)(u0), (float)(u1));
-						else if (((lineCap) == (NVG_BUTT)) || ((lineCap) == (NVG_SQUARE)))
-							dst = __buttCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (float)(w - aa), (float)(aa), (float)(u0), (float)(u1));
-						else if ((lineCap) == (NVG_ROUND))
-							dst = __roundCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1));
-					}
-
-					path.Stroke = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
-
-					var newPos = verts.Offset + path.Stroke.Value.Count;
-					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
-				}
-			}
-			return (int)(1);
-		}
-
-		public int __expandFill(float w, int lineJoin, float miterLimit)
-		{
-			int cverts = 0;
-			int convex = 0;
-			int i = 0;
-			int j = 0;
-			float aa = (float)(_fringeWidth);
-			int fringe = (int)((w) > (0.0f) ? 1 : 0);
-			__calculateJoins((float)(w), (int)(lineJoin), (float)(miterLimit));
-			cverts = (int)(0);
-			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
-			{
-				Path path = _cache.Paths[i];
-				cverts += (int)(path.Count + path.BevelCount + 1);
-				if ((fringe) != 0)
-					cverts += (int)((path.Count + path.BevelCount * 5 + 1) * 2);
-			}
-			var verts = __allocTempVerts((int)(cverts));
-			convex = (int)(((_cache.Paths.Count) == (1)) && ((_cache.Paths[0].Convex) != 0) ? 1 : 0);
-			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
-			{
-				Path path = _cache.Paths[i];
-				NvgPoint* pts = &_cache.Points[path.First];
-				NvgPoint* p0;
-				NvgPoint* p1;
-				float rw = 0;
-				float lw = 0;
-				float woff = 0;
-				float ru = 0;
-				float lu = 0;
-				woff = (float)(0.5f * aa);
-				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
-				{
-					var dst = dst2;
-					if ((fringe) != 0)
-					{
-						p0 = &pts[path.Count - 1];
-						p1 = &pts[0];
-						for (j = (int)(0); (j) < (path.Count); ++j)
-						{
-							if ((p1->flags & NVG_PT_BEVEL) != 0)
-							{
-								float dlx0 = (float)(p0->DeltaY);
-								float dly0 = (float)(-p0->DeltaX);
-								float dlx1 = (float)(p1->DeltaY);
-								float dly1 = (float)(-p1->DeltaX);
-								if ((p1->flags & NVG_PT_LEFT) != 0)
-								{
-									float lx = (float)(p1->X + p1->dmx * woff);
-									float ly = (float)(p1->Y + p1->dmy * woff);
-									__vset(dst, (float)(lx), (float)(ly), (float)(0.5f), (float)(1));
-									dst++;
-								}
-								else
-								{
-									float lx0 = (float)(p1->X + dlx0 * woff);
-									float ly0 = (float)(p1->Y + dly0 * woff);
-									float lx1 = (float)(p1->X + dlx1 * woff);
-									float ly1 = (float)(p1->Y + dly1 * woff);
-									__vset(dst, (float)(lx0), (float)(ly0), (float)(0.5f), (float)(1));
-									dst++;
-									__vset(dst, (float)(lx1), (float)(ly1), (float)(0.5f), (float)(1));
-									dst++;
-								}
-							}
-							else
-							{
-								__vset(dst, (float)(p1->X + (p1->dmx * woff)), (float)(p1->Y + (p1->dmy * woff)), (float)(0.5f), (float)(1));
-								dst++;
-							}
-							p0 = p1++;
-						}
-					}
-					else
-					{
-						for (j = (int)(0); (j) < (path.Count); ++j)
-						{
-							__vset(dst, (float)(pts[j].X), (float)(pts[j].Y), (float)(0.5f), (float)(1));
-							dst++;
-						}
-					}
-
-					path.Fill = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
-
-					var newPos = verts.Offset + path.Fill.Value.Count;
-					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
-				}
-				if ((fringe) != 0)
-				{
-					lw = (float)(w + woff);
-					rw = (float)(w - woff);
-					lu = (float)(0);
-					ru = (float)(1);
-					fixed (Vertex* dst2 = &verts.Array[verts.Offset])
-					{
-						var dst = dst2;
-						if ((convex) != 0)
-						{
-							lw = (float)(woff);
-							lu = (float)(0.5f);
-						}
-						p0 = &pts[path.Count - 1];
-						p1 = &pts[0];
-						for (j = (int)(0); (j) < (path.Count); ++j)
-						{
-							if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
-							{
-								dst = __bevelJoin(dst, p0, p1, (float)(lw), (float)(rw), (float)(lu), (float)(ru), (float)(_fringeWidth));
-							}
-							else
-							{
-								__vset(dst, (float)(p1->X + (p1->dmx * lw)), (float)(p1->Y + (p1->dmy * lw)), (float)(lu), (float)(1));
-								dst++;
-								__vset(dst, (float)(p1->X - (p1->dmx * rw)), (float)(p1->Y - (p1->dmy * rw)), (float)(ru), (float)(1));
-								dst++;
-							}
-							p0 = p1++;
-						}
-						__vset(dst, (float)(verts.Array[verts.Offset].Position.X),
-							(float)(verts.Array[verts.Offset].Position.Y),
-							(float)(lu), (float)(1));
-						dst++;
-						__vset(dst, (float)(verts.Array[verts.Offset + 1].Position.X),
-							(float)(verts.Array[verts.Offset + 1].Position.Y),
-							(float)(ru), (float)(1));
-						dst++;
-
-						path.Stroke = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
-
-						var newPos = verts.Offset + path.Stroke.Value.Count;
-						verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
-					}
-				}
-				else
-				{
-					path.Stroke = null;
-				}
-			}
-
-			return (int)(1);
 		}
 
 		public void BeginPath()
@@ -1250,30 +613,30 @@ namespace NanoVGSharp
 			dy0 = (float)(y0 - y1);
 			dx1 = (float)(x2 - x1);
 			dy1 = (float)(y2 - y1);
-			__normalize(&dx0, &dy0);
-			__normalize(&dx1, &dy1);
-			a = (float)(acosf((float)(dx0 * dx1 + dy0 * dy1)));
-			d = (float)(radius / tanf((float)(a / 2.0f)));
+			NvgUtility.__normalize(&dx0, &dy0);
+			NvgUtility.__normalize(&dx1, &dy1);
+			a = (float)(NvgUtility.acosf((float)(dx0 * dx1 + dy0 * dy1)));
+			d = (float)(radius / NvgUtility.tanf((float)(a / 2.0f)));
 			if ((d) > (10000.0f))
 			{
 				LineTo((float)(x1), (float)(y1));
 				return;
 			}
 
-			if ((__cross((float)(dx0), (float)(dy0), (float)(dx1), (float)(dy1))) > (0.0f))
+			if ((NvgUtility.__cross((float)(dx0), (float)(dy0), (float)(dx1), (float)(dy1))) > (0.0f))
 			{
 				cx = (float)(x1 + dx0 * d + dy0 * radius);
 				cy = (float)(y1 + dy0 * d + -dx0 * radius);
-				a0 = (float)(atan2f((float)(dx0), (float)(-dy0)));
-				a1 = (float)(atan2f((float)(-dx1), (float)(dy1)));
+				a0 = (float)(NvgUtility.atan2f((float)(dx0), (float)(-dy0)));
+				a1 = (float)(NvgUtility.atan2f((float)(-dx1), (float)(dy1)));
 				dir = (int)(NVG_CW);
 			}
 			else
 			{
 				cx = (float)(x1 + dx0 * d + -dy0 * radius);
 				cy = (float)(y1 + dy0 * d + dx0 * radius);
-				a0 = (float)(atan2f((float)(-dx0), (float)(dy0)));
-				a1 = (float)(atan2f((float)(dx1), (float)(-dy1)));
+				a0 = (float)(NvgUtility.atan2f((float)(-dx0), (float)(dy0)));
+				a1 = (float)(NvgUtility.atan2f((float)(dx1), (float)(-dy1)));
 				dir = (int)(NVG_CCW);
 			}
 
@@ -1321,7 +684,7 @@ namespace NanoVGSharp
 			da = (float)(a1 - a0);
 			if ((dir) == (NVG_CW))
 			{
-				if ((__absf((float)(da))) >= (3.14159274 * 2))
+				if ((NvgUtility.__absf((float)(da))) >= (3.14159274 * 2))
 				{
 					da = (float)(3.14159274 * 2);
 				}
@@ -1335,7 +698,7 @@ namespace NanoVGSharp
 			}
 			else
 			{
-				if ((__absf((float)(da))) >= (3.14159274 * 2))
+				if ((NvgUtility.__absf((float)(da))) >= (3.14159274 * 2))
 				{
 					da = (float)(-3.14159274 * 2);
 				}
@@ -1348,17 +711,17 @@ namespace NanoVGSharp
 				}
 			}
 
-			ndivs = (int)(__maxi((int)(1), (int)(__mini((int)(__absf((float)(da)) / (3.14159274 * 0.5f) + 0.5f), (int)(5)))));
+			ndivs = (int)(NvgUtility.__maxi((int)(1), (int)(NvgUtility.__mini((int)(NvgUtility.__absf((float)(da)) / (3.14159274 * 0.5f) + 0.5f), (int)(5)))));
 			hda = (float)((da / (float)(ndivs)) / 2.0f);
-			kappa = (float)(__absf((float)(4.0f / 3.0f * (1.0f - cosf((float)(hda))) / sinf((float)(hda)))));
+			kappa = (float)(NvgUtility.__absf((float)(4.0f / 3.0f * (1.0f - NvgUtility.cosf((float)(hda))) / NvgUtility.sinf((float)(hda)))));
 			if ((dir) == (NVG_CCW))
 				kappa = (float)(-kappa);
 			nvals = (int)(0);
 			for (i = (int)(0); i <= ndivs; i++)
 			{
 				a = (float)(a0 + da * (i / (float)(ndivs)));
-				dx = (float)(cosf((float)(a)));
-				dy = (float)(sinf((float)(a)));
+				dx = (float)(NvgUtility.cosf((float)(a)));
+				dy = (float)(NvgUtility.sinf((float)(a)));
 				x = (float)(cx + dx * r);
 				y = (float)(cy + dy * r);
 				tanx = (float)(-dy * r * kappa);
@@ -1421,16 +784,16 @@ namespace NanoVGSharp
 			}
 			else
 			{
-				float halfw = (float)(__absf((float)(w)) * 0.5f);
-				float halfh = (float)(__absf((float)(h)) * 0.5f);
-				float rxBL = (float)(__minf((float)(radBottomLeft), (float)(halfw)) * __signf((float)(w)));
-				float ryBL = (float)(__minf((float)(radBottomLeft), (float)(halfh)) * __signf((float)(h)));
-				float rxBR = (float)(__minf((float)(radBottomRight), (float)(halfw)) * __signf((float)(w)));
-				float ryBR = (float)(__minf((float)(radBottomRight), (float)(halfh)) * __signf((float)(h)));
-				float rxTR = (float)(__minf((float)(radTopRight), (float)(halfw)) * __signf((float)(w)));
-				float ryTR = (float)(__minf((float)(radTopRight), (float)(halfh)) * __signf((float)(h)));
-				float rxTL = (float)(__minf((float)(radTopLeft), (float)(halfw)) * __signf((float)(w)));
-				float ryTL = (float)(__minf((float)(radTopLeft), (float)(halfh)) * __signf((float)(h)));
+				float halfw = (float)(NvgUtility.__absf((float)(w)) * 0.5f);
+				float halfh = (float)(NvgUtility.__absf((float)(h)) * 0.5f);
+				float rxBL = (float)(NvgUtility.__minf((float)(radBottomLeft), (float)(halfw)) * NvgUtility.__signf((float)(w)));
+				float ryBL = (float)(NvgUtility.__minf((float)(radBottomLeft), (float)(halfh)) * NvgUtility.__signf((float)(h)));
+				float rxBR = (float)(NvgUtility.__minf((float)(radBottomRight), (float)(halfw)) * NvgUtility.__signf((float)(w)));
+				float ryBR = (float)(NvgUtility.__minf((float)(radBottomRight), (float)(halfh)) * NvgUtility.__signf((float)(h)));
+				float rxTR = (float)(NvgUtility.__minf((float)(radTopRight), (float)(halfw)) * NvgUtility.__signf((float)(w)));
+				float ryTR = (float)(NvgUtility.__minf((float)(radTopRight), (float)(halfh)) * NvgUtility.__signf((float)(h)));
+				float rxTL = (float)(NvgUtility.__minf((float)(radTopLeft), (float)(halfw)) * NvgUtility.__signf((float)(w)));
+				float ryTL = (float)(NvgUtility.__minf((float)(radTopLeft), (float)(halfh)) * NvgUtility.__signf((float)(h)));
 				float* vals = stackalloc float[44];
 				vals[0] = (float)(NVG_MOVETO);
 				vals[1] = (float)(x);
@@ -1596,13 +959,13 @@ namespace NanoVGSharp
 		{
 			NanoVGContextState state = GetState();
 			float scale = (float)(__getAverageScale(ref state.Transform));
-			float strokeWidth = (float)(__clampf((float)(state.StrokeWidth * scale), (float)(0.0f), (float)(200.0f)));
+			float strokeWidth = (float)(NvgUtility.__clampf((float)(state.StrokeWidth * scale), (float)(0.0f), (float)(200.0f)));
 			Paint strokePaint = (Paint)(state.Stroke);
 			Path path;
 			int i = 0;
 			if ((strokeWidth) < (_fringeWidth))
 			{
-				float alpha = (float)(__clampf((float)(strokeWidth / _fringeWidth), (float)(0.0f), (float)(1.0f)));
+				float alpha = (float)(NvgUtility.__clampf((float)(strokeWidth / _fringeWidth), (float)(0.0f), (float)(1.0f)));
 
 				MultiplyAlpha(ref strokePaint.InnerColor, alpha * alpha);
 				MultiplyAlpha(ref strokePaint.OuterColor, alpha * alpha);
@@ -1617,7 +980,7 @@ namespace NanoVGSharp
 				__expandStroke((float)(strokeWidth * 0.5f), (float)(_fringeWidth), (int)(state.LineCap), (int)(state.LineJoin), (float)(state.MiterLimit));
 			else
 				__expandStroke((float)(strokeWidth * 0.5f), (float)(0.0f), (int)(state.LineCap), (int)(state.LineJoin), (float)(state.MiterLimit));
-			_renderer.RenderStroke(ref strokePaint, ref state.Scissor, 
+			_renderer.RenderStroke(ref strokePaint, ref state.Scissor,
 				(float)(_fringeWidth), (float)(strokeWidth), _cache.Paths.ToArraySegment());
 			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
 			{
@@ -1693,66 +1056,6 @@ namespace NanoVGSharp
 			state.FontId = (int)(_fontSyst.GetFontByName(font));
 		}
 
-		public void __flushTextTexture()
-		{
-			int* dirty = stackalloc int[4];
-			if ((_fontSyst.ValidateTexture(dirty)) != 0)
-			{
-				int fontImage = (int)(_fontImages[_fontImageIdx]);
-				if (fontImage != 0)
-				{
-					int iw = 0;
-					int ih = 0;
-					byte[] data = _fontSyst.GetTextureData(&iw, &ih);
-					int x = (int)(dirty[0]);
-					int y = (int)(dirty[1]);
-					int w = (int)(dirty[2] - dirty[0]);
-					int h = (int)(dirty[3] - dirty[1]);
-					_renderer.UpdateTexture((int)(fontImage), (int)(x), (int)(y), (int)(w), (int)(h), data);
-				}
-			}
-		}
-
-		public int __allocTextAtlas()
-		{
-			int iw = 0;
-			int ih = 0;
-			__flushTextTexture();
-			if ((_fontImageIdx) >= (4 - 1))
-				return (int)(0);
-			if (_fontImages[_fontImageIdx + 1] != 0)
-				ImageSize((int)(_fontImages[_fontImageIdx + 1]), out iw, out ih);
-			else
-			{
-				ImageSize((int)(_fontImages[_fontImageIdx]), out iw, out ih);
-				if ((iw) > (ih))
-					ih *= (int)(2);
-				else
-					iw *= (int)(2);
-				if (((iw) > (2048)) || ((ih) > (2048)))
-					iw = (int)(ih = (int)(2048));
-				_fontImages[_fontImageIdx + 1] = (int)(_renderer.CreateTexture((int)(NVG_TEXTURE_ALPHA), (int)(iw), (int)(ih), (int)(0), null));
-			}
-
-			++_fontImageIdx;
-			_fontSyst.ResetAtlas((int)(iw), (int)(ih));
-			return (int)(1);
-		}
-
-		private void __renderText(ArraySegment<Vertex> verts)
-		{
-			NanoVGContextState state = GetState();
-			Paint paint = (Paint)(state.Fill);
-			paint.Image = (int)(_fontImages[_fontImageIdx]);
-
-			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
-			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
-
-			_renderer.RenderTriangles(ref paint, ref state.Scissor, verts);
-			_drawCallCount++;
-			_textTriCount += (int)(verts.Count / 3);
-		}
-
 		public float Text(float x, float y, StringSegment _string_)
 		{
 			NanoVGContextState state = GetState();
@@ -1770,7 +1073,7 @@ namespace NanoVGSharp
 			_fontSyst.SetBlur((float)(state.FontBlur * scale));
 			_fontSyst.SetAlign((int)(state.TextAlign));
 			_fontSyst.SetFont((int)(state.FontId));
-			cverts = (int)(__maxi((int)(2), (int)(_string_.Length)) * 6);
+			cverts = (int)(NvgUtility.__maxi((int)(2), (int)(_string_.Length)) * 6);
 			var verts = __allocTempVerts((int)(cverts));
 
 			_fontSyst.TextIterInit(iter, (float)(x * scale), (float)(y * scale), _string_, (int)(FontSystem.FONS_GLYPH_BITMAP_REQUIRED));
@@ -1894,8 +1197,8 @@ namespace NanoVGSharp
 				prevIter = (FontTextIterator)(iter);
 				positions[npos].Str = iter.Str;
 				positions[npos].X = (float)(iter.X * invscale);
-				positions[npos].MinX = (float)(__minf((float)(iter.X), (float)(q.X0)) * invscale);
-				positions[npos].MaxX = (float)(__maxf((float)(iter.NextX), (float)(q.X1)) * invscale);
+				positions[npos].MinX = (float)(NvgUtility.__minf((float)(iter.X), (float)(q.X0)) * invscale);
+				positions[npos].MaxX = (float)(NvgUtility.__maxf((float)(iter.NextX), (float)(q.X1)) * invscale);
 				npos++;
 				if ((npos) >= (positions.Length))
 					break;
@@ -2187,10 +1490,10 @@ namespace NanoVGSharp
 						dx = (float)(breakRowWidth - row.Width);
 					rminx = (float)(x + row.MinX + dx);
 					rmaxx = (float)(x + row.MaxX + dx);
-					minx = (float)(__minf((float)(minx), (float)(rminx)));
-					maxx = (float)(__maxf((float)(maxx), (float)(rmaxx)));
-					miny = (float)(__minf((float)(miny), (float)(y + rminy)));
-					maxy = (float)(__maxf((float)(maxy), (float)(y + rmaxy)));
+					minx = (float)(NvgUtility.__minf((float)(minx), (float)(rminx)));
+					maxx = (float)(NvgUtility.__maxf((float)(maxx), (float)(rmaxx)));
+					miny = (float)(NvgUtility.__minf((float)(miny), (float)(y + rminy)));
+					maxy = (float)(NvgUtility.__maxf((float)(maxy), (float)(y + rmaxy)));
 					y += (float)(lineh * state.LineHeight);
 				}
 			}
@@ -2221,157 +1524,702 @@ namespace NanoVGSharp
 			lineh *= (float)(invscale);
 		}
 
-		public static float sqrtf(float a)
+		private void SetDevicePixelRatio(float ratio)
 		{
-			return (float)(Math.Sqrt((float)(a)));
+			_tessTol = (float)(0.25f / ratio);
+			_distTol = (float)(0.01f / ratio);
+			_fringeWidth = (float)(1.0f / ratio);
+			_devicePxRatio = (float)(ratio);
 		}
 
-		public static float sinf(float a)
+		private NanoVGContextState GetState()
 		{
-			return (float)(Math.Sin((float)(a)));
+			return _states[_statesNumber - 1];
 		}
 
-		public static float tanf(float a)
+		private void __appendCommands(float* vals, int nvals)
 		{
-			return (float)(Math.Tan((float)(a)));
-		}
-
-		public static float atan2f(float a, float b)
-		{
-			return (float)(Math.Atan2(a, b));
-		}
-
-		public static float cosf(float a)
-		{
-			return (float)(Math.Cos((float)(a)));
-		}
-
-		public static float acosf(float a)
-		{
-			return (float)(Math.Acos((float)(a)));
-		}
-
-		public static float ceilf(float a)
-		{
-			return (float)(Math.Ceiling((float)(a)));
-		}
-
-		private static float __modf(float a, float b)
-		{
-			return (float)(CRuntime.fmod((float)(a), (float)(b)));
-		}
-
-		public static int __mini(int a, int b)
-		{
-			return (int)((a) < (b) ? a : b);
-		}
-
-		public static int __maxi(int a, int b)
-		{
-			return (int)((a) > (b) ? a : b);
-		}
-
-		public static int __clampi(int a, int mn, int mx)
-		{
-			return (int)((a) < (mn) ? mn : ((a) > (mx) ? mx : a));
-		}
-
-		private static float __minf(float a, float b)
-		{
-			return (float)((a) < (b) ? a : b);
-		}
-
-		private static float __maxf(float a, float b)
-		{
-			return (float)((a) > (b) ? a : b);
-		}
-
-		private static float __absf(float a)
-		{
-			return (float)((a) >= (0.0f) ? a : -a);
-		}
-
-		private static float __signf(float a)
-		{
-			return (float)((a) >= (0.0f) ? 1.0f : -1.0f);
-		}
-
-		private static float __clampf(float a, float mn, float mx)
-		{
-			return (float)((a) < (mn) ? mn : ((a) > (mx) ? mx : a));
-		}
-
-		private static float __cross(float dx0, float dy0, float dx1, float dy1)
-		{
-			return (float)(dx1 * dy0 - dx0 * dy1);
-		}
-
-		private static float __normalize(float* x, float* y)
-		{
-			float d = (float)(sqrtf((float)((*x) * (*x) + (*y) * (*y))));
-			if ((d) > (1e-6f))
+			NanoVGContextState state = GetState();
+			int i = 0;
+			if ((_commandsNumber + nvals) > (_commandsCount))
 			{
-				float id = (float)(1.0f / d);
-				*x *= (float)(id);
-				*y *= (float)(id);
+				float* commands;
+				int ccommands = (int)(_commandsNumber + nvals + this._commandsCount / 2);
+				commands = (float*)(CRuntime.realloc(this._commands, (ulong)(sizeof(float) * ccommands)));
+				if ((commands) == null)
+					return;
+				this._commands = commands;
+				this._commandsCount = (int)(ccommands);
 			}
 
-			return (float)(d);
+			if (((int)(vals[0]) != NVG_CLOSE) && ((int)(vals[0]) != NVG_WINDING))
+			{
+				_commandX = (float)(vals[nvals - 2]);
+				_commandY = (float)(vals[nvals - 1]);
+			}
+
+			i = (int)(0);
+			while ((i) < (nvals))
+			{
+				int cmd = (int)(vals[i]);
+				switch (cmd)
+				{
+					case NVG_MOVETO:
+						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
+						i += (int)(3);
+						break;
+					case NVG_LINETO:
+						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
+						i += (int)(3);
+						break;
+					case NVG_BEZIERTO:
+						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], (float)(vals[i + 1]), (float)(vals[i + 2]));
+						state.Transform.TransformPoint(out vals[i + 3], out vals[i + 4], (float)(vals[i + 3]), (float)(vals[i + 4]));
+						state.Transform.TransformPoint(out vals[i + 5], out vals[i + 6], (float)(vals[i + 5]), (float)(vals[i + 6]));
+						i += (int)(7);
+						break;
+					case NVG_CLOSE:
+						i++;
+						break;
+					case NVG_WINDING:
+						i += (int)(2);
+						break;
+					default:
+						i++;
+						break;
+				}
+			}
+			CRuntime.memcpy(&_commands[_commandsNumber], vals, (ulong)(nvals * sizeof(float)));
+			_commandsNumber += (int)(nvals);
 		}
 
-		private static float __hue(float h, float m1, float m2)
+		private void __clearPathCache()
 		{
-			if ((h) < (0))
-				h += (float)(1);
-			if ((h) > (1))
-				h -= (float)(1);
-			if ((h) < (1.0f / 6.0f))
-				return (float)(m1 + (m2 - m1) * h * 6.0f);
-			else if ((h) < (3.0f / 6.0f))
-				return (float)(m2);
-			else if ((h) < (4.0f / 6.0f))
-				return (float)(m1 + (m2 - m1) * (2.0f / 3.0f - h) * 6.0f);
-			return (float)(m1);
+			_cache.Paths.Clear();
+			_cache.PointsNumber = 0;
 		}
 
-		public static Color HSLA(float h, float s, float l, byte a)
+		private Path __lastPath()
 		{
-			float m1 = 0;
-			float m2 = 0;
-			h = (float)(__modf((float)(h), (float)(1.0f)));
-			if ((h) < (0.0f))
-				h += (float)(1.0f);
-			s = (float)(__clampf((float)(s), (float)(0.0f), (float)(1.0f)));
-			l = (float)(__clampf((float)(l), (float)(0.0f), (float)(1.0f)));
-			m2 = (float)(l <= 0.5f ? (l * (1 + s)) : (l + s - l * s));
-			m1 = (float)(2 * l - m2);
-
-			float fr = (float)(__clampf((float)(__hue((float)(h + 1.0f / 3.0f), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
-			float fg = (float)(__clampf((float)(__hue((float)(h), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
-			float fb = (float)(__clampf((float)(__hue((float)(h - 1.0f / 3.0f), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
-			float fa = (float)(a / 255.0f);
-
-			return new Color(fr, fg, fb, fa);
+			if ((_cache.Paths.Count) > (0))
+				return _cache.Paths[_cache.Paths.Count - 1];
+			return null;
 		}
 
-		public static float DegToRad(float deg)
+		private void __addPath()
 		{
-			return (float)(deg / 180.0f * 3.14159274);
+			var newPath = new Path
+			{
+				First = _cache.PointsNumber,
+				Winding = NVG_CCW
+			};
+
+			_cache.Paths.Add(newPath);
 		}
 
-		public static float RadToDeg(float rad)
+		private NvgPoint* __lastPoint()
 		{
-			return (float)(rad / 3.14159274 * 180.0f);
+			if ((_cache.PointsNumber) > (0))
+				return &_cache.Points[_cache.PointsNumber - 1];
+			return null;
 		}
 
-		private static void __setPaintColor(ref Paint p, Color color)
+		private void __addPoint(float x, float y, int flags)
 		{
-			p.Zero();
-			p.Transform.SetIdentity();
-			p.Radius = 0.0f;
-			p.Feather = 1.0f;
-			p.InnerColor = color;
-			p.OuterColor = color;
+			Path path = __lastPath();
+			NvgPoint* pt;
+			if ((path) == null)
+				return;
+			if (((path.Count) > (0)) && ((_cache.PointsNumber) > (0)))
+			{
+				pt = __lastPoint();
+				if ((__ptEquals((float)(pt->X), (float)(pt->Y), (float)(x), (float)(y), (float)(_distTol))) != 0)
+				{
+					pt->flags |= (byte)(flags);
+					return;
+				}
+			}
+
+			if ((_cache.PointsNumber + 1) > (_cache.PointsCount))
+			{
+				NvgPoint* points;
+				int cpoints = (int)(_cache.PointsNumber + 1 + _cache.PointsCount / 2);
+				points = (NvgPoint*)(CRuntime.realloc(_cache.Points, (ulong)(sizeof(NvgPoint) * cpoints)));
+				if ((points) == null)
+					return;
+				_cache.Points = points;
+				_cache.PointsCount = (int)(cpoints);
+			}
+
+			pt = &_cache.Points[_cache.PointsNumber];
+			pt->Reset();
+			pt->X = (float)(x);
+			pt->Y = (float)(y);
+			pt->flags = ((byte)(flags));
+			_cache.PointsNumber++;
+			path.Count++;
+		}
+
+		private void __closePath()
+		{
+			Path path = __lastPath();
+			if ((path) == null)
+				return;
+			path.Closed = (byte)(1);
+		}
+
+		private void __pathWinding(int winding)
+		{
+			Path path = __lastPath();
+			if ((path) == null)
+				return;
+			path.Winding = (int)(winding);
+		}
+
+		private ArraySegment<Vertex> __allocTempVerts(int nverts)
+		{
+			_cache.Vertexes.EnsureSize(nverts);
+
+			return new ArraySegment<Vertex>(_cache.Vertexes.Array);
+		}
+
+		private void __tesselateBezier(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, int level, int type)
+		{
+			float x12 = 0;
+			float y12 = 0;
+			float x23 = 0;
+			float y23 = 0;
+			float x34 = 0;
+			float y34 = 0;
+			float x123 = 0;
+			float y123 = 0;
+			float x234 = 0;
+			float y234 = 0;
+			float x1234 = 0;
+			float y1234 = 0;
+			float dx = 0;
+			float dy = 0;
+			float d2 = 0;
+			float d3 = 0;
+			if ((level) > (10))
+				return;
+			x12 = (float)((x1 + x2) * 0.5f);
+			y12 = (float)((y1 + y2) * 0.5f);
+			x23 = (float)((x2 + x3) * 0.5f);
+			y23 = (float)((y2 + y3) * 0.5f);
+			x34 = (float)((x3 + x4) * 0.5f);
+			y34 = (float)((y3 + y4) * 0.5f);
+			x123 = (float)((x12 + x23) * 0.5f);
+			y123 = (float)((y12 + y23) * 0.5f);
+			dx = (float)(x4 - x1);
+			dy = (float)(y4 - y1);
+			d2 = (float)(NvgUtility.__absf((float)((x2 - x4) * dy - (y2 - y4) * dx)));
+			d3 = (float)(NvgUtility.__absf((float)((x3 - x4) * dy - (y3 - y4) * dx)));
+			if (((d2 + d3) * (d2 + d3)) < (_tessTol * (dx * dx + dy * dy)))
+			{
+				__addPoint((float)(x4), (float)(y4), (int)(type));
+				return;
+			}
+
+			x234 = (float)((x23 + x34) * 0.5f);
+			y234 = (float)((y23 + y34) * 0.5f);
+			x1234 = (float)((x123 + x234) * 0.5f);
+			y1234 = (float)((y123 + y234) * 0.5f);
+			__tesselateBezier((float)(x1), (float)(y1), (float)(x12), (float)(y12), (float)(x123), (float)(y123), (float)(x1234), (float)(y1234), (int)(level + 1), (int)(0));
+			__tesselateBezier((float)(x1234), (float)(y1234), (float)(x234), (float)(y234), (float)(x34), (float)(y34), (float)(x4), (float)(y4), (int)(level + 1), (int)(type));
+		}
+
+		private void __flattenPaths()
+		{
+			NvgPoint* last;
+			NvgPoint* p0;
+			NvgPoint* p1;
+			NvgPoint* pts;
+			Path path;
+			int i = 0;
+			int j = 0;
+			float* cp1;
+			float* cp2;
+			float* p;
+			float area = 0;
+			if ((_cache.Paths.Count) > (0))
+				return;
+			i = (int)(0);
+			while ((i) < (_commandsNumber))
+			{
+				int cmd = (int)(_commands[i]);
+				switch (cmd)
+				{
+					case NVG_MOVETO:
+						__addPath();
+						p = &_commands[i + 1];
+						__addPoint((float)(p[0]), (float)(p[1]), (int)(NVG_PT_CORNER));
+						i += (int)(3);
+						break;
+					case NVG_LINETO:
+						p = &_commands[i + 1];
+						__addPoint((float)(p[0]), (float)(p[1]), (int)(NVG_PT_CORNER));
+						i += (int)(3);
+						break;
+					case NVG_BEZIERTO:
+						last = __lastPoint();
+						if (last != null)
+						{
+							cp1 = &_commands[i + 1];
+							cp2 = &_commands[i + 3];
+							p = &_commands[i + 5];
+							__tesselateBezier((float)(last->X), (float)(last->Y), (float)(cp1[0]), (float)(cp1[1]), (float)(cp2[0]), (float)(cp2[1]), (float)(p[0]), (float)(p[1]), (int)(0), (int)(NVG_PT_CORNER));
+						}
+						i += (int)(7);
+						break;
+					case NVG_CLOSE:
+						__closePath();
+						i++;
+						break;
+					case NVG_WINDING:
+						__pathWinding((int)(_commands[i + 1]));
+						i += (int)(2);
+						break;
+					default:
+						i++;
+						break;
+				}
+			}
+			_cache.Bounds.b1 = (float)(_cache.Bounds.b2 = (float)(1e6f));
+			_cache.Bounds.b3 = (float)(_cache.Bounds.b4 = (float)(-1e6f));
+			for (j = (int)(0); (j) < (_cache.Paths.Count); j++)
+			{
+				path = _cache.Paths[j];
+				pts = &_cache.Points[path.First];
+				p0 = &pts[path.Count - 1];
+				p1 = &pts[0];
+				if ((__ptEquals((float)(p0->X), (float)(p0->Y), (float)(p1->X), (float)(p1->Y), (float)(_distTol))) != 0)
+				{
+					path.Count--;
+					p0 = &pts[path.Count - 1];
+					path.Closed = (byte)(1);
+				}
+				if ((path.Count) > (2))
+				{
+					area = (float)(__polyArea(pts, (int)(path.Count)));
+					if (((path.Winding) == (NVG_CCW)) && ((area) < (0.0f)))
+						__polyReverse(pts, (int)(path.Count));
+					if (((path.Winding) == (NVG_CW)) && ((area) > (0.0f)))
+						__polyReverse(pts, (int)(path.Count));
+				}
+				for (i = (int)(0); (i) < (path.Count); i++)
+				{
+					p0->DeltaX = (float)(p1->X - p0->X);
+					p0->DeltaY = (float)(p1->Y - p0->Y);
+					p0->Length = (float)(NvgUtility.__normalize(&p0->DeltaX, &p0->DeltaY));
+					_cache.Bounds.b1 = (float)(NvgUtility.__minf((float)(_cache.Bounds.b1), (float)(p0->X)));
+					_cache.Bounds.b2 = (float)(NvgUtility.__minf((float)(_cache.Bounds.b2), (float)(p0->Y)));
+					_cache.Bounds.b3 = (float)(NvgUtility.__maxf((float)(_cache.Bounds.b3), (float)(p0->X)));
+					_cache.Bounds.b4 = (float)(NvgUtility.__maxf((float)(_cache.Bounds.b4), (float)(p0->Y)));
+					p0 = p1++;
+				}
+			}
+		}
+
+		private void __calculateJoins(float w, int lineJoin, float miterLimit)
+		{
+			int i = 0;
+			int j = 0;
+			float iw = (float)(0.0f);
+			if ((w) > (0.0f))
+				iw = (float)(1.0f / w);
+			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
+			{
+				Path path = _cache.Paths[i];
+				NvgPoint* pts = &_cache.Points[path.First];
+				NvgPoint* p0 = &pts[path.Count - 1];
+				NvgPoint* p1 = &pts[0];
+				int nleft = (int)(0);
+				path.BevelCount = (int)(0);
+				for (j = (int)(0); (j) < (path.Count); j++)
+				{
+					float dlx0 = 0;
+					float dly0 = 0;
+					float dlx1 = 0;
+					float dly1 = 0;
+					float dmr2 = 0;
+					float cross = 0;
+					float limit = 0;
+					dlx0 = (float)(p0->DeltaY);
+					dly0 = (float)(-p0->DeltaX);
+					dlx1 = (float)(p1->DeltaY);
+					dly1 = (float)(-p1->DeltaX);
+					p1->dmx = (float)((dlx0 + dlx1) * 0.5f);
+					p1->dmy = (float)((dly0 + dly1) * 0.5f);
+					dmr2 = (float)(p1->dmx * p1->dmx + p1->dmy * p1->dmy);
+					if ((dmr2) > (0.000001f))
+					{
+						float scale = (float)(1.0f / dmr2);
+						if ((scale) > (600.0f))
+						{
+							scale = (float)(600.0f);
+						}
+						p1->dmx *= (float)(scale);
+						p1->dmy *= (float)(scale);
+					}
+					p1->flags = (byte)(((p1->flags & NVG_PT_CORNER) != 0) ? NVG_PT_CORNER : 0);
+					cross = (float)(p1->DeltaX * p0->DeltaY - p0->DeltaX * p1->DeltaY);
+					if ((cross) > (0.0f))
+					{
+						nleft++;
+						p1->flags |= (byte)(NVG_PT_LEFT);
+					}
+					limit = (float)(NvgUtility.__maxf((float)(1.01f), (float)(NvgUtility.__minf((float)(p0->Length), (float)(p1->Length)) * iw)));
+					if ((dmr2 * limit * limit) < (1.0f))
+						p1->flags |= (byte)(NVG_PR_INNERBEVEL);
+					if ((p1->flags & NVG_PT_CORNER) != 0)
+					{
+						if ((((dmr2 * miterLimit * miterLimit) < (1.0f)) || ((lineJoin) == (NVG_BEVEL))) || ((lineJoin) == (NVG_ROUND)))
+						{
+							p1->flags |= (byte)(NVG_PT_BEVEL);
+						}
+					}
+					if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+						path.BevelCount++;
+					p0 = p1++;
+				}
+				path.Convex = (int)(((nleft) == (path.Count)) ? 1 : 0);
+			}
+		}
+
+		private int __expandStroke(float w, float fringe, int lineCap, int lineJoin, float miterLimit)
+		{
+			int cverts = 0;
+			int i = 0;
+			int j = 0;
+			float aa = (float)(fringe);
+			float u0 = (float)(0.0f);
+			float u1 = (float)(1.0f);
+			int ncap = (int)(__curveDivs((float)(w), (float)(3.14159274), (float)(_tessTol)));
+			w += (float)(aa * 0.5f);
+			if ((aa) == (0.0f))
+			{
+				u0 = (float)(0.5f);
+				u1 = (float)(0.5f);
+			}
+
+			__calculateJoins((float)(w), (int)(lineJoin), (float)(miterLimit));
+			cverts = (int)(0);
+			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
+			{
+				Path path = _cache.Paths[i];
+				int loop = (int)(((path.Closed) == (0)) ? 0 : 1);
+				if ((lineJoin) == (NVG_ROUND))
+					cverts += (int)((path.Count + path.BevelCount * (ncap + 2) + 1) * 2);
+				else
+					cverts += (int)((path.Count + path.BevelCount * 5 + 1) * 2);
+				if ((loop) == (0))
+				{
+					if ((lineCap) == (NVG_ROUND))
+					{
+						cverts += (int)((ncap * 2 + 2) * 2);
+					}
+					else
+					{
+						cverts += (int)((3 + 3) * 2);
+					}
+				}
+			}
+			var verts = __allocTempVerts((int)(cverts));
+			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
+			{
+				Path path = _cache.Paths[i];
+				NvgPoint* pts = &_cache.Points[path.First];
+				NvgPoint* p0;
+				NvgPoint* p1;
+				int s = 0;
+				int e = 0;
+				int loop = 0;
+				float dx = 0;
+				float dy = 0;
+				path.Fill = null;
+				loop = (int)(((path.Closed) == (0)) ? 0 : 1);
+				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
+				{
+					var dst = dst2;
+					if ((loop) != 0)
+					{
+						p0 = &pts[path.Count - 1];
+						p1 = &pts[0];
+						s = (int)(0);
+						e = (int)(path.Count);
+					}
+					else
+					{
+						p0 = &pts[0];
+						p1 = &pts[1];
+						s = (int)(1);
+						e = (int)(path.Count - 1);
+					}
+					if ((loop) == (0))
+					{
+						dx = (float)(p1->X - p0->X);
+						dy = (float)(p1->Y - p0->Y);
+						NvgUtility.__normalize(&dx, &dy);
+						if ((lineCap) == (NVG_BUTT))
+							dst = __buttCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (float)(-aa * 0.5f), (float)(aa), (float)(u0), (float)(u1));
+						else if (((lineCap) == (NVG_BUTT)) || ((lineCap) == (NVG_SQUARE)))
+							dst = __buttCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (float)(w - aa), (float)(aa), (float)(u0), (float)(u1));
+						else if ((lineCap) == (NVG_ROUND))
+							dst = __roundCapStart(dst, p0, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1));
+					}
+					for (j = (int)(s); (j) < (e); ++j)
+					{
+						if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+						{
+							if ((lineJoin) == (NVG_ROUND))
+							{
+								dst = __roundJoin(dst, p0, p1, (float)(w), (float)(w), (float)(u0), (float)(u1), (int)(ncap), (float)(aa));
+							}
+							else
+							{
+								dst = __bevelJoin(dst, p0, p1, (float)(w), (float)(w), (float)(u0), (float)(u1), (float)(aa));
+							}
+						}
+						else
+						{
+							__vset(dst, (float)(p1->X + (p1->dmx * w)), (float)(p1->Y + (p1->dmy * w)), (float)(u0), (float)(1));
+							dst++;
+							__vset(dst, (float)(p1->X - (p1->dmx * w)), (float)(p1->Y - (p1->dmy * w)), (float)(u1), (float)(1));
+							dst++;
+						}
+						p0 = p1++;
+					}
+					if ((loop) != 0)
+					{
+						__vset(dst, (float)(verts.Array[verts.Offset].Position.X), (float)(verts.Array[verts.Offset].Position.Y), (float)(u0), (float)(1));
+						dst++;
+						__vset(dst, (float)(verts.Array[verts.Offset + 1].Position.X), (float)(verts.Array[verts.Offset + 1].Position.Y), (float)(u1), (float)(1));
+						dst++;
+					}
+					else
+					{
+						dx = (float)(p1->X - p0->X);
+						dy = (float)(p1->Y - p0->Y);
+						NvgUtility.__normalize(&dx, &dy);
+						if ((lineCap) == (NVG_BUTT))
+							dst = __buttCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (float)(-aa * 0.5f), (float)(aa), (float)(u0), (float)(u1));
+						else if (((lineCap) == (NVG_BUTT)) || ((lineCap) == (NVG_SQUARE)))
+							dst = __buttCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (float)(w - aa), (float)(aa), (float)(u0), (float)(u1));
+						else if ((lineCap) == (NVG_ROUND))
+							dst = __roundCapEnd(dst, p1, (float)(dx), (float)(dy), (float)(w), (int)(ncap), (float)(aa), (float)(u0), (float)(u1));
+					}
+
+					path.Stroke = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
+
+					var newPos = verts.Offset + path.Stroke.Value.Count;
+					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
+				}
+			}
+			return (int)(1);
+		}
+
+		private int __expandFill(float w, int lineJoin, float miterLimit)
+		{
+			int cverts = 0;
+			int convex = 0;
+			int i = 0;
+			int j = 0;
+			float aa = (float)(_fringeWidth);
+			int fringe = (int)((w) > (0.0f) ? 1 : 0);
+			__calculateJoins((float)(w), (int)(lineJoin), (float)(miterLimit));
+			cverts = (int)(0);
+			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
+			{
+				Path path = _cache.Paths[i];
+				cverts += (int)(path.Count + path.BevelCount + 1);
+				if ((fringe) != 0)
+					cverts += (int)((path.Count + path.BevelCount * 5 + 1) * 2);
+			}
+			var verts = __allocTempVerts((int)(cverts));
+			convex = (int)(((_cache.Paths.Count) == (1)) && ((_cache.Paths[0].Convex) != 0) ? 1 : 0);
+			for (i = (int)(0); (i) < (_cache.Paths.Count); i++)
+			{
+				Path path = _cache.Paths[i];
+				NvgPoint* pts = &_cache.Points[path.First];
+				NvgPoint* p0;
+				NvgPoint* p1;
+				float rw = 0;
+				float lw = 0;
+				float woff = 0;
+				float ru = 0;
+				float lu = 0;
+				woff = (float)(0.5f * aa);
+				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
+				{
+					var dst = dst2;
+					if ((fringe) != 0)
+					{
+						p0 = &pts[path.Count - 1];
+						p1 = &pts[0];
+						for (j = (int)(0); (j) < (path.Count); ++j)
+						{
+							if ((p1->flags & NVG_PT_BEVEL) != 0)
+							{
+								float dlx0 = (float)(p0->DeltaY);
+								float dly0 = (float)(-p0->DeltaX);
+								float dlx1 = (float)(p1->DeltaY);
+								float dly1 = (float)(-p1->DeltaX);
+								if ((p1->flags & NVG_PT_LEFT) != 0)
+								{
+									float lx = (float)(p1->X + p1->dmx * woff);
+									float ly = (float)(p1->Y + p1->dmy * woff);
+									__vset(dst, (float)(lx), (float)(ly), (float)(0.5f), (float)(1));
+									dst++;
+								}
+								else
+								{
+									float lx0 = (float)(p1->X + dlx0 * woff);
+									float ly0 = (float)(p1->Y + dly0 * woff);
+									float lx1 = (float)(p1->X + dlx1 * woff);
+									float ly1 = (float)(p1->Y + dly1 * woff);
+									__vset(dst, (float)(lx0), (float)(ly0), (float)(0.5f), (float)(1));
+									dst++;
+									__vset(dst, (float)(lx1), (float)(ly1), (float)(0.5f), (float)(1));
+									dst++;
+								}
+							}
+							else
+							{
+								__vset(dst, (float)(p1->X + (p1->dmx * woff)), (float)(p1->Y + (p1->dmy * woff)), (float)(0.5f), (float)(1));
+								dst++;
+							}
+							p0 = p1++;
+						}
+					}
+					else
+					{
+						for (j = (int)(0); (j) < (path.Count); ++j)
+						{
+							__vset(dst, (float)(pts[j].X), (float)(pts[j].Y), (float)(0.5f), (float)(1));
+							dst++;
+						}
+					}
+
+					path.Fill = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
+
+					var newPos = verts.Offset + path.Fill.Value.Count;
+					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
+				}
+				if ((fringe) != 0)
+				{
+					lw = (float)(w + woff);
+					rw = (float)(w - woff);
+					lu = (float)(0);
+					ru = (float)(1);
+					fixed (Vertex* dst2 = &verts.Array[verts.Offset])
+					{
+						var dst = dst2;
+						if ((convex) != 0)
+						{
+							lw = (float)(woff);
+							lu = (float)(0.5f);
+						}
+						p0 = &pts[path.Count - 1];
+						p1 = &pts[0];
+						for (j = (int)(0); (j) < (path.Count); ++j)
+						{
+							if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+							{
+								dst = __bevelJoin(dst, p0, p1, (float)(lw), (float)(rw), (float)(lu), (float)(ru), (float)(_fringeWidth));
+							}
+							else
+							{
+								__vset(dst, (float)(p1->X + (p1->dmx * lw)), (float)(p1->Y + (p1->dmy * lw)), (float)(lu), (float)(1));
+								dst++;
+								__vset(dst, (float)(p1->X - (p1->dmx * rw)), (float)(p1->Y - (p1->dmy * rw)), (float)(ru), (float)(1));
+								dst++;
+							}
+							p0 = p1++;
+						}
+						__vset(dst, (float)(verts.Array[verts.Offset].Position.X),
+							(float)(verts.Array[verts.Offset].Position.Y),
+							(float)(lu), (float)(1));
+						dst++;
+						__vset(dst, (float)(verts.Array[verts.Offset + 1].Position.X),
+							(float)(verts.Array[verts.Offset + 1].Position.Y),
+							(float)(ru), (float)(1));
+						dst++;
+
+						path.Stroke = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
+
+						var newPos = verts.Offset + path.Stroke.Value.Count;
+						verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
+					}
+				}
+				else
+				{
+					path.Stroke = null;
+				}
+			}
+
+			return (int)(1);
+		}
+
+
+		private void __flushTextTexture()
+		{
+			int* dirty = stackalloc int[4];
+			if ((_fontSyst.ValidateTexture(dirty)) != 0)
+			{
+				int fontImage = (int)(_fontImages[_fontImageIdx]);
+				if (fontImage != 0)
+				{
+					int iw = 0;
+					int ih = 0;
+					byte[] data = _fontSyst.GetTextureData(&iw, &ih);
+					int x = (int)(dirty[0]);
+					int y = (int)(dirty[1]);
+					int w = (int)(dirty[2] - dirty[0]);
+					int h = (int)(dirty[3] - dirty[1]);
+					_renderer.UpdateTexture((int)(fontImage), (int)(x), (int)(y), (int)(w), (int)(h), data);
+				}
+			}
+		}
+
+		private int __allocTextAtlas()
+		{
+			int iw = 0;
+			int ih = 0;
+			__flushTextTexture();
+			if ((_fontImageIdx) >= (4 - 1))
+				return (int)(0);
+			if (_fontImages[_fontImageIdx + 1] != 0)
+				ImageSize((int)(_fontImages[_fontImageIdx + 1]), out iw, out ih);
+			else
+			{
+				ImageSize((int)(_fontImages[_fontImageIdx]), out iw, out ih);
+				if ((iw) > (ih))
+					ih *= (int)(2);
+				else
+					iw *= (int)(2);
+				if (((iw) > (2048)) || ((ih) > (2048)))
+					iw = (int)(ih = (int)(2048));
+				_fontImages[_fontImageIdx + 1] = (int)(_renderer.CreateTexture((int)(NVG_TEXTURE_ALPHA), (int)(iw), (int)(ih), (int)(0), null));
+			}
+
+			++_fontImageIdx;
+			_fontSyst.ResetAtlas((int)(iw), (int)(ih));
+			return (int)(1);
+		}
+
+		private void __renderText(ArraySegment<Vertex> verts)
+		{
+			NanoVGContextState state = GetState();
+			Paint paint = (Paint)(state.Fill);
+			paint.Image = (int)(_fontImages[_fontImageIdx]);
+
+			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
+			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
+
+			_renderer.RenderTriangles(ref paint, ref state.Scissor, verts);
+			_drawCallCount++;
+			_textTriCount += (int)(verts.Count / 3);
 		}
 
 		private static float __triarea2(float ax, float ay, float bx, float by, float cx, float cy)
@@ -2427,14 +2275,14 @@ namespace NanoVGSharp
 
 		private static void __isectRects(float* dst, float ax, float ay, float aw, float ah, float bx, float by, float bw, float bh)
 		{
-			float minx = (float)(__maxf((float)(ax), (float)(bx)));
-			float miny = (float)(__maxf((float)(ay), (float)(by)));
-			float maxx = (float)(__minf((float)(ax + aw), (float)(bx + bw)));
-			float maxy = (float)(__minf((float)(ay + ah), (float)(by + bh)));
+			float minx = (float)(NvgUtility.__maxf((float)(ax), (float)(bx)));
+			float miny = (float)(NvgUtility.__maxf((float)(ay), (float)(by)));
+			float maxx = (float)(NvgUtility.__minf((float)(ax + aw), (float)(bx + bw)));
+			float maxy = (float)(NvgUtility.__minf((float)(ay + ah), (float)(by + bh)));
 			dst[0] = (float)(minx);
 			dst[1] = (float)(miny);
-			dst[2] = (float)(__maxf((float)(0.0f), (float)(maxx - minx)));
-			dst[3] = (float)(__maxf((float)(0.0f), (float)(maxy - miny)));
+			dst[2] = (float)(NvgUtility.__maxf((float)(0.0f), (float)(maxx - minx)));
+			dst[3] = (float)(NvgUtility.__maxf((float)(0.0f), (float)(maxy - miny)));
 		}
 
 		private static float __getAverageScale(ref Transform t)
@@ -2444,10 +2292,10 @@ namespace NanoVGSharp
 			return (float)((sx + sy) * 0.5f);
 		}
 
-		public static int __curveDivs(float r, float arc, float tol)
+		private static int __curveDivs(float r, float arc, float tol)
 		{
-			float da = (float)(acosf((float)(r / (r + tol))) * 2.0f);
-			return (int)(__maxi((int)(2), (int)(ceilf((float)(arc / da)))));
+			float da = (float)(NvgUtility.acosf((float)(r / (r + tol))) * 2.0f);
+			return (int)(NvgUtility.__maxi((int)(2), (int)(NvgUtility.ceilf((float)(arc / da)))));
 		}
 
 		private static void __chooseBevel(int bevel, NvgPoint* p0, NvgPoint* p1, float w, float* x0, float* y0, float* x1, float* y1)
@@ -2475,7 +2323,7 @@ namespace NanoVGSharp
 
 		private static float __getFontScale(NanoVGContextState state)
 		{
-			return (float)(__minf((float)(__quantize((float)(__getAverageScale(ref state.Transform)), (float)(0.01f))), (float)(4.0f)));
+			return (float)(NvgUtility.__minf((float)(__quantize((float)(__getAverageScale(ref state.Transform)), (float)(0.01f))), (float)(4.0f)));
 		}
 
 		private static Vertex* __roundJoin(Vertex* dst, NvgPoint* p0, NvgPoint* p1, float lw, float rw, float lu, float ru, int ncap, float fringe)
@@ -2495,21 +2343,21 @@ namespace NanoVGSharp
 				float a0 = 0;
 				float a1 = 0;
 				__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(lw), &lx0, &ly0, &lx1, &ly1);
-				a0 = (float)(atan2f((float)(-dly0), (float)(-dlx0)));
-				a1 = (float)(atan2f((float)(-dly1), (float)(-dlx1)));
+				a0 = (float)(NvgUtility.atan2f((float)(-dly0), (float)(-dlx0)));
+				a1 = (float)(NvgUtility.atan2f((float)(-dly1), (float)(-dlx1)));
 				if ((a1) > (a0))
 					a1 -= (float)(3.14159274 * 2);
 				__vset(dst, (float)(lx0), (float)(ly0), (float)(lu), (float)(1));
 				dst++;
 				__vset(dst, (float)(p1->X - dlx0 * rw), (float)(p1->Y - dly0 * rw), (float)(ru), (float)(1));
 				dst++;
-				n = (int)(__clampi((int)(ceilf((float)(((a0 - a1) / 3.14159274) * ncap))), (int)(2), (int)(ncap)));
+				n = (int)(NvgUtility.__clampi((int)(NvgUtility.ceilf((float)(((a0 - a1) / 3.14159274) * ncap))), (int)(2), (int)(ncap)));
 				for (i = (int)(0); (i) < (n); i++)
 				{
 					float u = (float)(i / (float)(n - 1));
 					float a = (float)(a0 + u * (a1 - a0));
-					float rx = (float)(p1->X + cosf((float)(a)) * rw);
-					float ry = (float)(p1->Y + sinf((float)(a)) * rw);
+					float rx = (float)(p1->X + NvgUtility.cosf((float)(a)) * rw);
+					float ry = (float)(p1->Y + NvgUtility.sinf((float)(a)) * rw);
 					__vset(dst, (float)(p1->X), (float)(p1->Y), (float)(0.5f), (float)(1));
 					dst++;
 					__vset(dst, (float)(rx), (float)(ry), (float)(ru), (float)(1));
@@ -2529,21 +2377,21 @@ namespace NanoVGSharp
 				float a0 = 0;
 				float a1 = 0;
 				__chooseBevel((int)(p1->flags & NVG_PR_INNERBEVEL), p0, p1, (float)(-rw), &rx0, &ry0, &rx1, &ry1);
-				a0 = (float)(atan2f((float)(dly0), (float)(dlx0)));
-				a1 = (float)(atan2f((float)(dly1), (float)(dlx1)));
+				a0 = (float)(NvgUtility.atan2f((float)(dly0), (float)(dlx0)));
+				a1 = (float)(NvgUtility.atan2f((float)(dly1), (float)(dlx1)));
 				if ((a1) < (a0))
 					a1 += (float)(3.14159274 * 2);
 				__vset(dst, (float)(p1->X + dlx0 * rw), (float)(p1->Y + dly0 * rw), (float)(lu), (float)(1));
 				dst++;
 				__vset(dst, (float)(rx0), (float)(ry0), (float)(ru), (float)(1));
 				dst++;
-				n = (int)(__clampi((int)(ceilf((float)(((a1 - a0) / 3.14159274) * ncap))), (int)(2), (int)(ncap)));
+				n = (int)(NvgUtility.__clampi((int)(NvgUtility.ceilf((float)(((a1 - a0) / 3.14159274) * ncap))), (int)(2), (int)(ncap)));
 				for (i = (int)(0); (i) < (n); i++)
 				{
 					float u = (float)(i / (float)(n - 1));
 					float a = (float)(a0 + u * (a1 - a0));
-					float lx = (float)(p1->X + cosf((float)(a)) * lw);
-					float ly = (float)(p1->Y + sinf((float)(a)) * lw);
+					float lx = (float)(p1->X + NvgUtility.cosf((float)(a)) * lw);
+					float ly = (float)(p1->Y + NvgUtility.sinf((float)(a)) * lw);
 					__vset(dst, (float)(lx), (float)(ly), (float)(lu), (float)(1));
 					dst++;
 					__vset(dst, (float)(p1->X), (float)(p1->Y), (float)(0.5f), (float)(1));
@@ -2700,8 +2548,8 @@ namespace NanoVGSharp
 			for (i = (int)(0); (i) < (ncap); i++)
 			{
 				float a = (float)(i / (float)(ncap - 1) * 3.14159274);
-				float ax = (float)(cosf((float)(a)) * w);
-				float ay = (float)(sinf((float)(a)) * w);
+				float ax = (float)(NvgUtility.cosf((float)(a)) * w);
+				float ay = (float)(NvgUtility.sinf((float)(a)) * w);
 				__vset(dst, (float)(px - dlx * ax - dx * ay), (float)(py - dly * ax - dy * ay), (float)(u0), (float)(1));
 				dst++;
 				__vset(dst, (float)(px), (float)(py), (float)(0.5f), (float)(1));
@@ -2728,8 +2576,8 @@ namespace NanoVGSharp
 			for (i = (int)(0); (i) < (ncap); i++)
 			{
 				float a = (float)(i / (float)(ncap - 1) * 3.14159274);
-				float ax = (float)(cosf((float)(a)) * w);
-				float ay = (float)(sinf((float)(a)) * w);
+				float ax = (float)(NvgUtility.cosf((float)(a)) * w);
+				float ay = (float)(NvgUtility.sinf((float)(a)) * w);
 				__vset(dst, (float)(px), (float)(py), (float)(0.5f), (float)(1));
 				dst++;
 				__vset(dst, (float)(px - dlx * ax + dx * ay), (float)(py - dly * ax + dy * ay), (float)(u0), (float)(1));
@@ -2738,7 +2586,7 @@ namespace NanoVGSharp
 			return dst;
 		}
 
-		public static int __ptEquals(float x1, float y1, float x2, float y2, float tol)
+		private static int __ptEquals(float x1, float y1, float x2, float y2, float tol)
 		{
 			float dx = (float)(x2 - x1);
 			float dy = (float)(y2 - y1);
