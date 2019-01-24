@@ -8,8 +8,6 @@ namespace NanoVGSharp
 	public class XNARenderer : IRenderer
 	{
 		private readonly GraphicsDevice _device;
-		private DynamicVertexBuffer _vertexBuffer;
-		private IndexBuffer _indexBufferFill;
 		private readonly Effect _effect;
 		private int _indexesCount = 0;
 		private readonly List<Texture2D> _textures = new List<Texture2D>();
@@ -57,6 +55,7 @@ namespace NanoVGSharp
 		private Transform _scissorTransform;
 		private Vector2 _scissorExt, _scissorScale;
 		float _strokeMult;
+		private short[] _indexes;
 
 		private enum RenderingType
 		{
@@ -78,8 +77,6 @@ namespace NanoVGSharp
 			}
 
 			_device = device;
-
-			_vertexBuffer = new DynamicVertexBuffer(device, Vertex.VertexDeclaration, 2000, BufferUsage.WriteOnly);
 
 			_effect = new Effect(device, Resources.NvgEffectSource);
 
@@ -216,14 +213,6 @@ namespace NanoVGSharp
 
 			var transform = paint.xform.BuildInverse();
 
-			if (_vertexBuffer.VertexCount < verts.Count)
-			{
-				// Resize vertex ArraySegment if data doesnt fit
-				_vertexBuffer = new DynamicVertexBuffer(_device, Vertex.VertexDeclaration, verts.Count * 2,
-					BufferUsage.WriteOnly);
-			}
-			_vertexBuffer.SetData(verts.Array, 0, verts.Count);
-
 			var transformMatrix = transform.ToMatrix();
 
 			_viewSizeParam.SetValue(new Vector2(_device.PresentationParameters.Bounds.Width, _device.PresentationParameters.Bounds.Height));
@@ -252,46 +241,35 @@ namespace NanoVGSharp
 
 				if (indexed)
 				{
-					_device.DrawIndexedPrimitives(primitiveType, 0, 0, verts.Count, 0, _indexesCount / 3);
+					_device.DrawUserIndexedPrimitives(primitiveType, verts.Array, verts.Offset, verts.Count,
+						_indexes, 0, _indexesCount / 3);
 				}
 				else
 				{
-					int count = primitiveType == PrimitiveType.TriangleList ? verts.Count / 3 : (verts.Count - 2);
-					_device.DrawPrimitives(primitiveType, 0, count);
+					int primitiveCount = primitiveType == PrimitiveType.TriangleList ? verts.Count / 3 : (verts.Count - 2);
+					_device.DrawUserPrimitives(primitiveType, verts.Array, verts.Offset, primitiveCount);
 				}
 			}
 
 			_vertexes.Clear();
 		}
 
-		private void SetIndexBuffer(ref IndexBuffer indexBuffer, int vertexesCount, int indexesCount, Func<int, ushort[]> indexGenerator)
-		{
-			if (indexBuffer == null || indexBuffer.IndexCount < indexesCount)
-			{
-				// Reallocate index buffer
-				indexBuffer = new DynamicIndexBuffer(_device, typeof(ushort), indexesCount, BufferUsage.WriteOnly);
-				var indexes = indexGenerator(vertexesCount);
-				indexBuffer.SetData<ushort>(indexes);
-			}
-
-			_device.Indices = indexBuffer;
-			_indexesCount = indexesCount;
-		}
-
 		private void SetIndexBufferFill(int vertexesCount, int indexesCount)
 		{
-			SetIndexBuffer(ref _indexBufferFill, vertexesCount, indexesCount, i =>
+			if (_indexes == null || _indexes.Length < indexesCount)
 			{
-				var result = new List<ushort>();
-				for (var j = 2; j < i; ++j)
+				var result = new List<short>();
+				for (var j = 2; j < indexesCount; ++j)
 				{
 					result.Add(0);
-					result.Add((ushort)(j - 1));
-					result.Add((ushort)(j));
+					result.Add((short)(j - 1));
+					result.Add((short)(j));
 				}
 
-				return result.ToArray();
-			});
+				_indexes = result.ToArray();
+			}
+
+			_indexesCount = indexesCount;
 		}
 
 		public void renderFill(ref Paint paint, ref Scissor scissor,
@@ -384,8 +362,6 @@ namespace NanoVGSharp
 
 		public void Begin()
 		{
-			_device.SetVertexBuffer(_vertexBuffer);
-
 			_oldSamplerState = _device.SamplerStates[0];
 			_oldBlendState = _device.BlendState;
 			_oldDepthStencilState = _device.DepthStencilState;

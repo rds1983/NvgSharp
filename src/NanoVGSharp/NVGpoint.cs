@@ -13,5 +13,11 @@ namespace NanoVGSharp
 		public float dmx;
 		public float dmy;
 		public byte flags;
+
+		public void Reset()
+		{
+			x = y = dx = dy = len = dmx = dmy = 0;
+			flags = 0;
+		}
 	}
 }

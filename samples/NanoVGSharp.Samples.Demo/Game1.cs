@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Diagnostics;
 
 namespace NanoVGSharp.Samples.Demo
 {
@@ -62,7 +64,19 @@ namespace NanoVGSharp.Samples.Demo
 			base.Update(gameTime);
 
 			_perfGraph.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+
+			if (dt == null)
+			{
+				dt = DateTime.Now;
+			}
+			else if ((DateTime.Now - dt.Value).TotalSeconds >= 1)
+			{
+				Trace.WriteLine("FPS: " + 1.0f / _perfGraph.GetAverage());
+				dt = DateTime.Now;
+			}
 		}
+
+		DateTime? dt;
 
 		/// <summary>
 		/// This is called when the game should draw itself.

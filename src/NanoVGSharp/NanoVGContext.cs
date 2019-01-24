@@ -654,7 +654,7 @@ namespace NanoVGSharp
 			}
 
 			pt = &cache.points[cache.npoints];
-			CRuntime.memset(pt, (int)(0), (ulong)(sizeof(NVGpoint)));
+			pt->Reset();
 			pt->x = (float)(x);
 			pt->y = (float)(y);
 			pt->flags = ((byte)(flags));
