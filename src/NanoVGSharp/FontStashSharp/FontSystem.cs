@@ -648,7 +648,7 @@ namespace FontStashSharp
 			iter.Y = (float)(iter.NextY = (float)(y));
 			iter.Spacing = (float)(state.Spacing);
 			iter.Str = str;
-			iter.NextSegment = str;
+			iter.Next = str;
 			iter.Codepoint = (uint)(0);
 			iter.PrevGlyphIndex = (int)(-1);
 			iter.BitmapOption = (int)(bitmapOption);
@@ -657,7 +657,7 @@ namespace FontStashSharp
 
 		public bool TextIterNext(FontTextIterator iter, FontGlyphSquad* quad)
 		{
-			iter.Str = iter.NextSegment;
+			iter.Str = iter.Next;
 
 			if (iter.Str.IsNullOrEmpty)
 			{
@@ -672,7 +672,7 @@ namespace FontStashSharp
 				GetQuad(iter.Font, (int)(iter.PrevGlyphIndex), glyph, (float)(iter.Scale), (float)(iter.Spacing), ref iter.NextX, ref iter.NextY, quad);
 			iter.PrevGlyphIndex = (int)(glyph != null ? glyph->Index : -1);
 
-			++iter.NextSegment.Location;
+			++iter.Next.Location;
 
 			return true;
 		}

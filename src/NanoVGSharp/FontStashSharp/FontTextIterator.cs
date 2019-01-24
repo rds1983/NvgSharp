@@ -13,7 +13,7 @@
 		public short iBlur;
 		public Font Font;
 		public int PrevGlyphIndex;
-		public StringSegment Str, NextSegment;
+		public StringSegment Str, Next;
 		public int BitmapOption;
 	}
 }
