@@ -3,7 +3,7 @@
 namespace NanoVGSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	internal class NanoVGContextState
+	internal class NvgContextState
 	{
 		public int ShapeAntiAlias;
 		public Paint Fill;
@@ -22,9 +22,9 @@ namespace NanoVGSharp
 		public int TextAlign;
 		public int FontId;
 
-		public NanoVGContextState Clone()
+		public NvgContextState Clone()
 		{
-			return new NanoVGContextState
+			return new NvgContextState
 			{
 				ShapeAntiAlias = ShapeAntiAlias,
 				Fill = Fill,

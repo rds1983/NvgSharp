@@ -6,7 +6,7 @@ using FontStashSharp;
 
 namespace NanoVGSharp
 {
-	public unsafe class NanoVGContext : IDisposable
+	public unsafe class NvgContext : IDisposable
 	{
 		public const int NVG_CCW = 1;
 		public const int NVG_CW = 2;
@@ -77,7 +77,7 @@ namespace NanoVGSharp
 		private int _commandsNumber;
 		private float _commandX;
 		private float _commandY;
-		private NanoVGContextState[] _states = new NanoVGContextState[32];
+		private NvgContextState[] _states = new NvgContextState[32];
 		private int _statesNumber;
 		private PathCache _cache;
 		private float _tessTol;
@@ -93,7 +93,7 @@ namespace NanoVGSharp
 		private int _textTriCount;
 		private readonly TextRow[] _rows = new TextRow[MaxTextRows];
 
-		public NanoVGContext(GraphicsDevice device, int edgeAntiAlias)
+		public NvgContext(GraphicsDevice device, int edgeAntiAlias)
 		{
 			_renderer = new XNARenderer(device);
 
@@ -212,7 +212,7 @@ namespace NanoVGSharp
 			}
 			else
 			{
-				_states[_statesNumber] = new NanoVGContextState();
+				_states[_statesNumber] = new NvgContextState();
 			}
 			_statesNumber++;
 		}
@@ -226,7 +226,7 @@ namespace NanoVGSharp
 
 		public void Reset()
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.Fill = new Paint(Color.White);
 			state.Stroke = new Paint(Color.Black);
 			state.ShapeAntiAlias = (int)(1);
@@ -248,43 +248,43 @@ namespace NanoVGSharp
 
 		public void ShapeAntiAlias(int enabled)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.ShapeAntiAlias = (int)(enabled);
 		}
 
 		public void StrokeWidth(float width)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.StrokeWidth = (float)(width);
 		}
 
 		public void MiterLimit(float limit)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.MiterLimit = (float)(limit);
 		}
 
 		public void LineCap(int cap)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.LineCap = (int)(cap);
 		}
 
 		public void LineJoin(int join)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.LineJoin = (int)(join);
 		}
 
 		public void GlobalAlpha(float alpha)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.Alpha = (float)(alpha);
 		}
 
 		public void Transform(float a, float b, float c, float d, float e, float f)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			Transform t;
 			t.T1 = (float)(a);
 			t.T2 = (float)(b);
@@ -298,13 +298,13 @@ namespace NanoVGSharp
 
 		public void ResetTransform()
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.Transform.SetIdentity();
 		}
 
 		public void Translate(float x, float y)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			var t = new Transform();
 			t.SetTranslate((float)(x), (float)(y));
 			state.Transform.Premultiply(ref t);
@@ -312,7 +312,7 @@ namespace NanoVGSharp
 
 		public void Rotate(float angle)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			var t = new Transform();
 			t.SetRotate((float)(angle));
 			state.Transform.Premultiply(ref t);
@@ -320,7 +320,7 @@ namespace NanoVGSharp
 
 		public void SkewX(float angle)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			var t = new Transform();
 			t.SetSkewX((float)(angle));
 			state.Transform.Premultiply(ref t);
@@ -328,7 +328,7 @@ namespace NanoVGSharp
 
 		public void SkewY(float angle)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			var t = new Transform();
 			t.SetSkewY((float)(angle));
 			state.Transform.Premultiply(ref t);
@@ -336,7 +336,7 @@ namespace NanoVGSharp
 
 		public void Scale(float x, float y)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			var t = new Transform();
 			t.SetScale((float)(x), (float)(y));
 			state.Transform.Premultiply(ref t);
@@ -344,33 +344,33 @@ namespace NanoVGSharp
 
 		public void CurrentTransform(Transform xform)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 
 			state.Transform = xform;
 		}
 
 		public void StrokeColor(Color color)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.Stroke = new Paint(color);
 		}
 
 		public void StrokePaint(Paint paint)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.Stroke = paint;
 			state.Stroke.Transform.Multiply(ref state.Transform);
 		}
 
 		public void FillColor(Color color)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.Fill = new Paint(color);
 		}
 
 		public void FillPaint(Paint paint)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.Fill = (Paint)(paint);
 			state.Fill.Transform.Multiply(ref state.Transform);
 		}
@@ -481,7 +481,7 @@ namespace NanoVGSharp
 
 		public void Scissor(float x, float y, float w, float h)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			w = (float)(NvgUtility.__maxf((float)(0.0f), (float)(w)));
 			h = (float)(NvgUtility.__maxf((float)(0.0f), (float)(h)));
 			state.Scissor.Transform.SetIdentity();
@@ -494,7 +494,7 @@ namespace NanoVGSharp
 
 		public void IntersectScissor(float x, float y, float w, float h)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			var pxform = new Transform();
 			var invxorm = new Transform();
 			float* rect = stackalloc float[4];
@@ -521,7 +521,7 @@ namespace NanoVGSharp
 
 		public void ResetScissor()
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.Scissor.Transform.Zero();
 			state.Scissor.Extent.X = (float)(-1.0f);
 			state.Scissor.Extent.Y = (float)(-1.0f);
@@ -926,7 +926,7 @@ namespace NanoVGSharp
 
 		public void Fill()
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			Path path;
 			Paint fillPaint = (Paint)(state.Fill);
 			int i = 0;
@@ -957,7 +957,7 @@ namespace NanoVGSharp
 
 		public void Stroke()
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			float scale = (float)(__getAverageScale(ref state.Transform));
 			float strokeWidth = (float)(NvgUtility.__clampf((float)(state.StrokeWidth * scale), (float)(0.0f), (float)(200.0f)));
 			Paint strokePaint = (Paint)(state.Stroke);
@@ -1016,49 +1016,49 @@ namespace NanoVGSharp
 
 		public void FontSize(float size)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.FontSize = (float)(size);
 		}
 
 		public void FontBlur(float blur)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.FontBlur = (float)(blur);
 		}
 
 		public void TextLetterSpacing(float spacing)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.LetterSpacing = (float)(spacing);
 		}
 
 		public void TextLineHeight(float lineHeight)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.LineHeight = (float)(lineHeight);
 		}
 
 		public void TextAlign(int align)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.TextAlign = (int)(align);
 		}
 
 		public void FontFaceId(int font)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.FontId = (int)(font);
 		}
 
 		public void FontFace(string font)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			state.FontId = (int)(_fontSyst.GetFontByName(font));
 		}
 
 		public float Text(float x, float y, StringSegment _string_)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			FontTextIterator iter = new FontTextIterator();
 			FontTextIterator prevIter = new FontTextIterator();
 			FontGlyphSquad q = new FontGlyphSquad();
@@ -1129,7 +1129,7 @@ namespace NanoVGSharp
 
 		public void TextBox(float x, float y, float breakRowWidth, StringSegment _string_)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			int i = 0;
 			int oldAlign = (int)(state.TextAlign);
 			int haling = (int)(state.TextAlign & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT));
@@ -1165,7 +1165,7 @@ namespace NanoVGSharp
 
 		public int TextGlyphPositions(float x, float y, StringSegment _string_, GlyphPosition[] positions)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			float scale = (float)(__getFontScale(state) * _devicePxRatio);
 			float invscale = (float)(1.0f / scale);
 			FontTextIterator iter = new FontTextIterator();
@@ -1210,7 +1210,7 @@ namespace NanoVGSharp
 		{
 			remaining = StringSegment.Null;
 
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			float scale = (float)(__getFontScale(state) * _devicePxRatio);
 			float invscale = (float)(1.0f / scale);
 			FontTextIterator iter = new FontTextIterator();
@@ -1413,7 +1413,7 @@ namespace NanoVGSharp
 
 		public float TextBounds(float x, float y, string _string_, ref Bounds bounds)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			float scale = (float)(__getFontScale(state) * _devicePxRatio);
 			float invscale = (float)(1.0f / scale);
 			float width = 0;
@@ -1436,7 +1436,7 @@ namespace NanoVGSharp
 
 		public void TextBoxBounds(float x, float y, float breakRowWidth, StringSegment _string_, ref Bounds bounds)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			float scale = (float)(__getFontScale(state) * _devicePxRatio);
 			float invscale = (float)(1.0f / scale);
 			int i = 0;
@@ -1508,7 +1508,7 @@ namespace NanoVGSharp
 		{
 			ascender = descender = lineh = 0;
 
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			float scale = (float)(__getFontScale(state) * _devicePxRatio);
 			float invscale = (float)(1.0f / scale);
 			if ((state.FontId) == (-1))
@@ -1532,14 +1532,14 @@ namespace NanoVGSharp
 			_devicePxRatio = (float)(ratio);
 		}
 
-		private NanoVGContextState GetState()
+		private NvgContextState GetState()
 		{
 			return _states[_statesNumber - 1];
 		}
 
 		private void __appendCommands(float* vals, int nvals)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			int i = 0;
 			if ((_commandsNumber + nvals) > (_commandsCount))
 			{
@@ -2210,7 +2210,7 @@ namespace NanoVGSharp
 
 		private void __renderText(ArraySegment<Vertex> verts)
 		{
-			NanoVGContextState state = GetState();
+			NvgContextState state = GetState();
 			Paint paint = (Paint)(state.Fill);
 			paint.Image = (int)(_fontImages[_fontImageIdx]);
 
@@ -2321,7 +2321,7 @@ namespace NanoVGSharp
 			return (float)(((int)(a / d + 0.5f)) * d);
 		}
 
-		private static float __getFontScale(NanoVGContextState state)
+		private static float __getFontScale(NvgContextState state)
 		{
 			return (float)(NvgUtility.__minf((float)(__quantize((float)(__getAverageScale(ref state.Transform)), (float)(0.01f))), (float)(4.0f)));
 		}

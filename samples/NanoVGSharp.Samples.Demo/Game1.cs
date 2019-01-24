@@ -13,7 +13,7 @@ namespace NanoVGSharp.Samples.Demo
 	{
 		GraphicsDeviceManager _graphics;
 
-		private NanoVGContext _context;
+		private NvgContext _context;
 		private SpriteBatch _spriteBatch;
 		private Demo _demo;
 		private readonly PerfGraph _perfGraph = new PerfGraph(PerfGraph.Style.GRAPH_RENDER_FPS, "Frame Time");
@@ -42,7 +42,7 @@ namespace NanoVGSharp.Samples.Demo
 		{
 			var device = GraphicsDevice;
 
-			_context = new NanoVGContext(GraphicsDevice, 0);
+			_context = new NvgContext(GraphicsDevice, 0);
 
 			_demo = new Demo();
 			_demo.loadDemoData(GraphicsDevice, _context);

@@ -34,7 +34,7 @@ namespace NanoVGSharp.Samples.Demo
 		}
 
 
-		public static void drawWindow(NanoVGContext vg, string title, float x, float y, float w, float h)
+		public static void drawWindow(NvgContext vg, string title, float x, float y, float w, float h)
 		{
 			float cornerRadius = 3.0f;
 			Paint shadowPaint;
@@ -55,7 +55,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(x - 10, y - 10, w + 20, h + 30);
 			vg.RoundedRect(x, y, w, h, cornerRadius);
-			vg.PathWinding(NanoVGContext.NVG_HOLE);
+			vg.PathWinding(NvgContext.NVG_HOLE);
 			vg.FillPaint(shadowPaint);
 			vg.Fill();
 
@@ -73,7 +73,7 @@ namespace NanoVGSharp.Samples.Demo
 
 			vg.FontSize(18.0f);
 			vg.FontFace("sans-bold");
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_CENTER | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
 
 			vg.FontBlur(2);
 			vg.FillColor(new Color(0, 0, 0, 128));
@@ -86,7 +86,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawSearchBox(NanoVGContext vg, string text, float x, float y, float w, float h)
+		public static void drawSearchBox(NvgContext vg, string text, float x, float y, float w, float h)
 		{
 			Paint bg;
 			float cornerRadius = h / 2 - 1;
@@ -106,22 +106,22 @@ namespace NanoVGSharp.Samples.Demo
 			vg.FontSize(h * 1.3f);
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_CENTER | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
 
 			vg.FontSize(20.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 32));
 
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
 			vg.Text(x + h * 1.05f, y + h * 0.5f, text);
 
 			vg.FontSize(h * 1.3f);
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 32));
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_CENTER | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
 		}
 
-		public static void drawDropDown(NanoVGContext vg, string text, float x, float y, float w, float h)
+		public static void drawDropDown(NvgContext vg, string text, float x, float y, float w, float h)
 		{
 			Paint bg;
 			float cornerRadius = 4.0f;
@@ -140,26 +140,26 @@ namespace NanoVGSharp.Samples.Demo
 			vg.FontSize(20.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 160));
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
 			vg.Text(x + h * 0.3f, y + h * 0.5f, text);
 
 			vg.FontSize(h * 1.3f);
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_CENTER | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
 		}
 
-		public static void drawLabel(NanoVGContext vg, string text, float x, float y, float w, float h)
+		public static void drawLabel(NvgContext vg, string text, float x, float y, float w, float h)
 		{
 			vg.FontSize(18.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 128));
 
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
 			vg.Text(x, y + h * 0.5f, text);
 		}
 
-		public static void drawEditBoxBase(NanoVGContext vg, float x, float y, float w, float h)
+		public static void drawEditBoxBase(NvgContext vg, float x, float y, float w, float h)
 		{
 			Paint bg;
 			// Edit
@@ -175,7 +175,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Stroke();
 		}
 
-		public static void drawEditBox(NanoVGContext vg, string text, float x, float y, float w, float h)
+		public static void drawEditBox(NvgContext vg, string text, float x, float y, float w, float h)
 		{
 
 			drawEditBoxBase(vg, x, y, w, h);
@@ -183,11 +183,11 @@ namespace NanoVGSharp.Samples.Demo
 			vg.FontSize(20.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
 			vg.Text(x + h * 0.3f, y + h * 0.5f, text);
 		}
 
-		public static void drawEditBoxNum(NanoVGContext vg,
+		public static void drawEditBoxNum(NvgContext vg,
 							string text, string units, float x, float y, float w, float h)
 		{
 			float uw;
@@ -200,17 +200,17 @@ namespace NanoVGSharp.Samples.Demo
 			vg.FontSize(18.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_RIGHT | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_MIDDLE);
 			vg.Text(x + w - h * 0.3f, y + h * 0.5f, units);
 
 			vg.FontSize(20.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 128));
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_RIGHT | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_MIDDLE);
 			vg.Text(x + w - uw - h * 0.5f, y + h * 0.5f, text);
 		}
 
-		public static void drawCheckBox(NanoVGContext vg, string text, float x, float y, float w, float h)
+		public static void drawCheckBox(NvgContext vg, string text, float x, float y, float w, float h)
 		{
 			Paint bg;
 
@@ -218,7 +218,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 160));
 
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
 			vg.Text(x + 28, y + h * 0.5f, text);
 
 			bg = vg.BoxGradient(x + 1, y + (int)(h * 0.5f) - 9 + 1, 18, 18, 3, 3, new Color(0, 0, 0, 32), new Color(0, 0, 0, 92));
@@ -230,10 +230,10 @@ namespace NanoVGSharp.Samples.Demo
 			vg.FontSize(40);
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 128));
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_CENTER | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
 		}
 
-		public static void drawButton(NanoVGContext vg, int preicon, string text, float x, float y, float w, float h, Color col)
+		public static void drawButton(NvgContext vg, int preicon, string text, float x, float y, float w, float h, Color col)
 		{
 			Paint bg;
 			float cornerRadius = 4.0f;
@@ -271,19 +271,19 @@ namespace NanoVGSharp.Samples.Demo
 				vg.FontSize(h * 1.3f);
 				vg.FontFace("icons");
 				vg.FillColor(new Color(255, 255, 255, 96));
-				vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_MIDDLE);
+				vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
 			}
 
 			vg.FontSize(20.0f);
 			vg.FontFace("sans-bold");
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
 			vg.FillColor(new Color(0, 0, 0, 160));
 			vg.Text(x + w * 0.5f - tw * 0.5f + iw * 0.25f, y + h * 0.5f - 1, text);
 			vg.FillColor(new Color(255, 255, 255, 160));
 			vg.Text(x + w * 0.5f - tw * 0.5f + iw * 0.25f, y + h * 0.5f, text);
 		}
 
-		public static void drawSlider(NanoVGContext vg, float pos, float x, float y, float w, float h)
+		public static void drawSlider(NvgContext vg, float pos, float x, float y, float w, float h)
 		{
 			Paint bg, knob;
 			float cy = y + (int)(h * 0.5f);
@@ -304,7 +304,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(x + (int)(pos * w) - kr - 5, cy - kr - 5, kr * 2 + 5 + 5, kr * 2 + 5 + 5 + 3);
 			vg.Circle(x + (int)(pos * w), cy, kr);
-			vg.PathWinding(NanoVGContext.NVG_HOLE);
+			vg.PathWinding(NvgContext.NVG_HOLE);
 			vg.FillPaint(bg);
 			vg.Fill();
 
@@ -325,7 +325,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawEyes(NanoVGContext vg, float x, float y, float w, float h, float mx, float my, float t)
+		public static void drawEyes(NvgContext vg, float x, float y, float w, float h, float mx, float my, float t)
 		{
 			Paint gloss, bg;
 			float ex = w * 0.23f;
@@ -395,7 +395,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Fill();
 		}
 
-		public static void drawGraph(NanoVGContext vg, float x, float y, float w, float h, float t)
+		public static void drawGraph(NvgContext vg, float x, float y, float w, float h, float t)
 		{
 			Paint bg;
 			float[] samples = new float[6];
@@ -468,7 +468,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.StrokeWidth(1.0f);
 		}
 
-		public static void drawSpinner(NanoVGContext vg, float cx, float cy, float r, float t)
+		public static void drawSpinner(NvgContext vg, float cx, float cy, float r, float t)
 		{
 			float a0 = 0.0f + t * 6;
 			float a1 = (float)Math.PI + t * 6;
@@ -480,8 +480,8 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Save();
 
 			vg.BeginPath();
-			vg.Arc(cx, cy, r0, a0, a1, NanoVGContext.NVG_CW);
-			vg.Arc(cx, cy, r1, a1, a0, NanoVGContext.NVG_CCW);
+			vg.Arc(cx, cy, r0, a0, a1, NvgContext.NVG_CW);
+			vg.Arc(cx, cy, r1, a1, a0, NvgContext.NVG_CCW);
 			vg.ClosePath();
 			ax = cx + (float)Math.Cos(a0) * (r0 + r1) * 0.5f;
 			ay = cy + (float)Math.Sin(a0) * (r0 + r1) * 0.5f;
@@ -494,7 +494,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawThumbnails(NanoVGContext vg, float x, float y, float w, float h, int[] images, float t)
+		public static void drawThumbnails(NvgContext vg, float x, float y, float w, float h, int[] images, float t)
 		{
 			float cornerRadius = 3.0f;
 			Paint shadowPaint, imgPaint, fadePaint;
@@ -516,7 +516,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(x - 10, y - 10, w + 20, h + 30);
 			vg.RoundedRect(x, y, w, h, cornerRadius);
-			vg.PathWinding(NanoVGContext.NVG_HOLE);
+			vg.PathWinding(NvgContext.NVG_HOLE);
 			vg.FillPaint(shadowPaint);
 			vg.Fill();
 
@@ -574,7 +574,7 @@ namespace NanoVGSharp.Samples.Demo
 				vg.BeginPath();
 				vg.Rect(tx - 5, ty - 5, thumb + 10, thumb + 10);
 				vg.RoundedRect(tx, ty, thumb, thumb, 6);
-				vg.PathWinding(NanoVGContext.NVG_HOLE);
+				vg.PathWinding(NvgContext.NVG_HOLE);
 				vg.FillPaint(shadowPaint);
 				vg.Fill();
 
@@ -618,7 +618,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawColorwheel(NanoVGContext vg, float x, float y, float w, float h, float t)
+		public static void drawColorwheel(NvgContext vg, float x, float y, float w, float h, float t)
 		{
 			int i;
 			float r0, r1, ax, ay, bx, by, cx, cy, aeps, r;
@@ -643,8 +643,8 @@ namespace NanoVGSharp.Samples.Demo
 				float a0 = (float)i / 6.0f * (float)Math.PI * 2.0f - aeps;
 				float a1 = (float)(i + 1.0f) / 6.0f * (float)Math.PI * 2.0f + aeps;
 				vg.BeginPath();
-				vg.Arc(cx, cy, r0, a0, a1, NanoVGContext.NVG_CW);
-				vg.Arc(cx, cy, r1, a1, a0, NanoVGContext.NVG_CCW);
+				vg.Arc(cx, cy, r0, a0, a1, NvgContext.NVG_CW);
+				vg.Arc(cx, cy, r1, a1, a0, NvgContext.NVG_CCW);
 				vg.ClosePath();
 				ax = cx + (float)Math.Cos(a0) * (r0 + r1) * 0.5f;
 				ay = cy + (float)Math.Sin(a0) * (r0 + r1) * 0.5f;
@@ -678,7 +678,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(r0 - 2 - 10, -4 - 10, r1 - r0 + 4 + 20, 8 + 20);
 			vg.Rect(r0 - 2, -4, r1 - r0 + 4, 8);
-			vg.PathWinding(NanoVGContext.NVG_HOLE);
+			vg.PathWinding(NvgContext.NVG_HOLE);
 			vg.FillPaint(paint);
 			vg.Fill();
 
@@ -715,7 +715,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(ax - 20, ay - 20, 40, 40);
 			vg.Circle(ax, ay, 7);
-			vg.PathWinding(NanoVGContext.NVG_HOLE);
+			vg.PathWinding(NvgContext.NVG_HOLE);
 			vg.FillPaint(paint);
 			vg.Fill();
 
@@ -724,14 +724,14 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawLines(NanoVGContext vg, float x, float y, float w, float h, float t)
+		public static void drawLines(NvgContext vg, float x, float y, float w, float h, float t)
 		{
 			int i, j;
 			float pad = 5.0f, s = w / 9.0f - pad * 2;
 			float[] pts = new float[4 * 2];
 			float fx, fy;
-			int[] joins = new int[] { NanoVGContext.NVG_MITER, NanoVGContext.NVG_ROUND, NanoVGContext.NVG_BEVEL };
-			int[] caps = new int[] { NanoVGContext.NVG_BUTT, NanoVGContext.NVG_ROUND, NanoVGContext.NVG_SQUARE };
+			int[] joins = new int[] { NvgContext.NVG_MITER, NvgContext.NVG_ROUND, NvgContext.NVG_BEVEL };
+			int[] caps = new int[] { NvgContext.NVG_BUTT, NvgContext.NVG_ROUND, NvgContext.NVG_SQUARE };
 
 			vg.Save();
 			pts[0] = -s * 0.25f + (float)Math.Cos(t * 0.3f) * s * 0.5f;
@@ -762,8 +762,8 @@ namespace NanoVGSharp.Samples.Demo
 					vg.LineTo(fx + pts[6], fy + pts[7]);
 					vg.Stroke();
 
-					vg.LineCap(NanoVGContext.NVG_BUTT);
-					vg.LineJoin(NanoVGContext.NVG_BEVEL);
+					vg.LineCap(NvgContext.NVG_BUTT);
+					vg.LineJoin(NvgContext.NVG_BEVEL);
 
 					vg.StrokeWidth(1.0f);
 					vg.StrokeColor(new Color(0, 192, 255, 255));
@@ -779,7 +779,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		private static int LoadFont(NanoVGContext vg, string name, string path)
+		private static int LoadFont(NvgContext vg, string name, string path)
 		{
 			byte[] data;
 			var ms = new MemoryStream();
@@ -793,7 +793,7 @@ namespace NanoVGSharp.Samples.Demo
 			return vg.CreateFontMem(name, data);
 		}
 
-		public int loadDemoData(GraphicsDevice device, NanoVGContext vg)
+		public int loadDemoData(GraphicsDevice device, NvgContext vg)
 		{
 			int i;
 
@@ -826,7 +826,7 @@ namespace NanoVGSharp.Samples.Demo
 			return 0;
 		}
 
-		public static void drawParagraph(NanoVGContext vg, float x, float y, float width, float height, float mx, float my)
+		public static void drawParagraph(NvgContext vg, float x, float y, float width, float height, float mx, float my)
 		{
 			TextRow[] rows = new TextRow[3];
 			GlyphPosition[] glyphs = new GlyphPosition[100];
@@ -849,7 +849,7 @@ namespace NanoVGSharp.Samples.Demo
 
 			vg.FontSize(18.0f);
 			vg.FontFace("sans");
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_TOP);
+			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_TOP);
 
 			float ascender, descender;
 			vg.TextMetrics(out ascender, out descender, out lineh);
@@ -911,7 +911,7 @@ namespace NanoVGSharp.Samples.Demo
 			{
 				string txt = gutter.ToString();
 				vg.FontSize(13.0f);
-				vg.TextAlign(NanoVGContext.NVG_ALIGN_RIGHT | NanoVGContext.NVG_ALIGN_MIDDLE);
+				vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_MIDDLE);
 
 				vg.TextBounds(gx, gy, txt, ref bounds);
 
@@ -930,7 +930,7 @@ namespace NanoVGSharp.Samples.Demo
 			y += 20.0f;
 
 			vg.FontSize(13.0f);
-			vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_TOP);
+			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_TOP);
 			vg.TextLineHeight(1.2f);
 
 			vg.TextBoxBounds(x, y, 150, "Hover your mouse over the text to see calculated caret position.", ref bounds);
@@ -957,7 +957,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawWidths(NanoVGContext vg, float x, float y, float width)
+		public static void drawWidths(NvgContext vg, float x, float y, float width)
 		{
 			int i;
 
@@ -979,10 +979,10 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawCaps(NanoVGContext vg, float x, float y, float width)
+		public static void drawCaps(NvgContext vg, float x, float y, float width)
 		{
 			int i;
-			int[] caps = new[] { NanoVGContext.NVG_BUTT, NanoVGContext.NVG_ROUND, NanoVGContext.NVG_SQUARE };
+			int[] caps = new[] { NvgContext.NVG_BUTT, NvgContext.NVG_ROUND, NvgContext.NVG_SQUARE };
 			float lineWidth = 8.0f;
 
 			vg.Save();
@@ -1011,7 +1011,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawScissor(NanoVGContext vg, float x, float y, float t)
+		public static void drawScissor(NvgContext vg, float x, float y, float t)
 		{
 			vg.Save();
 
@@ -1047,7 +1047,7 @@ namespace NanoVGSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public void renderDemo(NanoVGContext vg, float mx, float my, float width, float height,
+		public void renderDemo(NvgContext vg, float mx, float my, float width, float height,
 						float t, bool blowup)
 		{
 			float x, y, popy;

@@ -38,7 +38,7 @@ namespace NanoVGSharp.Samples.Demo
 			return avg / (float)_values.Length;
 		}
 
-		public void Render(NanoVGContext vg, float x, float y)
+		public void Render(NvgContext vg, float x, float y)
 		{
 			int i;
 			float avg, w, h;
@@ -104,7 +104,7 @@ namespace NanoVGSharp.Samples.Demo
 			if (string.IsNullOrEmpty(_name))
 			{
 				vg.FontSize(14.0f);
-				vg.TextAlign(NanoVGContext.NVG_ALIGN_LEFT | NanoVGContext.NVG_ALIGN_TOP);
+				vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_TOP);
 				vg.FillColor(new Color(240, 240, 240, 192));
 				vg.Text(x + 3, y + 1, _name);
 			}
@@ -112,13 +112,13 @@ namespace NanoVGSharp.Samples.Demo
 			if (_style == Style.GRAPH_RENDER_FPS)
 			{
 				vg.FontSize(18.0f);
-				vg.TextAlign(NanoVGContext.NVG_ALIGN_RIGHT | NanoVGContext.NVG_ALIGN_TOP);
+				vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_TOP);
 				vg.FillColor(new Color(240, 240, 240, 255));
 				str = string.Format("{0:0.00} FPS", 1.0f / avg);
 				vg.Text(x + w - 3, y + 1, str);
 
 				vg.FontSize(15.0f);
-				vg.TextAlign(NanoVGContext.NVG_ALIGN_RIGHT | NanoVGContext.NVG_ALIGN_BOTTOM);
+				vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_BOTTOM);
 				vg.FillColor(new Color(240, 240, 240, 160));
 				str = string.Format("{0:0.00} ms", avg * 1000.0f);
 				vg.Text(x + w - 3, y + h - 1, str);
@@ -126,7 +126,7 @@ namespace NanoVGSharp.Samples.Demo
 			else if (_style == Style.GRAPH_RENDER_PERCENT)
 			{
 				vg.FontSize(18.0f);
-				vg.TextAlign(NanoVGContext.NVG_ALIGN_RIGHT | NanoVGContext.NVG_ALIGN_TOP);
+				vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_TOP);
 				vg.FillColor(new Color(240, 240, 240, 255));
 				str = string.Format("{0:0.00} %%", avg);
 				vg.Text(x + w - 3, y + 1, str);
@@ -134,7 +134,7 @@ namespace NanoVGSharp.Samples.Demo
 			else
 			{
 				vg.FontSize(18.0f);
-				vg.TextAlign(NanoVGContext.NVG_ALIGN_RIGHT | NanoVGContext.NVG_ALIGN_TOP);
+				vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_TOP);
 				vg.FillColor(new Color(240, 240, 240, 255));
 				str = string.Format("{0:0.00} ms", avg * 1000.0f);
 				vg.Text(x + w - 3, y + 1, str);
