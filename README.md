@@ -1,7 +1,7 @@
 # NvgSharp
 [![NuGet](https://img.shields.io/nuget/v/NvgSharp.MonoGame.svg)](https://www.nuget.org/packages/NvgSharp.MonoGame/) [![Build status](https://ci.appveyor.com/api/projects/status/r4cd8vcao5i84xo7?svg=true)](https://ci.appveyor.com/project/RomanShapiro/nvgsharp)
 
-Library that extends functionality of the SpriteFont. For now it has only one feature - ability to create SpiteFont dynamically from ttf.
+C# port of https://github.com/memononen/nanovg for MonoGame and FNA.
 
 # Adding Reference
 `Install-Package NvgSharp.MonoGame` (or `Install-Package NvgSharp.FNA` for FNA)
