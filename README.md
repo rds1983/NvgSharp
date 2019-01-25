@@ -48,8 +48,7 @@ Following code renders a simple circle:
 
 # Demo
 This [sample](https://github.com/rds1983/NvgSharp/tree/master/samples/NvgSharp.Samples.Demo) demonstrates rendering of the following:
-It would render following:
-![](/images/sampleDynamicSpriteFont.png)
+![](/images/nanovg.gif)
 
 ## Credits
 * [nanovg](https://github.com/memononen/nanovg)
