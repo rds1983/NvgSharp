@@ -35,7 +35,7 @@ And following code to the LoadContent method:
 ```
 
 # Drawing
-Following code renders a simple circle:
+Add following code to Draw method to render a red circle:
 
 ```c#
 	_context.BeginFrame(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, 1.0f);
