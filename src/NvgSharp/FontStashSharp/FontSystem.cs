@@ -1,4 +1,5 @@
 ﻿using System;
+using NvgSharp;
 using StbSharp;
 
 namespace FontStashSharp
@@ -9,13 +10,6 @@ namespace FontStashSharp
 
 		public const int FONS_ZERO_TOPLEFT = 1;
 		public const int FONS_ZERO_BOTTOMLEFT = 2;
-		public const int FONS_ALIGN_LEFT = 1 << 0;
-		public const int FONS_ALIGN_CENTER = 1 << 1;
-		public const int FONS_ALIGN_RIGHT = 1 << 2;
-		public const int FONS_ALIGN_TOP = 1 << 3;
-		public const int FONS_ALIGN_MIDDLE = 1 << 4;
-		public const int FONS_ALIGN_BOTTOM = 1 << 5;
-		public const int FONS_ALIGN_BASELINE = 1 << 6;
 		public const int FONS_GLYPH_BITMAP_OPTIONAL = 1;
 		public const int FONS_GLYPH_BITMAP_REQUIRED = 2;
 		public const int FONS_ATLAS_FULL = 1;
@@ -135,7 +129,7 @@ namespace FontStashSharp
 			GetState().Blur = blur;
 		}
 
-		public void SetAlign(int align)
+		public void SetAlign(Alignment align)
 		{
 			GetState().Align = align;
 		}
@@ -173,7 +167,7 @@ namespace FontStashSharp
 			state.Font = 0;
 			state.Blur = 0;
 			state.Spacing = 0;
-			state.Align = FONS_ALIGN_LEFT | FONS_ALIGN_BASELINE;
+			state.Align = Alignment.Left | Alignment.Baseline;
 		}
 
 		public int LoadFont(StbTrueType.stbtt_fontinfo font, byte* data, int dataSize)
@@ -489,28 +483,28 @@ namespace FontStashSharp
 			_vertsNumber++;
 		}
 
-		public float GetVertAlign(Font font, int align, short isize)
+		public float GetVertAlign(Font font, Alignment align, short isize)
 		{
 			if ((_params_.Flags & FONS_ZERO_TOPLEFT) != 0)
 			{
-				if ((align & FONS_ALIGN_TOP) != 0)
+				if ((align & Alignment.Top) != 0)
 					return font.Ascender * isize / 10.0f;
-				if ((align & FONS_ALIGN_MIDDLE) != 0)
+				if ((align & Alignment.Middle) != 0)
 					return (font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
-				if ((align & FONS_ALIGN_BASELINE) != 0)
+				if ((align & Alignment.Baseline) != 0)
 					return 0.0f;
-				if ((align & FONS_ALIGN_BOTTOM) != 0)
+				if ((align & Alignment.Bottom) != 0)
 					return font.Descender * isize / 10.0f;
 			}
 			else
 			{
-				if ((align & FONS_ALIGN_TOP) != 0)
+				if ((align & Alignment.Top) != 0)
 					return -font.Ascender * isize / 10.0f;
-				if ((align & FONS_ALIGN_MIDDLE) != 0)
+				if ((align & Alignment.Middle) != 0)
 					return -(font.Ascender + font.Descender) / 2.0f * isize / 10.0f;
-				if ((align & FONS_ALIGN_BASELINE) != 0)
+				if ((align & Alignment.Baseline) != 0)
 					return 0.0f;
-				if ((align & FONS_ALIGN_BOTTOM) != 0)
+				if ((align & Alignment.Bottom) != 0)
 					return -font.Descender * isize / 10.0f;
 			}
 
@@ -529,16 +523,16 @@ namespace FontStashSharp
 			iter.iSize = (short)(state.Size * 10.0f);
 			iter.iBlur = (short)state.Blur;
 			iter.Scale = iter.Font.FontInfo.__tt_getPixelHeightScale(iter.iSize / 10.0f);
-			if ((state.Align & FONS_ALIGN_LEFT) != 0)
+			if ((state.Align & Alignment.Left) != 0)
 			{
 			}
-			else if ((state.Align & FONS_ALIGN_RIGHT) != 0)
+			else if ((state.Align & Alignment.Right) != 0)
 			{
 				var bounds = new Bounds();
 				width = TextBounds(x, y, str, ref bounds);
 				x -= width;
 			}
-			else if ((state.Align & FONS_ALIGN_CENTER) != 0)
+			else if ((state.Align & Alignment.Center) != 0)
 			{
 				var bounds = new Bounds();
 				width = TextBounds(x, y, str, ref bounds);
@@ -679,15 +673,15 @@ namespace FontStashSharp
 			}
 
 			advance = x - startx;
-			if ((state.Align & FONS_ALIGN_LEFT) != 0)
+			if ((state.Align & Alignment.Left) != 0)
 			{
 			}
-			else if ((state.Align & FONS_ALIGN_RIGHT) != 0)
+			else if ((state.Align & Alignment.Right) != 0)
 			{
 				minx -= advance;
 				maxx -= advance;
 			}
-			else if ((state.Align & FONS_ALIGN_CENTER) != 0)
+			else if ((state.Align & Alignment.Center) != 0)
 			{
 				minx -= advance * 0.5f;
 				maxx -= advance * 0.5f;

@@ -8,66 +8,6 @@ namespace NvgSharp
 {
 	public unsafe class NvgContext : IDisposable
 	{
-		public const int NVG_CCW = 1;
-		public const int NVG_CW = 2;
-		public const int NVG_SOLID = 1;
-		public const int NVG_HOLE = 2;
-		public const int NVG_BUTT = 0;
-		public const int NVG_ROUND = 1;
-		public const int NVG_SQUARE = 2;
-		public const int NVG_BEVEL = 3;
-		public const int NVG_MITER = 4;
-		public const int NVG_ALIGN_LEFT = 1 << 0;
-		public const int NVG_ALIGN_CENTER = 1 << 1;
-		public const int NVG_ALIGN_RIGHT = 1 << 2;
-		public const int NVG_ALIGN_TOP = 1 << 3;
-		public const int NVG_ALIGN_MIDDLE = 1 << 4;
-		public const int NVG_ALIGN_BOTTOM = 1 << 5;
-		public const int NVG_ALIGN_BASELINE = 1 << 6;
-		public const int NVG_ZERO = 1 << 0;
-		public const int NVG_ONE = 1 << 1;
-		public const int NVG_SRC_COLOR = 1 << 2;
-		public const int NVG_ONE_MINUS_SRC_COLOR = 1 << 3;
-		public const int NVG_DST_COLOR = 1 << 4;
-		public const int NVG_ONE_MINUS_DST_COLOR = 1 << 5;
-		public const int NVG_SRC_ALPHA = 1 << 6;
-		public const int NVG_ONE_MINUS_SRC_ALPHA = 1 << 7;
-		public const int NVG_DST_ALPHA = 1 << 8;
-		public const int NVG_ONE_MINUS_DST_ALPHA = 1 << 9;
-		public const int NVG_SRC_ALPHA_SATURATE = 1 << 10;
-		public const int NVG_SOURCE_OVER = 0;
-		public const int NVG_SOURCE_IN = 1;
-		public const int NVG_SOURCE_OUT = 2;
-		public const int NVG_ATOP = 3;
-		public const int NVG_DESTINATION_OVER = 4;
-		public const int NVG_DESTINATION_IN = 5;
-		public const int NVG_DESTINATION_OUT = 6;
-		public const int NVG_DESTINATION_ATOP = 7;
-		public const int NVG_LIGHTER = 8;
-		public const int NVG_COPY = 9;
-		public const int NVG_XOR = 10;
-		public const int NVG_IMAGE_GENERATE_MIPMAPS = 1 << 0;
-		public const int NVG_IMAGE_REPEATX = 1 << 1;
-		public const int NVG_IMAGE_REPEATY = 1 << 2;
-		public const int NVG_IMAGE_FLIPY = 1 << 3;
-		public const int NVG_IMAGE_PREMULTIPLIED = 1 << 4;
-		public const int NVG_IMAGE_NEAREST = 1 << 5;
-		public const int NVG_TEXTURE_ALPHA = 0x01;
-		public const int NVG_TEXTURE_RGBA = 0x02;
-		public const int NVG_MOVETO = 0;
-		public const int NVG_LINETO = 1;
-		public const int NVG_BEZIERTO = 2;
-		public const int NVG_CLOSE = 3;
-		public const int NVG_WINDING = 4;
-		public const int NVG_PT_CORNER = 0x01;
-		public const int NVG_PT_LEFT = 0x02;
-		public const int NVG_PT_BEVEL = 0x04;
-		public const int NVG_PR_INNERBEVEL = 0x08;
-		public const int NVG_SPACE = 0;
-		public const int NVG_NEWLINE = 1;
-		public const int NVG_CHAR = 2;
-		public const int NVG_CJK_CHAR = 3;
-
 		public const int MaxTextRows = 10;
 		private readonly int[] _fontImages = new int[4];
 
@@ -113,7 +53,7 @@ namespace NvgSharp
 			fontParams.Height = 512;
 			fontParams.Flags = FontSystem.FONS_ZERO_TOPLEFT;
 			_fontSystem = new FontSystem(fontParams);
-			_fontImages[0] = _renderer.CreateTexture(NVG_TEXTURE_ALPHA, fontParams.Width, fontParams.Height, 0, null);
+			_fontImages[0] = _renderer.CreateTexture(TextureType.Alpha, fontParams.Width, fontParams.Height, 0, null);
 			_fontImageIdx = 0;
 
 			for (var i = 0; i < _rows.Length; ++i)
@@ -219,8 +159,8 @@ namespace NvgSharp
 			state.ShapeAntiAlias = 1;
 			state.StrokeWidth = 1.0f;
 			state.MiterLimit = 10.0f;
-			state.LineCap = NVG_BUTT;
-			state.LineJoin = NVG_MITER;
+			state.LineCap = NvgSharp.LineCap.Butt;
+			state.LineJoin = NvgSharp.LineCap.Miter;
 			state.Alpha = 1.0f;
 			state.Transform.SetIdentity();
 			state.Scissor.Extent.X = -1.0f;
@@ -229,7 +169,7 @@ namespace NvgSharp
 			state.LetterSpacing = 0.0f;
 			state.LineHeight = 1.0f;
 			state.FontBlur = 0.0f;
-			state.TextAlign = NVG_ALIGN_LEFT | NVG_ALIGN_BASELINE;
+			state.TextAlign = Alignment.Left | Alignment.Baseline;
 			state.FontId = 0;
 		}
 
@@ -251,13 +191,13 @@ namespace NvgSharp
 			state.MiterLimit = limit;
 		}
 
-		public void LineCap(int cap)
+		public void LineCap(LineCap cap)
 		{
 			var state = GetState();
 			state.LineCap = cap;
 		}
 
-		public void LineJoin(int join)
+		public void LineJoin(LineCap join)
 		{
 			var state = GetState();
 			state.LineJoin = join;
@@ -362,9 +302,9 @@ namespace NvgSharp
 			state.Fill.Transform.Multiply(ref state.Transform);
 		}
 
-		public int CreateImageRGBA(int w, int h, int imageFlags, byte[] data)
+		public int CreateImageRGBA(int w, int h, ImageFlags imageFlags, byte[] data)
 		{
-			return _renderer.CreateTexture(NVG_TEXTURE_RGBA, w, h, imageFlags, data);
+			return _renderer.CreateTexture(TextureType.RGBA, w, h, imageFlags, data);
 		}
 
 		public void UpdateImage(int image, byte[] data)
@@ -523,7 +463,7 @@ namespace NvgSharp
 		public void MoveTo(float x, float y)
 		{
 			var vals = stackalloc float[3];
-			vals[0] = NVG_MOVETO;
+			vals[0] = (int)CommandType.MoveTo;
 			vals[1] = x;
 			vals[2] = y;
 
@@ -533,7 +473,7 @@ namespace NvgSharp
 		public void LineTo(float x, float y)
 		{
 			var vals = stackalloc float[3];
-			vals[0] = NVG_LINETO;
+			vals[0] = (int)CommandType.LineTo;
 			vals[1] = x;
 			vals[2] = y;
 
@@ -543,7 +483,7 @@ namespace NvgSharp
 		public void BezierTo(float c1x, float c1y, float c2x, float c2y, float x, float y)
 		{
 			var vals = stackalloc float[7];
-			vals[0] = NVG_BEZIERTO;
+			vals[0] = (int)CommandType.BezierTo;
 			vals[1] = c1x;
 			vals[2] = c1y;
 			vals[3] = c2x;
@@ -559,7 +499,7 @@ namespace NvgSharp
 			var x0 = _commandX;
 			var y0 = _commandY;
 			var vals = stackalloc float[7];
-			vals[0] = NVG_BEZIERTO;
+			vals[0] = (int)CommandType.BezierTo;
 			vals[1] = x0 + 2.0f / 3.0f * (cx - x0);
 			vals[2] = y0 + 2.0f / 3.0f * (cy - y0);
 			vals[3] = x + 2.0f / 3.0f * (cx - x);
@@ -584,7 +524,7 @@ namespace NvgSharp
 			float cy = 0;
 			float a0 = 0;
 			float a1 = 0;
-			var dir = 0;
+			Winding dir = Winding.CounterClockWise;
 			if (_commandsNumber == 0)
 				return;
 
@@ -615,7 +555,7 @@ namespace NvgSharp
 				cy = y1 + dy0 * d + -dx0 * radius;
 				a0 = NvgUtility.atan2f(dx0, -dy0);
 				a1 = NvgUtility.atan2f(-dx1, dy1);
-				dir = NVG_CW;
+				dir = Winding.ClockWise;
 			}
 			else
 			{
@@ -623,7 +563,7 @@ namespace NvgSharp
 				cy = y1 + dy0 * d + dx0 * radius;
 				a0 = NvgUtility.atan2f(-dx0, dy0);
 				a1 = NvgUtility.atan2f(dx1, -dy1);
-				dir = NVG_CCW;
+				dir = Winding.CounterClockWise;
 			}
 
 			Arc(cx, cy, radius, a0, a1, dir);
@@ -632,21 +572,21 @@ namespace NvgSharp
 		public void ClosePath()
 		{
 			var vals = stackalloc float[1];
-			vals[0] = NVG_CLOSE;
+			vals[0] = (int)CommandType.Close;
 
 			__appendCommands(vals, 1);
 		}
 
-		public void PathWinding(int dir)
+		public void PathWinding(Solidity dir)
 		{
 			var vals = stackalloc float[2];
-			vals[0] = NVG_WINDING;
-			vals[1] = dir;
+			vals[0] = (int)CommandType.Winding;
+			vals[1] = (int)dir;
 
 			__appendCommands(vals, 2);
 		}
 
-		public void Arc(float cx, float cy, float r, float a0, float a1, int dir)
+		public void Arc(float cx, float cy, float r, float a0, float a1, Winding dir)
 		{
 			var a = (float)0;
 			var da = (float)0;
@@ -666,9 +606,9 @@ namespace NvgSharp
 			var i = 0;
 			var ndivs = 0;
 			var nvals = 0;
-			var move = _commandsNumber > 0 ? NVG_LINETO : NVG_MOVETO;
+			var move = _commandsNumber > 0 ? CommandType.LineTo : CommandType.MoveTo;
 			da = a1 - a0;
-			if (dir == NVG_CW)
+			if (dir == Winding.ClockWise)
 			{
 				if (NvgUtility.__absf(da) >= 3.14159274 * 2)
 					da = (float)(3.14159274 * 2);
@@ -689,7 +629,7 @@ namespace NvgSharp
 				NvgUtility.__mini((int)(NvgUtility.__absf(da) / (3.14159274 * 0.5f) + 0.5f), 5));
 			hda = da / ndivs / 2.0f;
 			kappa = NvgUtility.__absf(4.0f / 3.0f * (1.0f - NvgUtility.cosf(hda)) / NvgUtility.sinf(hda));
-			if (dir == NVG_CCW)
+			if (dir == Winding.CounterClockWise)
 				kappa = -kappa;
 			nvals = 0;
 			for (i = 0; i <= ndivs; i++)
@@ -703,13 +643,13 @@ namespace NvgSharp
 				tany = dx * r * kappa;
 				if (i == 0)
 				{
-					vals[nvals++] = move;
+					vals[nvals++] = (int)move;
 					vals[nvals++] = x;
 					vals[nvals++] = y;
 				}
 				else
 				{
-					vals[nvals++] = NVG_BEZIERTO;
+					vals[nvals++] = (int)CommandType.BezierTo;
 					vals[nvals++] = px + ptanx;
 					vals[nvals++] = py + ptany;
 					vals[nvals++] = x - tanx;
@@ -730,19 +670,19 @@ namespace NvgSharp
 		public void Rect(float x, float y, float w, float h)
 		{
 			var vals = stackalloc float[13];
-			vals[0] = NVG_MOVETO;
+			vals[0] = (int)CommandType.MoveTo;
 			vals[1] = x;
 			vals[2] = y;
-			vals[3] = NVG_LINETO;
+			vals[3] = (int)CommandType.LineTo;
 			vals[4] = x;
 			vals[5] = y + h;
-			vals[6] = NVG_LINETO;
+			vals[6] = (int)CommandType.LineTo;
 			vals[7] = x + w;
 			vals[8] = y + h;
-			vals[9] = NVG_LINETO;
+			vals[9] = (int)CommandType.LineTo;
 			vals[10] = x + w;
 			vals[11] = y;
-			vals[12] = NVG_CLOSE;
+			vals[12] = (int)CommandType.Close;
 
 			__appendCommands(vals, 13);
 		}
@@ -772,50 +712,50 @@ namespace NvgSharp
 				var rxTL = NvgUtility.__minf(radTopLeft, halfw) * NvgUtility.__signf(w);
 				var ryTL = NvgUtility.__minf(radTopLeft, halfh) * NvgUtility.__signf(h);
 				var vals = stackalloc float[44];
-				vals[0] = NVG_MOVETO;
+				vals[0] = (int)CommandType.MoveTo;
 				vals[1] = x;
 				vals[2] = y + ryTL;
-				vals[3] = NVG_LINETO;
+				vals[3] = (int)CommandType.LineTo;
 				vals[4] = x;
 				vals[5] = y + h - ryBL;
-				vals[6] = NVG_BEZIERTO;
+				vals[6] = (int)CommandType.BezierTo;
 				vals[7] = x;
 				vals[8] = y + h - ryBL * (1 - 0.5522847493f);
 				vals[9] = x + rxBL * (1 - 0.5522847493f);
 				vals[10] = y + h;
 				vals[11] = x + rxBL;
 				vals[12] = y + h;
-				vals[13] = NVG_LINETO;
+				vals[13] = (int)CommandType.LineTo;
 				vals[14] = x + w - rxBR;
 				vals[15] = y + h;
-				vals[16] = NVG_BEZIERTO;
+				vals[16] = (int)CommandType.BezierTo;
 				vals[17] = x + w - rxBR * (1 - 0.5522847493f);
 				vals[18] = y + h;
 				vals[19] = x + w;
 				vals[20] = y + h - ryBR * (1 - 0.5522847493f);
 				vals[21] = x + w;
 				vals[22] = y + h - ryBR;
-				vals[23] = NVG_LINETO;
+				vals[23] = (int)CommandType.LineTo;
 				vals[24] = x + w;
 				vals[25] = y + ryTR;
-				vals[26] = NVG_BEZIERTO;
+				vals[26] = (int)CommandType.BezierTo;
 				vals[27] = x + w;
 				vals[28] = y + ryTR * (1 - 0.5522847493f);
 				vals[29] = x + w - rxTR * (1 - 0.5522847493f);
 				vals[30] = y;
 				vals[31] = x + w - rxTR;
 				vals[32] = y;
-				vals[33] = NVG_LINETO;
+				vals[33] = (int)CommandType.LineTo;
 				vals[34] = x + rxTL;
 				vals[35] = y;
-				vals[36] = NVG_BEZIERTO;
+				vals[36] = (int)CommandType.BezierTo;
 				vals[37] = x + rxTL * (1 - 0.5522847493f);
 				vals[38] = y;
 				vals[39] = x;
 				vals[40] = y + ryTL * (1 - 0.5522847493f);
 				vals[41] = x;
 				vals[42] = y + ryTL;
-				vals[43] = NVG_CLOSE;
+				vals[43] = (int)CommandType.Close;
 				__appendCommands(vals, 44);
 			}
 		}
@@ -823,38 +763,38 @@ namespace NvgSharp
 		public void Ellipse(float cx, float cy, float rx, float ry)
 		{
 			var vals = stackalloc float[32];
-			vals[0] = NVG_MOVETO;
+			vals[0] = (int)CommandType.MoveTo;
 			vals[1] = cx - rx;
 			vals[2] = cy;
-			vals[3] = NVG_BEZIERTO;
+			vals[3] = (int)CommandType.BezierTo;
 			vals[4] = cx - rx;
 			vals[5] = cy + ry * 0.5522847493f;
 			vals[6] = cx - rx * 0.5522847493f;
 			vals[7] = cy + ry;
 			vals[8] = cx;
 			vals[9] = cy + ry;
-			vals[10] = NVG_BEZIERTO;
+			vals[10] = (int)CommandType.BezierTo;
 			vals[11] = cx + rx * 0.5522847493f;
 			vals[12] = cy + ry;
 			vals[13] = cx + rx;
 			vals[14] = cy + ry * 0.5522847493f;
 			vals[15] = cx + rx;
 			vals[16] = cy;
-			vals[17] = NVG_BEZIERTO;
+			vals[17] = (int)CommandType.BezierTo;
 			vals[18] = cx + rx;
 			vals[19] = cy - ry * 0.5522847493f;
 			vals[20] = cx + rx * 0.5522847493f;
 			vals[21] = cy - ry;
 			vals[22] = cx;
 			vals[23] = cy - ry;
-			vals[24] = NVG_BEZIERTO;
+			vals[24] = (int)CommandType.BezierTo;
 			vals[25] = cx - rx * 0.5522847493f;
 			vals[26] = cy - ry;
 			vals[27] = cx - rx;
 			vals[28] = cy - ry * 0.5522847493f;
 			vals[29] = cx - rx;
 			vals[30] = cy;
-			vals[31] = NVG_CLOSE;
+			vals[31] = (int)CommandType.Close;
 
 			__appendCommands(vals, 32);
 		}
@@ -908,9 +848,9 @@ namespace NvgSharp
 			var i = 0;
 			__flattenPaths();
 			if (_edgeAntiAlias != 0 && state.ShapeAntiAlias != 0)
-				__expandFill(_fringeWidth, NVG_MITER, 2.4f);
+				__expandFill(_fringeWidth, NvgSharp.LineCap.Miter, 2.4f);
 			else
-				__expandFill(0.0f, NVG_MITER, 2.4f);
+				__expandFill(0.0f, NvgSharp.LineCap.Miter, 2.4f);
 			MultiplyAlpha(ref fillPaint.InnerColor, state.Alpha);
 			MultiplyAlpha(ref fillPaint.OuterColor, state.Alpha);
 			_renderer.RenderFill(ref fillPaint, ref state.Scissor, _fringeWidth, _cache.Bounds,
@@ -1011,7 +951,7 @@ namespace NvgSharp
 			state.LineHeight = lineHeight;
 		}
 
-		public void TextAlign(int align)
+		public void TextAlign(Alignment align)
 		{
 			var state = GetState();
 			state.TextAlign = align;
@@ -1107,14 +1047,14 @@ namespace NvgSharp
 			var state = GetState();
 			var i = 0;
 			var oldAlign = state.TextAlign;
-			var haling = state.TextAlign & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT);
-			var valign = state.TextAlign & (NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE);
+			var haling = state.TextAlign & (Alignment.Left | Alignment.Center | Alignment.Right);
+			var valign = state.TextAlign & (Alignment.Top | Alignment.Middle | Alignment.Bottom | Alignment.Baseline);
 			var lineh = (float)0;
 			if (state.FontId == -1)
 				return;
 			float ascender, descender;
 			TextMetrics(out ascender, out descender, out lineh);
-			state.TextAlign = NVG_ALIGN_LEFT | valign;
+			state.TextAlign = Alignment.Left | valign;
 			while (true)
 			{
 				var nrows = TextBreakLines(_string_, breakRowWidth, _rows, out _string_);
@@ -1124,11 +1064,11 @@ namespace NvgSharp
 				for (i = 0; i < nrows; i++)
 				{
 					var row = _rows[i];
-					if ((haling & NVG_ALIGN_LEFT) != 0)
+					if ((haling & Alignment.Left) != 0)
 						Text(x, y, row.Str);
-					else if ((haling & NVG_ALIGN_CENTER) != 0)
+					else if ((haling & Alignment.Center) != 0)
 						Text(x + breakRowWidth * 0.5f - row.Width * 0.5f, y, row.Str);
-					else if ((haling & NVG_ALIGN_RIGHT) != 0)
+					else if ((haling & Alignment.Right) != 0)
 						Text(x + breakRowWidth - row.Width, y, row.Str);
 					y += lineh * state.LineHeight;
 				}
@@ -1204,8 +1144,8 @@ namespace NvgSharp
 			var wordMinX = (float)0;
 			var breakWidth = (float)0;
 			var breakMaxX = (float)0;
-			var type = NVG_SPACE;
-			var ptype = NVG_SPACE;
+			var type = CodepointType.Space;
+			var ptype = CodepointType.Space;
 			var pcodepoint = 0;
 
 			if (state.FontId == -1)
@@ -1237,16 +1177,16 @@ namespace NvgSharp
 					case 12:
 					case 32:
 					case 0x00a0:
-						type = NVG_SPACE;
+						type = CodepointType.Space;
 						break;
 					case 10:
-						type = pcodepoint == 13 ? NVG_SPACE : NVG_NEWLINE;
+						type = pcodepoint == 13 ? CodepointType.Space : CodepointType.Newline;
 						break;
 					case 13:
-						type = pcodepoint == 10 ? NVG_SPACE : NVG_NEWLINE;
+						type = pcodepoint == 10 ? CodepointType.Space : CodepointType.Newline;
 						break;
 					case 0x0085:
-						type = NVG_NEWLINE;
+						type = CodepointType.Newline;
 						break;
 					default:
 						if (iter.Codepoint >= 0x4E00 && iter.Codepoint <= 0x9FFF ||
@@ -1255,13 +1195,13 @@ namespace NvgSharp
 							iter.Codepoint >= 0x1100 && iter.Codepoint <= 0x11FF ||
 							iter.Codepoint >= 0x3130 && iter.Codepoint <= 0x318F ||
 							iter.Codepoint >= 0xAC00 && iter.Codepoint <= 0xD7AF)
-							type = NVG_CJK_CHAR;
+							type = CodepointType.CjkChar;
 						else
-							type = NVG_CHAR;
+							type = CodepointType.Char;
 						break;
 				}
 
-				if (type == NVG_NEWLINE)
+				if (type == CodepointType.Newline)
 				{
 					rows[nrows].Str = rowStart == null ? iter.Str : new StringSegment(iter.Str, rowStart.Value);
 					if (rowEnd != null)
@@ -1287,7 +1227,7 @@ namespace NvgSharp
 				{
 					if (rowStart == null)
 					{
-						if (type == NVG_CHAR || type == NVG_CJK_CHAR)
+						if (type == CodepointType.Char || type == CodepointType.CjkChar)
 						{
 							rowStartX = iter.X;
 							rowStart = iter.Str.Location;
@@ -1306,28 +1246,28 @@ namespace NvgSharp
 					else
 					{
 						var nextWidth = iter.NextX - rowStartX;
-						if (type == NVG_CHAR || type == NVG_CJK_CHAR)
+						if (type == CodepointType.Char || type == CodepointType.CjkChar)
 						{
 							rowEnd = iter.Str.Location + 1;
 							rowWidth = iter.NextX - rowStartX;
 							rowMaxX = q.X1 - rowStartX;
 						}
 
-						if ((ptype == NVG_CHAR || ptype == NVG_CJK_CHAR) && type == NVG_SPACE || type == NVG_CJK_CHAR)
+						if ((ptype == CodepointType.Char || ptype == CodepointType.CjkChar) && type == CodepointType.Space || type == CodepointType.CjkChar)
 						{
 							breakEnd = iter.Str.Location;
 							breakWidth = rowWidth;
 							breakMaxX = rowMaxX;
 						}
 
-						if (ptype == NVG_SPACE && (type == NVG_CHAR || type == NVG_CJK_CHAR) || type == NVG_CJK_CHAR)
+						if (ptype == CodepointType.Space && (type == CodepointType.Char || type == CodepointType.CjkChar) || type == CodepointType.CjkChar)
 						{
 							wordStart = iter.Str.Location;
 							wordStartX = iter.X;
 							wordMinX = q.X0 - rowStartX;
 						}
 
-						if ((type == NVG_CHAR || type == NVG_CJK_CHAR) && nextWidth > breakRowWidth)
+						if ((type == CodepointType.Char || type == CodepointType.CjkChar) && nextWidth > breakRowWidth)
 						{
 							if (breakEnd == rowStart)
 							{
@@ -1424,8 +1364,8 @@ namespace NvgSharp
 			var invscale = 1.0f / scale;
 			var i = 0;
 			var oldAlign = state.TextAlign;
-			var haling = state.TextAlign & (NVG_ALIGN_LEFT | NVG_ALIGN_CENTER | NVG_ALIGN_RIGHT);
-			var valign = state.TextAlign & (NVG_ALIGN_TOP | NVG_ALIGN_MIDDLE | NVG_ALIGN_BOTTOM | NVG_ALIGN_BASELINE);
+			var haling = state.TextAlign & (Alignment.Left | Alignment.Center | Alignment.Right);
+			var valign = state.TextAlign & (Alignment.Top | Alignment.Middle | Alignment.Bottom | Alignment.Baseline);
 			var lineh = (float)0;
 			var rminy = (float)0;
 			var rmaxy = (float)0;
@@ -1441,7 +1381,7 @@ namespace NvgSharp
 
 			float ascender, descender;
 			TextMetrics(out ascender, out descender, out lineh);
-			state.TextAlign = NVG_ALIGN_LEFT | valign;
+			state.TextAlign = Alignment.Left | valign;
 			minx = maxx = x;
 			miny = maxy = y;
 			_fontSystem.SetSize(state.FontSize * scale);
@@ -1463,11 +1403,11 @@ namespace NvgSharp
 					float rminx = 0;
 					float rmaxx = 0;
 					var dx = (float)0;
-					if ((haling & NVG_ALIGN_LEFT) != 0)
+					if ((haling & Alignment.Left) != 0)
 						dx = 0;
-					else if ((haling & NVG_ALIGN_CENTER) != 0)
+					else if ((haling & Alignment.Center) != 0)
 						dx = breakRowWidth * 0.5f - row.Width * 0.5f;
-					else if ((haling & NVG_ALIGN_RIGHT) != 0)
+					else if ((haling & Alignment.Right) != 0)
 						dx = breakRowWidth - row.Width;
 					rminx = x + row.MinX + dx;
 					rmaxx = x + row.MaxX + dx;
@@ -1534,7 +1474,7 @@ namespace NvgSharp
 				_commandsCount = ccommands;
 			}
 
-			if ((int)vals[0] != NVG_CLOSE && (int)vals[0] != NVG_WINDING)
+			if (vals[0] != (int)CommandType.Close && vals[0] != (int)CommandType.Winding)
 			{
 				_commandX = vals[nvals - 2];
 				_commandY = vals[nvals - 1];
@@ -1543,27 +1483,27 @@ namespace NvgSharp
 			i = 0;
 			while (i < nvals)
 			{
-				var cmd = (int)vals[i];
-				switch (cmd)
+				var cmd = vals[i];
+				switch ((CommandType)cmd)
 				{
-					case NVG_MOVETO:
+					case CommandType.MoveTo:
 						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], vals[i + 1], vals[i + 2]);
 						i += 3;
 						break;
-					case NVG_LINETO:
+					case CommandType.LineTo:
 						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], vals[i + 1], vals[i + 2]);
 						i += 3;
 						break;
-					case NVG_BEZIERTO:
+					case CommandType.BezierTo:
 						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], vals[i + 1], vals[i + 2]);
 						state.Transform.TransformPoint(out vals[i + 3], out vals[i + 4], vals[i + 3], vals[i + 4]);
 						state.Transform.TransformPoint(out vals[i + 5], out vals[i + 6], vals[i + 5], vals[i + 6]);
 						i += 7;
 						break;
-					case NVG_CLOSE:
+					case CommandType.Close:
 						i++;
 						break;
-					case NVG_WINDING:
+					case CommandType.Winding:
 						i += 2;
 						break;
 					default:
@@ -1594,7 +1534,7 @@ namespace NvgSharp
 			var newPath = new Path
 			{
 				First = _cache.PointsNumber,
-				Winding = NVG_CCW
+				Winding = Winding.CounterClockWise
 			};
 
 			_cache.Paths.Add(newPath);
@@ -1607,7 +1547,7 @@ namespace NvgSharp
 			return null;
 		}
 
-		private void __addPoint(float x, float y, int flags)
+		private void __addPoint(float x, float y, PointFlags flags)
 		{
 			var path = __lastPath();
 			NvgPoint* pt;
@@ -1651,7 +1591,7 @@ namespace NvgSharp
 			path.Closed = 1;
 		}
 
-		private void __pathWinding(int winding)
+		private void __pathWinding(Winding winding)
 		{
 			var path = __lastPath();
 			if (path == null)
@@ -1667,7 +1607,7 @@ namespace NvgSharp
 		}
 
 		private void __tesselateBezier(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4,
-			int level, int type)
+			int level, PointFlags type)
 		{
 			float x12 = 0;
 			float y12 = 0;
@@ -1731,21 +1671,21 @@ namespace NvgSharp
 			i = 0;
 			while (i < _commandsNumber)
 			{
-				var cmd = (int)_commands[i];
-				switch (cmd)
+				var cmd = _commands[i];
+				switch ((CommandType)cmd)
 				{
-					case NVG_MOVETO:
+					case CommandType.MoveTo:
 						__addPath();
 						p = &_commands[i + 1];
-						__addPoint(p[0], p[1], NVG_PT_CORNER);
+						__addPoint(p[0], p[1], PointFlags.Corner);
 						i += 3;
 						break;
-					case NVG_LINETO:
+					case CommandType.LineTo:
 						p = &_commands[i + 1];
-						__addPoint(p[0], p[1], NVG_PT_CORNER);
+						__addPoint(p[0], p[1], PointFlags.Corner);
 						i += 3;
 						break;
-					case NVG_BEZIERTO:
+					case CommandType.BezierTo:
 						last = __lastPoint();
 						if (last != null)
 						{
@@ -1753,17 +1693,17 @@ namespace NvgSharp
 							cp2 = &_commands[i + 3];
 							p = &_commands[i + 5];
 							__tesselateBezier(last->X, last->Y, cp1[0], cp1[1], cp2[0], cp2[1], p[0], p[1], 0,
-								NVG_PT_CORNER);
+								PointFlags.Corner);
 						}
 
 						i += 7;
 						break;
-					case NVG_CLOSE:
+					case CommandType.Close:
 						__closePath();
 						i++;
 						break;
-					case NVG_WINDING:
-						__pathWinding((int)_commands[i + 1]);
+					case CommandType.Winding:
+						__pathWinding((Winding)_commands[i + 1]);
 						i += 2;
 						break;
 					default:
@@ -1790,9 +1730,9 @@ namespace NvgSharp
 				if (path.Count > 2)
 				{
 					area = __polyArea(pts, path.Count);
-					if (path.Winding == NVG_CCW && area < 0.0f)
+					if (path.Winding == Winding.CounterClockWise && area < 0.0f)
 						__polyReverse(pts, path.Count);
-					if (path.Winding == NVG_CW && area > 0.0f)
+					if (path.Winding == Winding.ClockWise && area > 0.0f)
 						__polyReverse(pts, path.Count);
 				}
 
@@ -1810,7 +1750,7 @@ namespace NvgSharp
 			}
 		}
 
-		private void __calculateJoins(float w, int lineJoin, float miterLimit)
+		private void __calculateJoins(float w, LineCap lineJoin, float miterLimit)
 		{
 			var i = 0;
 			var j = 0;
@@ -1850,21 +1790,21 @@ namespace NvgSharp
 						p1->dmy *= scale;
 					}
 
-					p1->flags = (byte)((p1->flags & NVG_PT_CORNER) != 0 ? NVG_PT_CORNER : 0);
+					p1->flags = (byte)((p1->flags & (byte)PointFlags.Corner) != 0 ? PointFlags.Corner : 0);
 					cross = p1->DeltaX * p0->DeltaY - p0->DeltaX * p1->DeltaY;
 					if (cross > 0.0f)
 					{
 						nleft++;
-						p1->flags |= NVG_PT_LEFT;
+						p1->flags |= (byte)PointFlags.Left;
 					}
 
 					limit = NvgUtility.__maxf(1.01f, NvgUtility.__minf(p0->Length, p1->Length) * iw);
 					if (dmr2 * limit * limit < 1.0f)
-						p1->flags |= NVG_PR_INNERBEVEL;
-					if ((p1->flags & NVG_PT_CORNER) != 0)
-						if (dmr2 * miterLimit * miterLimit < 1.0f || lineJoin == NVG_BEVEL || lineJoin == NVG_ROUND)
-							p1->flags |= NVG_PT_BEVEL;
-					if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+						p1->flags |= (byte)PointFlags.InnerBevel;
+					if ((p1->flags & (byte)PointFlags.Corner) != 0)
+						if (dmr2 * miterLimit * miterLimit < 1.0f || lineJoin == NvgSharp.LineCap.Bevel || lineJoin == NvgSharp.LineCap.Round)
+							p1->flags |= (byte)PointFlags.Bevel;
+					if ((p1->flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
 						path.BevelCount++;
 					p0 = p1++;
 				}
@@ -1873,7 +1813,7 @@ namespace NvgSharp
 			}
 		}
 
-		private int __expandStroke(float w, float fringe, int lineCap, int lineJoin, float miterLimit)
+		private int __expandStroke(float w, float fringe, LineCap lineCap, LineCap lineJoin, float miterLimit)
 		{
 			var cverts = 0;
 			var i = 0;
@@ -1895,13 +1835,13 @@ namespace NvgSharp
 			{
 				var path = _cache.Paths[i];
 				var loop = path.Closed == 0 ? 0 : 1;
-				if (lineJoin == NVG_ROUND)
+				if (lineJoin == NvgSharp.LineCap.Round)
 					cverts += (path.Count + path.BevelCount * (ncap + 2) + 1) * 2;
 				else
 					cverts += (path.Count + path.BevelCount * 5 + 1) * 2;
 				if (loop == 0)
 				{
-					if (lineCap == NVG_ROUND)
+					if (lineCap == NvgSharp.LineCap.Round)
 						cverts += (ncap * 2 + 2) * 2;
 					else
 						cverts += (3 + 3) * 2;
@@ -1945,19 +1885,19 @@ namespace NvgSharp
 						dx = p1->X - p0->X;
 						dy = p1->Y - p0->Y;
 						NvgUtility.__normalize(&dx, &dy);
-						if (lineCap == NVG_BUTT)
+						if (lineCap == NvgSharp.LineCap.Butt)
 							dst = __buttCapStart(dst, p0, dx, dy, w, -aa * 0.5f, aa, u0, u1);
-						else if (lineCap == NVG_BUTT || lineCap == NVG_SQUARE)
+						else if (lineCap == NvgSharp.LineCap.Butt || lineCap == NvgSharp.LineCap.Square)
 							dst = __buttCapStart(dst, p0, dx, dy, w, w - aa, aa, u0, u1);
-						else if (lineCap == NVG_ROUND)
+						else if (lineCap == NvgSharp.LineCap.Round)
 							dst = __roundCapStart(dst, p0, dx, dy, w, ncap, aa, u0, u1);
 					}
 
 					for (j = s; j < e; ++j)
 					{
-						if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+						if ((p1->flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
 						{
-							if (lineJoin == NVG_ROUND)
+							if (lineJoin == NvgSharp.LineCap.Round)
 								dst = __roundJoin(dst, p0, p1, w, w, u0, u1, ncap, aa);
 							else
 								dst = __bevelJoin(dst, p0, p1, w, w, u0, u1, aa);
@@ -1986,11 +1926,11 @@ namespace NvgSharp
 						dx = p1->X - p0->X;
 						dy = p1->Y - p0->Y;
 						NvgUtility.__normalize(&dx, &dy);
-						if (lineCap == NVG_BUTT)
+						if (lineCap == NvgSharp.LineCap.Butt)
 							dst = __buttCapEnd(dst, p1, dx, dy, w, -aa * 0.5f, aa, u0, u1);
-						else if (lineCap == NVG_BUTT || lineCap == NVG_SQUARE)
+						else if (lineCap == NvgSharp.LineCap.Butt || lineCap == NvgSharp.LineCap.Square)
 							dst = __buttCapEnd(dst, p1, dx, dy, w, w - aa, aa, u0, u1);
-						else if (lineCap == NVG_ROUND)
+						else if (lineCap == NvgSharp.LineCap.Round)
 							dst = __roundCapEnd(dst, p1, dx, dy, w, ncap, aa, u0, u1);
 					}
 
@@ -2004,7 +1944,7 @@ namespace NvgSharp
 			return 1;
 		}
 
-		private int __expandFill(float w, int lineJoin, float miterLimit)
+		private int __expandFill(float w, LineCap lineJoin, float miterLimit)
 		{
 			var cverts = 0;
 			var convex = 0;
@@ -2045,13 +1985,13 @@ namespace NvgSharp
 						p1 = &pts[0];
 						for (j = 0; j < path.Count; ++j)
 						{
-							if ((p1->flags & NVG_PT_BEVEL) != 0)
+							if ((p1->flags & (byte)PointFlags.Bevel) != 0)
 							{
 								var dlx0 = p0->DeltaY;
 								var dly0 = -p0->DeltaX;
 								var dlx1 = p1->DeltaY;
 								var dly1 = -p1->DeltaX;
-								if ((p1->flags & NVG_PT_LEFT) != 0)
+								if ((p1->flags & (byte)PointFlags.Left) != 0)
 								{
 									var lx = p1->X + p1->dmx * woff;
 									var ly = p1->Y + p1->dmy * woff;
@@ -2113,7 +2053,7 @@ namespace NvgSharp
 						p1 = &pts[0];
 						for (j = 0; j < path.Count; ++j)
 						{
-							if ((p1->flags & (NVG_PT_BEVEL | NVG_PR_INNERBEVEL)) != 0)
+							if ((p1->flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
 							{
 								dst = __bevelJoin(dst, p0, p1, lw, rw, lu, ru, _fringeWidth);
 							}
@@ -2193,7 +2133,7 @@ namespace NvgSharp
 					iw *= 2;
 				if (iw > 2048 || ih > 2048)
 					iw = ih = 2048;
-				_fontImages[_fontImageIdx + 1] = _renderer.CreateTexture(NVG_TEXTURE_ALPHA, iw, ih, 0, null);
+				_fontImages[_fontImageIdx + 1] = _renderer.CreateTexture(TextureType.Alpha, iw, ih, 0, null);
 			}
 
 			++_fontImageIdx;
@@ -2331,7 +2271,7 @@ namespace NvgSharp
 			var dly0 = -p0->DeltaX;
 			var dlx1 = p1->DeltaY;
 			var dly1 = -p1->DeltaX;
-			if ((p1->flags & NVG_PT_LEFT) != 0)
+			if ((p1->flags & (byte)PointFlags.Left) != 0)
 			{
 				float lx0 = 0;
 				float ly0 = 0;
@@ -2339,7 +2279,7 @@ namespace NvgSharp
 				float ly1 = 0;
 				float a0 = 0;
 				float a1 = 0;
-				__chooseBevel(p1->flags & NVG_PR_INNERBEVEL, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
+				__chooseBevel(p1->flags & (byte)PointFlags.InnerBevel, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
 				a0 = NvgUtility.atan2f(-dly0, -dlx0);
 				a1 = NvgUtility.atan2f(-dly1, -dlx1);
 				if (a1 > a0)
@@ -2374,7 +2314,7 @@ namespace NvgSharp
 				float ry1 = 0;
 				float a0 = 0;
 				float a1 = 0;
-				__chooseBevel(p1->flags & NVG_PR_INNERBEVEL, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
+				__chooseBevel(p1->flags & (byte)PointFlags.InnerBevel, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
 				a0 = NvgUtility.atan2f(dly0, dlx0);
 				a1 = NvgUtility.atan2f(dly1, dlx1);
 				if (a1 < a0)
@@ -2420,14 +2360,14 @@ namespace NvgSharp
 			var dly0 = -p0->DeltaX;
 			var dlx1 = p1->DeltaY;
 			var dly1 = -p1->DeltaX;
-			if ((p1->flags & NVG_PT_LEFT) != 0)
+			if ((p1->flags & (byte)PointFlags.Left) != 0)
 			{
-				__chooseBevel(p1->flags & NVG_PR_INNERBEVEL, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
+				__chooseBevel(p1->flags & (byte)PointFlags.InnerBevel, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
 				__vset(dst, lx0, ly0, lu, 1);
 				dst++;
 				__vset(dst, p1->X - dlx0 * rw, p1->Y - dly0 * rw, ru, 1);
 				dst++;
-				if ((p1->flags & NVG_PT_BEVEL) != 0)
+				if ((p1->flags & (byte)PointFlags.Bevel) != 0)
 				{
 					__vset(dst, lx0, ly0, lu, 1);
 					dst++;
@@ -2463,12 +2403,12 @@ namespace NvgSharp
 			}
 			else
 			{
-				__chooseBevel(p1->flags & NVG_PR_INNERBEVEL, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
+				__chooseBevel(p1->flags & (byte)PointFlags.InnerBevel, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
 				__vset(dst, p1->X + dlx0 * lw, p1->Y + dly0 * lw, lu, 1);
 				dst++;
 				__vset(dst, rx0, ry0, ru, 1);
 				dst++;
-				if ((p1->flags & NVG_PT_BEVEL) != 0)
+				if ((p1->flags & (byte)PointFlags.Bevel) != 0)
 				{
 					__vset(dst, p1->X + dlx0 * lw, p1->Y + dly0 * lw, lu, 1);
 					dst++;

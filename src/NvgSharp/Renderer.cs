@@ -97,7 +97,7 @@ namespace NvgSharp
 				_techniques[(int)param] = _effect.Techniques[param.ToString()];
 		}
 
-		public int CreateTexture(int type, int w, int h, int imageFlags, byte[] d)
+		public int CreateTexture(TextureType type, int w, int h, ImageFlags imageFlags, byte[] d)
 		{
 			var texture = new Texture2D(_device, w, h);
 

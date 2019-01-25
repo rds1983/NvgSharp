@@ -62,7 +62,7 @@ namespace NvgSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(x - 10, y - 10, w + 20, h + 30);
 			vg.RoundedRect(x, y, w, h, cornerRadius);
-			vg.PathWinding(NvgContext.NVG_HOLE);
+			vg.PathWinding(Solidity.Hole);
 			vg.FillPaint(shadowPaint);
 			vg.Fill();
 
@@ -80,7 +80,7 @@ namespace NvgSharp.Samples.Demo
 
 			vg.FontSize(18.0f);
 			vg.FontFace("sans-bold");
-			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Center | Alignment.Middle);
 
 			vg.FontBlur(2);
 			vg.FillColor(new Color(0, 0, 0, 128));
@@ -113,7 +113,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FontSize(h * 1.3f);
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Center | Alignment.Middle);
 			vg.Text(x + h * 0.55f, y + h * 0.55f, ICON_SEARCH);
 
 
@@ -121,13 +121,13 @@ namespace NvgSharp.Samples.Demo
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 32));
 
-			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Left | Alignment.Middle);
 			vg.Text(x + h * 1.05f, y + h * 0.5f, text);
 
 			vg.FontSize(h * 1.3f);
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 32));
-			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Center | Alignment.Middle);
 			vg.Text(x + w - h * 0.55f, y + h * 0.55f, ICON_CIRCLED_CROSS);
 		}
 
@@ -150,13 +150,13 @@ namespace NvgSharp.Samples.Demo
 			vg.FontSize(20.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 160));
-			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Left | Alignment.Middle);
 			vg.Text(x + h * 0.3f, y + h * 0.5f, text);
 
 			vg.FontSize(h * 1.3f);
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Center | Alignment.Middle);
 			vg.Text(x + w - h * 0.5f, y + h * 0.5f, ICON_CHEVRON_RIGHT);
 		}
 
@@ -166,7 +166,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 128));
 
-			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Left | Alignment.Middle);
 			vg.Text(x, y + h * 0.5f, text);
 		}
 
@@ -194,7 +194,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FontSize(20.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Left | Alignment.Middle);
 			vg.Text(x + h * 0.3f, y + h * 0.5f, text);
 		}
 
@@ -211,13 +211,13 @@ namespace NvgSharp.Samples.Demo
 			vg.FontSize(18.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Right | Alignment.Middle);
 			vg.Text(x + w - h * 0.3f, y + h * 0.5f, units);
 
 			vg.FontSize(20.0f);
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 128));
-			vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Right | Alignment.Middle);
 			vg.Text(x + w - uw - h * 0.5f, y + h * 0.5f, text);
 		}
 
@@ -229,7 +229,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 160));
 
-			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Left | Alignment.Middle);
 			vg.Text(x + 28, y + h * 0.5f, text);
 
 			bg = vg.BoxGradient(x + 1, y + (int)(h * 0.5f) - 9 + 1, 18, 18, 3, 3, new Color(0, 0, 0, 32), new Color(0, 0, 0, 92));
@@ -241,7 +241,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FontSize(40);
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 128));
-			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Center | Alignment.Middle);
 			vg.Text(x + 9 + 2, y + h * 0.5f, ICON_CHECK);
 		}
 
@@ -284,13 +284,13 @@ namespace NvgSharp.Samples.Demo
 				vg.FontSize(h * 1.3f);
 				vg.FontFace("icons");
 				vg.FillColor(new Color(255, 255, 255, 96));
-				vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
+				vg.TextAlign(Alignment.Left | Alignment.Middle);
 				vg.Text(x + w * 0.5f - tw * 0.5f - iw * 0.75f, y + h * 0.5f, preicon);
 			}
 
 			vg.FontSize(20.0f);
 			vg.FontFace("sans-bold");
-			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.TextAlign(Alignment.Left | Alignment.Middle);
 			vg.FillColor(new Color(0, 0, 0, 160));
 			vg.Text(x + w * 0.5f - tw * 0.5f + iw * 0.25f, y + h * 0.5f - 1, text);
 			vg.FillColor(new Color(255, 255, 255, 160));
@@ -318,7 +318,7 @@ namespace NvgSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(x + (int)(pos * w) - kr - 5, cy - kr - 5, kr * 2 + 5 + 5, kr * 2 + 5 + 5 + 3);
 			vg.Circle(x + (int)(pos * w), cy, kr);
-			vg.PathWinding(NvgContext.NVG_HOLE);
+			vg.PathWinding(Solidity.Hole);
 			vg.FillPaint(bg);
 			vg.Fill();
 
@@ -494,8 +494,8 @@ namespace NvgSharp.Samples.Demo
 			vg.Save();
 
 			vg.BeginPath();
-			vg.Arc(cx, cy, r0, a0, a1, NvgContext.NVG_CW);
-			vg.Arc(cx, cy, r1, a1, a0, NvgContext.NVG_CCW);
+			vg.Arc(cx, cy, r0, a0, a1, Winding.ClockWise);
+			vg.Arc(cx, cy, r1, a1, a0, Winding.CounterClockWise);
 			vg.ClosePath();
 			ax = cx + (float)Math.Cos(a0) * (r0 + r1) * 0.5f;
 			ay = cy + (float)Math.Sin(a0) * (r0 + r1) * 0.5f;
@@ -530,7 +530,7 @@ namespace NvgSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(x - 10, y - 10, w + 20, h + 30);
 			vg.RoundedRect(x, y, w, h, cornerRadius);
-			vg.PathWinding(NvgContext.NVG_HOLE);
+			vg.PathWinding(Solidity.Hole);
 			vg.FillPaint(shadowPaint);
 			vg.Fill();
 
@@ -588,7 +588,7 @@ namespace NvgSharp.Samples.Demo
 				vg.BeginPath();
 				vg.Rect(tx - 5, ty - 5, thumb + 10, thumb + 10);
 				vg.RoundedRect(tx, ty, thumb, thumb, 6);
-				vg.PathWinding(NvgContext.NVG_HOLE);
+				vg.PathWinding(Solidity.Hole);
 				vg.FillPaint(shadowPaint);
 				vg.Fill();
 
@@ -657,8 +657,8 @@ namespace NvgSharp.Samples.Demo
 				float a0 = (float)i / 6.0f * (float)Math.PI * 2.0f - aeps;
 				float a1 = (float)(i + 1.0f) / 6.0f * (float)Math.PI * 2.0f + aeps;
 				vg.BeginPath();
-				vg.Arc(cx, cy, r0, a0, a1, NvgContext.NVG_CW);
-				vg.Arc(cx, cy, r1, a1, a0, NvgContext.NVG_CCW);
+				vg.Arc(cx, cy, r0, a0, a1, Winding.ClockWise);
+				vg.Arc(cx, cy, r1, a1, a0, Winding.CounterClockWise);
 				vg.ClosePath();
 				ax = cx + (float)Math.Cos(a0) * (r0 + r1) * 0.5f;
 				ay = cy + (float)Math.Sin(a0) * (r0 + r1) * 0.5f;
@@ -692,7 +692,7 @@ namespace NvgSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(r0 - 2 - 10, -4 - 10, r1 - r0 + 4 + 20, 8 + 20);
 			vg.Rect(r0 - 2, -4, r1 - r0 + 4, 8);
-			vg.PathWinding(NvgContext.NVG_HOLE);
+			vg.PathWinding(Solidity.Hole);
 			vg.FillPaint(paint);
 			vg.Fill();
 
@@ -729,7 +729,7 @@ namespace NvgSharp.Samples.Demo
 			vg.BeginPath();
 			vg.Rect(ax - 20, ay - 20, 40, 40);
 			vg.Circle(ax, ay, 7);
-			vg.PathWinding(NvgContext.NVG_HOLE);
+			vg.PathWinding(Solidity.Hole);
 			vg.FillPaint(paint);
 			vg.Fill();
 
@@ -744,8 +744,8 @@ namespace NvgSharp.Samples.Demo
 			float pad = 5.0f, s = w / 9.0f - pad * 2;
 			float[] pts = new float[4 * 2];
 			float fx, fy;
-			int[] joins = new int[] { NvgContext.NVG_MITER, NvgContext.NVG_ROUND, NvgContext.NVG_BEVEL };
-			int[] caps = new int[] { NvgContext.NVG_BUTT, NvgContext.NVG_ROUND, NvgContext.NVG_SQUARE };
+			LineCap[] joins = new LineCap[] { LineCap.Miter, LineCap.Round, LineCap.Bevel };
+			LineCap[] caps = new LineCap[] { LineCap.Butt, LineCap.Round, LineCap.Square };
 
 			vg.Save();
 			pts[0] = -s * 0.25f + (float)Math.Cos(t * 0.3f) * s * 0.5f;
@@ -776,8 +776,8 @@ namespace NvgSharp.Samples.Demo
 					vg.LineTo(fx + pts[6], fy + pts[7]);
 					vg.Stroke();
 
-					vg.LineCap(NvgContext.NVG_BUTT);
-					vg.LineJoin(NvgContext.NVG_BEVEL);
+					vg.LineCap(LineCap.Butt);
+					vg.LineJoin(LineCap.Bevel);
 
 					vg.StrokeWidth(1.0f);
 					vg.StrokeColor(new Color(0, 192, 255, 255));
@@ -863,7 +863,7 @@ namespace NvgSharp.Samples.Demo
 
 			vg.FontSize(18.0f);
 			vg.FontFace("sans");
-			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_TOP);
+			vg.TextAlign(Alignment.Left | Alignment.Top);
 
 			float ascender, descender;
 			vg.TextMetrics(out ascender, out descender, out lineh);
@@ -925,7 +925,7 @@ namespace NvgSharp.Samples.Demo
 			{
 				string txt = gutter.ToString();
 				vg.FontSize(13.0f);
-				vg.TextAlign(NvgContext.NVG_ALIGN_RIGHT | NvgContext.NVG_ALIGN_MIDDLE);
+				vg.TextAlign(Alignment.Right | Alignment.Middle);
 
 				vg.TextBounds(gx, gy, txt, ref bounds);
 
@@ -944,7 +944,7 @@ namespace NvgSharp.Samples.Demo
 			y += 20.0f;
 
 			vg.FontSize(13.0f);
-			vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_TOP);
+			vg.TextAlign(Alignment.Left | Alignment.Top);
 			vg.TextLineHeight(1.2f);
 
 			vg.TextBoxBounds(x, y, 150, "Hover your mouse over the text to see calculated caret position.", ref bounds);
@@ -996,7 +996,7 @@ namespace NvgSharp.Samples.Demo
 		public static void drawCaps(NvgContext vg, float x, float y, float width)
 		{
 			int i;
-			int[] caps = new[] { NvgContext.NVG_BUTT, NvgContext.NVG_ROUND, NvgContext.NVG_SQUARE };
+			LineCap[] caps = new[] { LineCap.Butt, LineCap.Round, LineCap.Square };
 			float lineWidth = 8.0f;
 
 			vg.Save();

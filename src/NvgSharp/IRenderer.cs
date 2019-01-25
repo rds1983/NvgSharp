@@ -8,7 +8,7 @@ namespace NvgSharp
 		void Begin();
 		void End();
 
-		int CreateTexture(int type, int w, int h, int imageFlags, byte[] data);
+		int CreateTexture(TextureType type, int w, int h, ImageFlags imageFlags, byte[] data);
 		void DeleteTexture(int image);
 		void UpdateTexture(int image, int x, int y, int w, int h, byte[] data);
 		void GetTextureSize(int image, out int w, out int h);

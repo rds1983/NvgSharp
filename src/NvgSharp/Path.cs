@@ -10,7 +10,7 @@ namespace NvgSharp
 		public int BevelCount;
 		public ArraySegment<Vertex>? Fill;
 		public ArraySegment<Vertex>? Stroke;
-		public int Winding;
+		public Winding Winding;
 		public int Convex;
 	}
 }

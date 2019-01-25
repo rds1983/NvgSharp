@@ -10,8 +10,8 @@ namespace NvgSharp
 		public Paint Stroke;
 		public float StrokeWidth;
 		public float MiterLimit;
-		public int LineJoin;
-		public int LineCap;
+		public LineCap LineJoin;
+		public LineCap LineCap;
 		public float Alpha;
 		public Transform Transform = new Transform();
 		public Scissor Scissor;
@@ -19,7 +19,7 @@ namespace NvgSharp
 		public float LetterSpacing;
 		public float LineHeight;
 		public float FontBlur;
-		public int TextAlign;
+		public Alignment TextAlign;
 		public int FontId;
 
 		public NvgContextState Clone()

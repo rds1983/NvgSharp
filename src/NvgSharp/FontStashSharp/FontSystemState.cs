@@ -1,9 +1,11 @@
-﻿namespace FontStashSharp
+﻿using NvgSharp;
+
+namespace FontStashSharp
 {
 	internal class FontSystemState
 	{
 		public int Font;
-		public int Align;
+		public Alignment Align;
 		public float Size;
 		public uint Color;
 		public float Blur;
