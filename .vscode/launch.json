@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FNA Demo Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "FNA Debug",
+            "program": "${workspaceFolder}/samples/NvgSharp.Samples.Demo/bin/FNA/Debug/netcoreapp2.1/NvgSharp.Samples.Demo.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/NvgSharp.Samples.Demo/bin/FNA/Debug/netcoreapp2.1/",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "FNA Demo Release",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "FNA Release",
+            "program": "${workspaceFolder}/samples/NvgSharp.Samples.Demo/bin/FNA/Release/netcoreapp2.1/NvgSharp.Samples.Demo.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/NvgSharp.Samples.Demo/bin/FNA/Release/netcoreapp2.1/",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+    ]
+}

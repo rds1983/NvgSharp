@@ -85,7 +85,7 @@ namespace NvgSharp
 		private readonly int _edgeAntiAlias;
 		private int _fillTriCount;
 		private int _fontImageIdx;
-		private FontSystem _fontSyst;
+		private FontSystem _fontSystem;
 		private float _fringeWidth;
 		private readonly NvgContextState[] _states = new NvgContextState[32];
 		private int _statesNumber;
@@ -112,7 +112,7 @@ namespace NvgSharp
 			fontParams.Width = 512;
 			fontParams.Height = 512;
 			fontParams.Flags = FontSystem.FONS_ZERO_TOPLEFT;
-			_fontSyst = new FontSystem(fontParams);
+			_fontSystem = new FontSystem(fontParams);
 			_fontImages[0] = _renderer.CreateTexture(NVG_TEXTURE_ALPHA, fontParams.Width, fontParams.Height, 0, null);
 			_fontImageIdx = 0;
 
@@ -129,10 +129,10 @@ namespace NvgSharp
 				_commands = null;
 			}
 
-			if (_fontSyst != null)
+			if (_fontSystem != null)
 			{
-				_fontSyst.Dispose();
-				_fontSyst = null;
+				_fontSystem.Dispose();
+				_fontSystem = null;
 			}
 
 			for (i = 0; i < 4; i++)
@@ -965,21 +965,21 @@ namespace NvgSharp
 
 		public int CreateFontMem(string name, byte[] data)
 		{
-			return _fontSyst.AddFontMem(name, data);
+			return _fontSystem.AddFontMem(name, data);
 		}
 
 		public int FindFont(string name)
 		{
 			if (name == null)
 				return -1;
-			return _fontSyst.GetFontByName(name);
+			return _fontSystem.GetFontByName(name);
 		}
 
 		public int AddFallbackFontId(int baseFont, int fallbackFont)
 		{
 			if (baseFont == -1 || fallbackFont == -1)
 				return 0;
-			return _fontSyst.AddFallbackFont(baseFont, fallbackFont);
+			return _fontSystem.AddFallbackFont(baseFont, fallbackFont);
 		}
 
 		public int AddFallbackFont(string baseFont, string fallbackFont)
@@ -1026,7 +1026,7 @@ namespace NvgSharp
 		public void FontFace(string font)
 		{
 			var state = GetState();
-			state.FontId = _fontSyst.GetFontByName(font);
+			state.FontId = _fontSystem.GetFontByName(font);
 		}
 
 		public float Text(float x, float y, StringSegment _string_)
@@ -1041,18 +1041,18 @@ namespace NvgSharp
 			var nverts = 0;
 			if (state.FontId == -1)
 				return x;
-			_fontSyst.SetSize(state.FontSize * scale);
-			_fontSyst.SetSpacing(state.LetterSpacing * scale);
-			_fontSyst.SetBlur(state.FontBlur * scale);
-			_fontSyst.SetAlign(state.TextAlign);
-			_fontSyst.SetFont(state.FontId);
+			_fontSystem.SetSize(state.FontSize * scale);
+			_fontSystem.SetSpacing(state.LetterSpacing * scale);
+			_fontSystem.SetBlur(state.FontBlur * scale);
+			_fontSystem.SetAlign(state.TextAlign);
+			_fontSystem.SetFont(state.FontId);
 			cverts = NvgUtility.__maxi(2, _string_.Length) * 6;
 			var verts = __allocTempVerts(cverts);
 
-			_fontSyst.TextIterInit(iter, x * scale, y * scale, _string_, FontSystem.FONS_GLYPH_BITMAP_REQUIRED);
+			_fontSystem.TextIterInit(iter, x * scale, y * scale, _string_, FontSystem.FONS_GLYPH_BITMAP_REQUIRED);
 			prevIter = iter;
 
-			while (_fontSyst.TextIterNext(iter, &q))
+			while (_fontSystem.TextIterNext(iter, &q))
 			{
 				var c = stackalloc float[4 * 2];
 				if (iter.PrevGlyphIndex == -1)
@@ -1067,7 +1067,7 @@ namespace NvgSharp
 					if (__allocTextAtlas() == 0)
 						break;
 					iter = prevIter;
-					_fontSyst.TextIterNext(iter, &q);
+					_fontSystem.TextIterNext(iter, &q);
 					if (iter.PrevGlyphIndex == -1)
 						break;
 				}
@@ -1152,19 +1152,19 @@ namespace NvgSharp
 			if (_string_.IsNullOrEmpty)
 				return 0;
 
-			_fontSyst.SetSize(state.FontSize * scale);
-			_fontSyst.SetSpacing(state.LetterSpacing * scale);
-			_fontSyst.SetBlur(state.FontBlur * scale);
-			_fontSyst.SetAlign(state.TextAlign);
-			_fontSyst.SetFont(state.FontId);
-			_fontSyst.TextIterInit(iter, x * scale, y * scale, _string_, FontSystem.FONS_GLYPH_BITMAP_OPTIONAL);
+			_fontSystem.SetSize(state.FontSize * scale);
+			_fontSystem.SetSpacing(state.LetterSpacing * scale);
+			_fontSystem.SetBlur(state.FontBlur * scale);
+			_fontSystem.SetAlign(state.TextAlign);
+			_fontSystem.SetFont(state.FontId);
+			_fontSystem.TextIterInit(iter, x * scale, y * scale, _string_, FontSystem.FONS_GLYPH_BITMAP_OPTIONAL);
 			prevIter = iter;
-			while (_fontSyst.TextIterNext(iter, &q))
+			while (_fontSystem.TextIterNext(iter, &q))
 			{
 				if (iter.PrevGlyphIndex < 0 && __allocTextAtlas() != 0)
 				{
 					iter = prevIter;
-					_fontSyst.TextIterNext(iter, &q);
+					_fontSystem.TextIterNext(iter, &q);
 				}
 
 				prevIter = iter;
@@ -1206,27 +1206,27 @@ namespace NvgSharp
 			var breakMaxX = (float)0;
 			var type = NVG_SPACE;
 			var ptype = NVG_SPACE;
-			var pcodepoint = (uint)0;
+			var pcodepoint = 0;
 
 			if (state.FontId == -1)
 				return 0;
 
 			if (_string_.IsNullOrEmpty)
 				return 0;
-			_fontSyst.SetSize(state.FontSize * scale);
-			_fontSyst.SetSpacing(state.LetterSpacing * scale);
-			_fontSyst.SetBlur(state.FontBlur * scale);
-			_fontSyst.SetAlign(state.TextAlign);
-			_fontSyst.SetFont(state.FontId);
+			_fontSystem.SetSize(state.FontSize * scale);
+			_fontSystem.SetSpacing(state.LetterSpacing * scale);
+			_fontSystem.SetBlur(state.FontBlur * scale);
+			_fontSystem.SetAlign(state.TextAlign);
+			_fontSystem.SetFont(state.FontId);
 			breakRowWidth *= scale;
-			_fontSyst.TextIterInit(iter, 0, 0, _string_, FontSystem.FONS_GLYPH_BITMAP_OPTIONAL);
+			_fontSystem.TextIterInit(iter, 0, 0, _string_, FontSystem.FONS_GLYPH_BITMAP_OPTIONAL);
 			prevIter = iter;
-			while (_fontSyst.TextIterNext(iter, &q))
+			while (_fontSystem.TextIterNext(iter, &q))
 			{
 				if (iter.PrevGlyphIndex < 0 && __allocTextAtlas() != 0)
 				{
 					iter = prevIter;
-					_fontSyst.TextIterNext(iter, &q);
+					_fontSystem.TextIterNext(iter, &q);
 				}
 
 				prevIter = iter;
@@ -1402,13 +1402,13 @@ namespace NvgSharp
 			float width = 0;
 			if (state.FontId == -1)
 				return 0;
-			_fontSyst.SetSize(state.FontSize * scale);
-			_fontSyst.SetSpacing(state.LetterSpacing * scale);
-			_fontSyst.SetBlur(state.FontBlur * scale);
-			_fontSyst.SetAlign(state.TextAlign);
-			_fontSyst.SetFont(state.FontId);
-			width = _fontSyst.TextBounds(x * scale, y * scale, _string_, ref bounds);
-			_fontSyst.LineBounds(y * scale, ref bounds.b2, ref bounds.b4);
+			_fontSystem.SetSize(state.FontSize * scale);
+			_fontSystem.SetSpacing(state.LetterSpacing * scale);
+			_fontSystem.SetBlur(state.FontBlur * scale);
+			_fontSystem.SetAlign(state.TextAlign);
+			_fontSystem.SetFont(state.FontId);
+			width = _fontSystem.TextBounds(x * scale, y * scale, _string_, ref bounds);
+			_fontSystem.LineBounds(y * scale, ref bounds.b2, ref bounds.b4);
 			bounds.b1 *= invscale;
 			bounds.b2 *= invscale;
 			bounds.b3 *= invscale;
@@ -1444,12 +1444,12 @@ namespace NvgSharp
 			state.TextAlign = NVG_ALIGN_LEFT | valign;
 			minx = maxx = x;
 			miny = maxy = y;
-			_fontSyst.SetSize(state.FontSize * scale);
-			_fontSyst.SetSpacing(state.LetterSpacing * scale);
-			_fontSyst.SetBlur(state.FontBlur * scale);
-			_fontSyst.SetAlign(state.TextAlign);
-			_fontSyst.SetFont(state.FontId);
-			_fontSyst.LineBounds(0, ref rminy, ref rmaxy);
+			_fontSystem.SetSize(state.FontSize * scale);
+			_fontSystem.SetSpacing(state.LetterSpacing * scale);
+			_fontSystem.SetBlur(state.FontBlur * scale);
+			_fontSystem.SetAlign(state.TextAlign);
+			_fontSystem.SetFont(state.FontId);
+			_fontSystem.LineBounds(0, ref rminy, ref rmaxy);
 			rminy *= invscale;
 			rmaxy *= invscale;
 			while (true)
@@ -1495,12 +1495,12 @@ namespace NvgSharp
 			var invscale = 1.0f / scale;
 			if (state.FontId == -1)
 				return;
-			_fontSyst.SetSize(state.FontSize * scale);
-			_fontSyst.SetSpacing(state.LetterSpacing * scale);
-			_fontSyst.SetBlur(state.FontBlur * scale);
-			_fontSyst.SetAlign(state.TextAlign);
-			_fontSyst.SetFont(state.FontId);
-			_fontSyst.VertMetrics(out ascender, out descender, out lineh);
+			_fontSystem.SetSize(state.FontSize * scale);
+			_fontSystem.SetSpacing(state.LetterSpacing * scale);
+			_fontSystem.SetBlur(state.FontBlur * scale);
+			_fontSystem.SetAlign(state.TextAlign);
+			_fontSystem.SetFont(state.FontId);
+			_fontSystem.VertMetrics(out ascender, out descender, out lineh);
 			ascender *= invscale;
 			descender *= invscale;
 			lineh *= invscale;
@@ -2156,14 +2156,14 @@ namespace NvgSharp
 		private void __flushTextTexture()
 		{
 			var dirty = stackalloc int[4];
-			if (_fontSyst.ValidateTexture(dirty) != 0)
+			if (_fontSystem.ValidateTexture(dirty) != 0)
 			{
 				var fontImage = _fontImages[_fontImageIdx];
 				if (fontImage != 0)
 				{
 					var iw = 0;
 					var ih = 0;
-					var data = _fontSyst.GetTextureData(&iw, &ih);
+					var data = _fontSystem.GetTextureData(&iw, &ih);
 					var x = dirty[0];
 					var y = dirty[1];
 					var w = dirty[2] - dirty[0];
@@ -2197,7 +2197,7 @@ namespace NvgSharp
 			}
 
 			++_fontImageIdx;
-			_fontSyst.ResetAtlas(iw, ih);
+			_fontSystem.ResetAtlas(iw, ih);
 			return 1;
 		}
 

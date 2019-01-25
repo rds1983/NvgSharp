@@ -277,7 +277,7 @@ namespace FontStashSharp
 			BlurCols(dst, w, h, dstStride, alpha);
 		}
 
-		public FontGlyph* GetGlyph(Font font, uint codepoint, short isize, short iblur, int bitmapOption)
+		public FontGlyph* GetGlyph(Font font, int codepoint, short isize, short iblur, int bitmapOption)
 		{
 			var i = 0;
 			var g = 0;
@@ -295,7 +295,7 @@ namespace FontStashSharp
 			var y = 0;
 			float scale = 0;
 			FontGlyph* glyph = null;
-			uint h = 0;
+			int h = 0;
 			var size = isize / 10.0f;
 			var pad = 0;
 			var added = 0;
@@ -516,69 +516,6 @@ namespace FontStashSharp
 
 			return (float)0.0;
 		}
-
-		public float DrawText(float x, float y, StringSegment str)
-		{
-			if (str.IsNullOrEmpty)
-				return 0.0f;
-
-			var state = GetState();
-			FontGlyph* glyph = null;
-			var q = new FontGlyphSquad();
-			var prevGlyphIndex = -1;
-			var isize = (short)(state.Size * 10.0f);
-			var iblur = (short)state.Blur;
-			float scale = 0;
-			Font font;
-			float width = 0;
-			if (state.Font < 0 || state.Font >= _fontsNumber)
-				return x;
-			font = _fonts[state.Font];
-			if (font.Data == null)
-				return x;
-			scale = font.FontInfo.__tt_getPixelHeightScale(isize / 10.0f);
-
-			if ((state.Align & FONS_ALIGN_LEFT) != 0)
-			{
-			}
-			else if ((state.Align & FONS_ALIGN_RIGHT) != 0)
-			{
-				var bounds = new Bounds();
-				width = TextBounds(x, y, str, ref bounds);
-				x -= width;
-			}
-			else if ((state.Align & FONS_ALIGN_CENTER) != 0)
-			{
-				var bounds = new Bounds();
-				width = TextBounds(x, y, str, ref bounds);
-				x -= width * 0.5f;
-			}
-
-			y += GetVertAlign(font, state.Align, isize);
-			for (var i = 0; i < str.Length; ++i)
-			{
-				var codepoint = str[i];
-				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_REQUIRED);
-				if (glyph != null)
-				{
-					GetQuad(font, prevGlyphIndex, glyph, scale, state.Spacing, ref x, ref y, &q);
-					if (_vertsNumber + 6 > 1024)
-						Flush();
-					AddVertex(q.X0, q.Y0, q.S0, q.T0, state.Color);
-					AddVertex(q.X1, q.Y1, q.S1, q.T1, state.Color);
-					AddVertex(q.X1, q.Y0, q.S1, q.T0, state.Color);
-					AddVertex(q.X0, q.Y0, q.S0, q.T0, state.Color);
-					AddVertex(q.X0, q.Y1, q.S0, q.T1, state.Color);
-					AddVertex(q.X1, q.Y1, q.S1, q.T1, state.Color);
-				}
-
-				prevGlyphIndex = glyph != null ? glyph->Index : -1;
-			}
-
-			Flush();
-			return x;
-		}
-
 		public int TextIterInit(FontTextIterator iter, float x, float y, StringSegment str, int bitmapOption)
 		{
 			var state = GetState();
@@ -627,7 +564,7 @@ namespace FontStashSharp
 			if (iter.Str.IsNullOrEmpty)
 				return false;
 
-			iter.Codepoint = iter.Str[0];
+			iter.Codepoint = Char.ConvertToUtf32(iter.Str.String, iter.Str.Location);
 			iter.X = iter.NextX;
 			iter.Y = iter.NextY;
 			var glyph = GetGlyph(iter.Font, iter.Codepoint, iter.iSize, iter.iBlur, iter.BitmapOption);
@@ -636,7 +573,14 @@ namespace FontStashSharp
 					quad);
 			iter.PrevGlyphIndex = glyph != null ? glyph->Index : -1;
 
-			++iter.Next.Location;
+			if (Char.IsSurrogatePair(iter.Str.String, iter.Str.Location))
+			{
+				iter.Next.Location += 2;
+			}
+			else
+			{
+				++iter.Next.Location;
+			}
 
 			return true;
 		}
@@ -704,9 +648,9 @@ namespace FontStashSharp
 			minx = maxx = x;
 			miny = maxy = y;
 			startx = x;
-			for (var i = 0; i < str.Length; ++i)
+			for (int i = 0; i < str.Length; i += Char.IsSurrogatePair(str.String, i + str.Location) ? 2 : 1)
 			{
-				var codepoint = str[i];
+				var codepoint = Char.ConvertToUtf32(str.String, i + str.Location);
 				glyph = GetGlyph(font, codepoint, isize, iblur, FONS_GLYPH_BITMAP_OPTIONAL);
 				if (glyph != null)
 				{
@@ -968,7 +912,7 @@ namespace FontStashSharp
 			}
 		}
 
-		public static uint HashInt(uint a)
+		public static int HashInt(int a)
 		{
 			a += ~(a << 15);
 			a ^= a >> 10;

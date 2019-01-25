@@ -5,7 +5,7 @@ namespace FontStashSharp
 	[StructLayout(LayoutKind.Sequential)]
 	internal struct FontGlyph
 	{
-		public uint Codepoint;
+		public int Codepoint;
 		public int Index;
 		public int Next;
 		public short Size;

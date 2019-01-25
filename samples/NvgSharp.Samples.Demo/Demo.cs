@@ -8,6 +8,13 @@ namespace NvgSharp.Samples.Demo
 {
 	public class Demo
 	{
+		private static readonly string ICON_SEARCH = Char.ConvertFromUtf32(0x1F50D);
+		private static readonly string ICON_CIRCLED_CROSS = Char.ConvertFromUtf32(0x2716);
+		private static readonly string ICON_CHEVRON_RIGHT = Char.ConvertFromUtf32(0xE75E);
+		private static readonly string ICON_CHECK = Char.ConvertFromUtf32(0x2713);
+		private static readonly string ICON_LOGIN = Char.ConvertFromUtf32(0xE740);
+		private static readonly string ICON_TRASH = Char.ConvertFromUtf32(0xE729);
+
 		int fontNormal, fontBold, fontIcons;
 		int[] images = new int[12];
 
@@ -107,6 +114,8 @@ namespace NvgSharp.Samples.Demo
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 64));
 			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.Text(x + h * 0.55f, y + h * 0.55f, ICON_SEARCH);
+
 
 			vg.FontSize(20.0f);
 			vg.FontFace("sans");
@@ -119,6 +128,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 32));
 			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.Text(x + w - h * 0.55f, y + h * 0.55f, ICON_CIRCLED_CROSS);
 		}
 
 		public static void drawDropDown(NvgContext vg, string text, float x, float y, float w, float h)
@@ -147,6 +157,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 64));
 			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.Text(x + w - h * 0.5f, y + h * 0.5f, ICON_CHEVRON_RIGHT);
 		}
 
 		public static void drawLabel(NvgContext vg, string text, float x, float y, float w, float h)
@@ -231,9 +242,10 @@ namespace NvgSharp.Samples.Demo
 			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 128));
 			vg.TextAlign(NvgContext.NVG_ALIGN_CENTER | NvgContext.NVG_ALIGN_MIDDLE);
+			vg.Text(x + 9 + 2, y + h * 0.5f, ICON_CHECK);
 		}
 
-		public static void drawButton(NvgContext vg, int preicon, string text, float x, float y, float w, float h, Color col)
+		public static void drawButton(NvgContext vg, string preicon, string text, float x, float y, float w, float h, Color col)
 		{
 			Paint bg;
 			float cornerRadius = 4.0f;
@@ -259,19 +271,21 @@ namespace NvgSharp.Samples.Demo
 			vg.FontFace("sans-bold");
 			Bounds bounds = new Bounds();
 			tw = vg.TextBounds(0, 0, text, ref bounds);
-			if (preicon != 0)
+			if (!string.IsNullOrEmpty(preicon))
 			{
 				vg.FontSize(h * 1.3f);
 				vg.FontFace("icons");
+				iw = vg.TextBounds(0, 0, preicon, ref bounds);
 				iw += h * 0.15f;
 			}
 
-			if (preicon != 0)
+			if (!string.IsNullOrEmpty(preicon))
 			{
 				vg.FontSize(h * 1.3f);
 				vg.FontFace("icons");
 				vg.FillColor(new Color(255, 255, 255, 96));
 				vg.TextAlign(NvgContext.NVG_ALIGN_LEFT | NvgContext.NVG_ALIGN_MIDDLE);
+				vg.Text(x + w * 0.5f - tw * 0.5f - iw * 0.75f, y + h * 0.5f, preicon);
 			}
 
 			vg.FontSize(20.0f);
@@ -917,9 +931,9 @@ namespace NvgSharp.Samples.Demo
 
 				vg.BeginPath();
 				vg.FillColor(new Color(255, 192, 0, 255));
-				vg.RoundedRect((int)bounds.b1 - 4, (int)bounds.b2 - 2, 
-					(int)(bounds.b3 - bounds.b1) + 8, 
-					(int)(bounds.b4 - bounds.b2) + 4, 
+				vg.RoundedRect((int)bounds.b1 - 4, (int)bounds.b2 - 2,
+					(int)(bounds.b3 - bounds.b1) + 8,
+					(int)(bounds.b4 - bounds.b2) + 4,
 					((int)(bounds.b4 - bounds.b2) + 4) / 2 - 1);
 				vg.Fill();
 
@@ -1093,6 +1107,7 @@ namespace NvgSharp.Samples.Demo
 			drawEditBox(vg, "Password", x, y, 280, 28);
 			y += 38;
 			drawCheckBox(vg, "Remember me", x, y, 140, 28);
+			drawButton(vg, ICON_LOGIN, "Sign in", x + 138, y, 140, 28, new Color(0, 96, 128, 255));
 			y += 45;
 
 			// Slider
@@ -1102,7 +1117,8 @@ namespace NvgSharp.Samples.Demo
 			drawSlider(vg, 0.4f, x, y, 170, 28);
 			y += 55;
 
-			drawButton(vg, 0, "Cancel", x + 170, y, 110, 28, new Color(0, 0, 0, 0));
+			drawButton(vg, ICON_TRASH, "Delete", x, y, 160, 28, new Color(128, 16, 8, 255));
+			drawButton(vg, null, "Cancel", x + 170, y, 110, 28, new Color(0, 0, 0, 0));
 
 			// Thumbnails box
 			drawThumbnails(vg, 365, popy - 30, 160, 300, images, t);

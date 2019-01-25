@@ -8,7 +8,7 @@
 		public float NextY;
 		public float Scale;
 		public float Spacing;
-		public uint Codepoint;
+		public int Codepoint;
 		public short iSize;
 		public short iBlur;
 		public Font Font;
