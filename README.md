@@ -9,6 +9,7 @@ C# port of https://github.com/memononen/nanovg for MonoGame and FNA.
 # Stencil
 NvgSharp requires Game to be created with stencil.
 That could be archived by setting PreferredDepthStencilFormat to DepthFormat.Depth24Stencil8 in the GraphicsDeviceManager creation.
+
 I.e.
 ```c#
 public Game1()
