@@ -32,6 +32,36 @@
                 "reveal": "silent"
             },
             "problemMatcher": "$msCompile"
-        }        
+		},
+        {
+            "label": "MonoGame Debug",
+            "command": "dotnet build",
+            "type": "shell",
+            "group": "build",
+            "args": [
+                "build/MonoGame/NvgSharp.sln",
+                "/t:build",
+                "/p:Configuration=Debug"
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "MonoGame Release",
+            "command": "dotnet build",
+            "type": "shell",
+            "group": "build",
+            "args": [
+                "build/MonoGame/NvgSharp.sln",
+                "/t:build",
+                "/p:Configuration=Release"
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        }		
     ]
 }

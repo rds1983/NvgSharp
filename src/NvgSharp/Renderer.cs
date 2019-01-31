@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using FontStashSharp;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace NvgSharp
 {
-	internal class XNARenderer : IRenderer
+	internal class Renderer : IRenderer
 	{
 		private readonly BlendState _blendStateNoDraw = new BlendState
 		{
@@ -72,7 +73,7 @@ namespace NvgSharp
 		private readonly EffectParameter _scissorScaleParam;
 		private readonly EffectParameter _paintMatParam;
 
-		public XNARenderer(GraphicsDevice device)
+		public Renderer(GraphicsDevice device)
 		{
 			if (device == null)
 				throw new ArgumentNullException("device");

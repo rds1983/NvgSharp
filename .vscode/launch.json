@@ -27,6 +27,30 @@
             "console": "internalConsole",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart"
+		},
+        {
+            "name": "MonoGame Demo Debug",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "MonoGame Debug",
+            "program": "${workspaceFolder}/samples/NvgSharp.Samples.Demo/bin/MonoGame/Debug/netcoreapp2.1/NvgSharp.Samples.Demo.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/NvgSharp.Samples.Demo/bin/MonoGame/Debug/netcoreapp2.1/",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
         },
+        {
+            "name": "MonoGame Demo Release",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "MonoGame Release",
+            "program": "${workspaceFolder}/samples/NvgSharp.Samples.Demo/bin/MonoGame/Release/netcoreapp2.1/NvgSharp.Samples.Demo.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/samples/NvgSharp.Samples.Demo/bin/MonoGame/Release/netcoreapp2.1/",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        },		
     ]
 }

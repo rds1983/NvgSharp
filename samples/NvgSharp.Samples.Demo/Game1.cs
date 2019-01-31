@@ -42,7 +42,7 @@ namespace NvgSharp.Samples.Demo
 		{
 			var device = GraphicsDevice;
 
-			_context = new NvgContext(GraphicsDevice, 0);
+			_context = new NvgContext(GraphicsDevice);
 
 			_demo = new Demo();
 			_demo.loadDemoData(GraphicsDevice, _context);

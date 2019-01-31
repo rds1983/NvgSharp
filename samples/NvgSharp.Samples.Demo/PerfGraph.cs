@@ -101,7 +101,7 @@ namespace NvgSharp.Samples.Demo
 
 			vg.FontFace("sans");
 
-			if (string.IsNullOrEmpty(_name))
+			if (!string.IsNullOrEmpty(_name))
 			{
 				vg.FontSize(14.0f);
 				vg.TextAlign(Alignment.Left | Alignment.Top);

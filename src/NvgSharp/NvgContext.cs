@@ -22,7 +22,7 @@ namespace NvgSharp
 		private float _devicePxRatio;
 		private float _distTol;
 		private int _drawCallCount;
-		private readonly int _edgeAntiAlias;
+		private readonly bool _edgeAntiAlias;
 		private int _fillTriCount;
 		private int _fontImageIdx;
 		private FontSystem _fontSystem;
@@ -33,9 +33,10 @@ namespace NvgSharp
 		private float _tessTol;
 		private int _textTriCount;
 
-		public NvgContext(GraphicsDevice device, int edgeAntiAlias)
+		
+		public NvgContext(GraphicsDevice device, bool edgeAntiAlias = true)
 		{
-			_renderer = new XNARenderer(device);
+			_renderer = new Renderer(device);
 
 			var fontParams = new FontSystemParams();
 
@@ -847,7 +848,7 @@ namespace NvgSharp
 			var fillPaint = state.Fill;
 			var i = 0;
 			__flattenPaths();
-			if (_edgeAntiAlias != 0 && state.ShapeAntiAlias != 0)
+			if (_edgeAntiAlias && state.ShapeAntiAlias != 0)
 				__expandFill(_fringeWidth, NvgSharp.LineCap.Miter, 2.4f);
 			else
 				__expandFill(0.0f, NvgSharp.LineCap.Miter, 2.4f);
@@ -889,7 +890,7 @@ namespace NvgSharp
 			MultiplyAlpha(ref strokePaint.OuterColor, state.Alpha);
 
 			__flattenPaths();
-			if (_edgeAntiAlias != 0 && state.ShapeAntiAlias != 0)
+			if (_edgeAntiAlias && state.ShapeAntiAlias != 0)
 				__expandStroke(strokeWidth * 0.5f, _fringeWidth, state.LineCap, state.LineJoin, state.MiterLimit);
 			else
 				__expandStroke(strokeWidth * 0.5f, 0.0f, state.LineCap, state.LineJoin, state.MiterLimit);
