@@ -112,7 +112,9 @@ namespace NvgSharp
 
 		public void DeleteTexture(int image)
 		{
-			throw new NotImplementedException();
+			var texture = GetTextureById(image);
+			_textures.Remove(texture);
+			texture.Dispose();
 		}
 
 		public void UpdateTexture(int image, int x, int y, int w, int h, byte[] d)

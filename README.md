@@ -4,7 +4,17 @@
 C# port of https://github.com/memononen/nanovg for MonoGame and FNA.
 
 # Adding Reference
-`Install-Package NvgSharp.MonoGame` (or `Install-Package NvgSharp.FNA` for FNA)
+There are two ways of referencing NvgSharp in the project:
+1. Through nuget: `install-package NvgSharp.MonoGame` for MonoGame(or `install-package NvgSharp.FNA` for FNA)
+2. As submodule:
+    
+    a. `git submodule add https://github.com/rds1983/NvgSharp.git`
+    
+    b. Copy SolutionDefines.targets from NvgSharp/build/MonoGame(or NvgSharp/build/FNA) to your solution folder.
+
+      * If FNA is used, SolutionDefines.targets needs to be edited and FNAProj variable should be updated to the location of FNA.csproj next to the NvgSharp location.
+    
+    c. Add NvgSharp/src/NvgSharp/NvgSharp.csproj to the solution.
 
 # Stencil
 NvgSharp requires Game to be created with stencil.
