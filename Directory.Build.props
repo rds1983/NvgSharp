@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <Authors>NvgSharpTeam</Authors>
+    <Product>NvgSharp</Product>
+    <PackageLicenseExpression>Zlib</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/rds1983/NvgSharp</PackageProjectUrl>
+    <RootNamespace>NvgSharp</RootNamespace>
+    <Version>0.6.0</Version>
+    <FontStashSharpVersion>1.1.4</FontStashSharpVersion>
+  </PropertyGroup>
+</Project>

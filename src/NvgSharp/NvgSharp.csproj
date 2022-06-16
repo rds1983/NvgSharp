@@ -1,17 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(SolutionDir)SolutionDefines.targets" />
-
   <PropertyGroup>
-    <Authors>NvgSharpTeam</Authors>
-    <Product>NvgSharp</Product>
     <Description>C# port of https://github.com/memononen/nanovg</Description>
-    <PackageLicense>https://github.com/rds1983/NvgSharp#license</PackageLicense>
-    <PackageProjectUrl>https://github.com/rds1983/NvgSharp</PackageProjectUrl>
-    <NoWarn>NU1701</NoWarn>
-    <AssemblyName>NvgSharp</AssemblyName>
-    <RootNamespace>NvgSharp</RootNamespace>
-    <Version>1.0.0.0</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
