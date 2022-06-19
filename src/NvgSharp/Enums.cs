@@ -21,18 +21,41 @@ namespace NvgSharp
 		Miter,
 	};
 
-	public enum Alignment
+	public enum TextHorizontalAlignment
 	{
-		// Horizontal align
-		Left = 1 << 0,    // Default, align text horizontally to left.
-		Center = 1 << 1,  // Align text horizontally to center.
-		Right = 1 << 2,   // Align text horizontally to right.
-									// Vertical align
-		Top = 1 << 3, // Align text vertically to top.
-		Middle = 1 << 4,  // Align text vertically to middle.
-		Bottom = 1 << 5,  // Align text vertically to bottom.
-		Baseline = 1 << 6, // Default, align text vertically to baseline.
-	};
+		/// <summary>
+		/// Default, align text horizontally to left
+		/// </summary>
+		Left,
+
+		/// <summary>
+		/// Align text horizontally to center
+		/// </summary>
+		Center,
+
+		/// <summary>
+		/// Align text horizontally to right
+		/// </summary>
+		Right
+	}
+
+	public enum TextVerticalAlignment
+	{
+		/// <summary>
+		/// Default, Align text vertically to top
+		/// </summary>
+		Top,
+
+		/// <summary>
+		/// Align text vertically to middle
+		/// </summary>
+		Center,
+
+		/// <summary>
+		/// Align text vertically to bottom
+		/// </summary>
+		Bottom
+	}
 
 	public enum ImageFlags
 	{
@@ -44,12 +67,6 @@ namespace NvgSharp
 		Nearest = 1 << 5,     // Image interpolation is Nearest instead Linear
 	};
 
-	internal enum TextureType
-	{
-		Alpha = 0x01,
-		RGBA = 0x02,
-	};
-	
 	internal enum CommandType
 	{
 		MoveTo = 0,

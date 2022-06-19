@@ -8,15 +8,17 @@ namespace NvgSharp.Samples.Demo
 {
 	public class Demo
 	{
-		private static readonly string ICON_SEARCH = Char.ConvertFromUtf32(0x1F50D);
-		private static readonly string ICON_CIRCLED_CROSS = Char.ConvertFromUtf32(0x2716);
-		private static readonly string ICON_CHEVRON_RIGHT = Char.ConvertFromUtf32(0xE75E);
-		private static readonly string ICON_CHECK = Char.ConvertFromUtf32(0x2713);
-		private static readonly string ICON_LOGIN = Char.ConvertFromUtf32(0xE740);
-		private static readonly string ICON_TRASH = Char.ConvertFromUtf32(0xE729);
+		private static readonly string ICON_SEARCH = char.ConvertFromUtf32(0x1F50D);
+		private static readonly string ICON_CIRCLED_CROSS = char.ConvertFromUtf32(0x2716);
+		private static readonly string ICON_CHEVRON_RIGHT = char.ConvertFromUtf32(0xE75E);
+		private static readonly string ICON_CHECK = char.ConvertFromUtf32(0x2713);
+		private static readonly string ICON_LOGIN = char.ConvertFromUtf32(0xE740);
+		private static readonly string ICON_TRASH = char.ConvertFromUtf32(0xE729);
 
-		int fontNormal, fontBold, fontIcons;
-		int[] images = new int[12];
+		public FontSystem fontSystemNormal, fontSystemBold, fontSystemIcons;
+		SpriteFontBase fontSans18, fontSans20, fontBold18, fontBold20;
+		Texture2D[] images = new Texture2D[12];
+		private SpriteBatch spriteBatch;
 
 		//static float minf(float a, float b) { return a < b ? a : b; }
 		static float maxf(float a, float b)
@@ -41,14 +43,13 @@ namespace NvgSharp.Samples.Demo
 		}
 
 
-		public static void drawWindow(NvgContext vg, string title, float x, float y, float w, float h)
+		public void drawWindow(NvgContext vg, string title, float x, float y, float w, float h)
 		{
 			float cornerRadius = 3.0f;
 			Paint shadowPaint;
 			Paint headerPaint;
 
 			vg.Save();
-			//	ClearState(vg);
 
 			// Window
 			vg.BeginPath();
@@ -78,22 +79,16 @@ namespace NvgSharp.Samples.Demo
 			vg.StrokeColor(new Color(0, 0, 0, 32));
 			vg.Stroke();
 
-			vg.FontSize(18.0f);
-			vg.FontFace("sans-bold");
-			vg.TextAlign(Alignment.Center | Alignment.Middle);
-
-			vg.FontBlur(2);
 			vg.FillColor(new Color(0, 0, 0, 128));
-			vg.Text(x + w / 2, y + 16 + 1, title);
+			vg.Text(fontBold18, title, x + w / 2, y + 16 + 1, TextHorizontalAlignment.Center, TextVerticalAlignment.Center);
 
-			vg.FontBlur(0);
 			vg.FillColor(new Color(220, 220, 220, 160));
-			vg.Text(x + w / 2, y + 16, title);
+			vg.Text(fontBold18, title, x + w / 2, y + 16, TextHorizontalAlignment.Center, TextVerticalAlignment.Center);
 
 			vg.Restore();
 		}
 
-		public static void drawSearchBox(NvgContext vg, string text, float x, float y, float w, float h)
+		public void drawSearchBox(NvgContext vg, string text, float x, float y, float w, float h)
 		{
 			Paint bg;
 			float cornerRadius = h / 2 - 1;
@@ -110,28 +105,19 @@ namespace NvgSharp.Samples.Demo
 				vg.StrokeColor(new Color(0,0,0,48));
 				vg.Stroke();*/
 
-			vg.FontSize(h * 1.3f);
-			vg.FontFace("icons");
+			var fontIcons = fontSystemIcons.GetFont((int)(h * 1.3f));
+
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(Alignment.Center | Alignment.Middle);
-			vg.Text(x + h * 0.55f, y + h * 0.55f, ICON_SEARCH);
+			vg.Text(fontIcons, ICON_SEARCH, x + h * 0.55f, y + h * 0.55f, TextHorizontalAlignment.Center, TextVerticalAlignment.Center);
 
-
-			vg.FontSize(20.0f);
-			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 32));
+			vg.Text(fontSans20, text, x + h * 1.05f, y + h * 0.5f, TextHorizontalAlignment.Left, TextVerticalAlignment.Center);
 
-			vg.TextAlign(Alignment.Left | Alignment.Middle);
-			vg.Text(x + h * 1.05f, y + h * 0.5f, text);
-
-			vg.FontSize(h * 1.3f);
-			vg.FontFace("icons");
 			vg.FillColor(new Color(255, 255, 255, 32));
-			vg.TextAlign(Alignment.Center | Alignment.Middle);
-			vg.Text(x + w - h * 0.55f, y + h * 0.55f, ICON_CIRCLED_CROSS);
+			vg.Text(fontIcons, ICON_CIRCLED_CROSS, x + w - h * 0.55f, y + h * 0.55f, TextHorizontalAlignment.Center, TextVerticalAlignment.Center);
 		}
 
-		public static void drawDropDown(NvgContext vg, string text, float x, float y, float w, float h)
+		public void drawDropDown(NvgContext vg, string text, float x, float y, float w, float h)
 		{
 			Paint bg;
 			float cornerRadius = 4.0f;
@@ -147,27 +133,18 @@ namespace NvgSharp.Samples.Demo
 			vg.StrokeColor(new Color(0, 0, 0, 48));
 			vg.Stroke();
 
-			vg.FontSize(20.0f);
-			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 160));
-			vg.TextAlign(Alignment.Left | Alignment.Middle);
-			vg.Text(x + h * 0.3f, y + h * 0.5f, text);
+			vg.Text(fontSans20, text, x + h * 0.3f, y + h * 0.5f, TextHorizontalAlignment.Left, TextVerticalAlignment.Center);
 
-			vg.FontSize(h * 1.3f);
-			vg.FontFace("icons");
+			var fontIcons = fontSystemIcons.GetFont((int)(h * 1.3f));
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(Alignment.Center | Alignment.Middle);
-			vg.Text(x + w - h * 0.5f, y + h * 0.5f, ICON_CHEVRON_RIGHT);
+			vg.Text(fontIcons, ICON_CHEVRON_RIGHT, x + w - h * 0.5f, y + h * 0.5f, TextHorizontalAlignment.Center, TextVerticalAlignment.Center);
 		}
 
-		public static void drawLabel(NvgContext vg, string text, float x, float y, float w, float h)
+		public void drawLabel(NvgContext vg, string text, float x, float y, float w, float h)
 		{
-			vg.FontSize(18.0f);
-			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 128));
-
-			vg.TextAlign(Alignment.Left | Alignment.Middle);
-			vg.Text(x, y + h * 0.5f, text);
+			vg.Text(fontSans18, text, x, y + h * 0.5f, TextHorizontalAlignment.Left, TextVerticalAlignment.Center);
 		}
 
 		public static void drawEditBoxBase(NvgContext vg, float x, float y, float w, float h)
@@ -186,51 +163,35 @@ namespace NvgSharp.Samples.Demo
 			vg.Stroke();
 		}
 
-		public static void drawEditBox(NvgContext vg, string text, float x, float y, float w, float h)
+		public void drawEditBox(NvgContext vg, string text, float x, float y, float w, float h)
 		{
-
 			drawEditBoxBase(vg, x, y, w, h);
 
-			vg.FontSize(20.0f);
-			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(Alignment.Left | Alignment.Middle);
-			vg.Text(x + h * 0.3f, y + h * 0.5f, text);
+			vg.Text(fontSans20, text, x + h * 0.3f, y + h * 0.5f, TextHorizontalAlignment.Left, TextVerticalAlignment.Center);
 		}
 
-		public static void drawEditBoxNum(NvgContext vg,
-							string text, string units, float x, float y, float w, float h)
+		public void drawEditBoxNum(NvgContext vg, string text, string units, float x, float y, float w, float h)
 		{
 			float uw;
 
 			drawEditBoxBase(vg, x, y, w, h);
 
-			Bounds bounds = new Bounds();
-			uw = vg.TextBounds(0, 0, units, ref bounds);
+			var bounds = vg.TextBounds(fontSans18, units, 0, 0);
 
-			vg.FontSize(18.0f);
-			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 64));
-			vg.TextAlign(Alignment.Right | Alignment.Middle);
-			vg.Text(x + w - h * 0.3f, y + h * 0.5f, units);
+			vg.Text(fontSans18, units, x + w - h * 0.3f, y + h * 0.5f, TextHorizontalAlignment.Right, TextVerticalAlignment.Center);
 
-			vg.FontSize(20.0f);
-			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 128));
-			vg.TextAlign(Alignment.Right | Alignment.Middle);
-			vg.Text(x + w - uw - h * 0.5f, y + h * 0.5f, text);
+			vg.Text(fontSans20, text, x + w - bounds.X2 - h * 0.5f, y + h * 0.5f, TextHorizontalAlignment.Right, TextVerticalAlignment.Center);
 		}
 
-		public static void drawCheckBox(NvgContext vg, string text, float x, float y, float w, float h)
+		public void drawCheckBox(NvgContext vg, string text, float x, float y, float w, float h)
 		{
 			Paint bg;
 
-			vg.FontSize(18.0f);
-			vg.FontFace("sans");
 			vg.FillColor(new Color(255, 255, 255, 160));
-
-			vg.TextAlign(Alignment.Left | Alignment.Middle);
-			vg.Text(x + 28, y + h * 0.5f, text);
+			vg.Text(fontSans18, text, x + 28, y + h * 0.5f, TextHorizontalAlignment.Left, TextVerticalAlignment.Center);
 
 			bg = vg.BoxGradient(x + 1, y + (int)(h * 0.5f) - 9 + 1, 18, 18, 3, 3, new Color(0, 0, 0, 32), new Color(0, 0, 0, 92));
 			vg.BeginPath();
@@ -238,14 +199,12 @@ namespace NvgSharp.Samples.Demo
 			vg.FillPaint(bg);
 			vg.Fill();
 
-			vg.FontSize(40);
-			vg.FontFace("icons");
+			var fontIcons = fontSystemIcons.GetFont(40);
 			vg.FillColor(new Color(255, 255, 255, 128));
-			vg.TextAlign(Alignment.Center | Alignment.Middle);
-			vg.Text(x + 9 + 2, y + h * 0.5f, ICON_CHECK);
+			vg.Text(fontIcons, ICON_CHECK, x + 9 + 2, y + h * 0.5f, TextHorizontalAlignment.Center, TextVerticalAlignment.Center);
 		}
 
-		public static void drawButton(NvgContext vg, string preicon, string text, float x, float y, float w, float h, Color col)
+		public void drawButton(NvgContext vg, string preicon, string text, float x, float y, float w, float h, Color col)
 		{
 			Paint bg;
 			float cornerRadius = 4.0f;
@@ -267,34 +226,23 @@ namespace NvgSharp.Samples.Demo
 			vg.StrokeColor(new Color(0, 0, 0, 48));
 			vg.Stroke();
 
-			vg.FontSize(20.0f);
-			vg.FontFace("sans-bold");
-			Bounds bounds = new Bounds();
-			tw = vg.TextBounds(0, 0, text, ref bounds);
+			var bounds = vg.TextBounds(fontBold20, text, 0, 0);
+			tw = bounds.X2;
 			if (!string.IsNullOrEmpty(preicon))
 			{
-				vg.FontSize(h * 1.3f);
-				vg.FontFace("icons");
-				iw = vg.TextBounds(0, 0, preicon, ref bounds);
+				var fontIcons = fontSystemIcons.GetFont((int)(h * 1.3f));
+				var bounds2 = vg.TextBounds(fontIcons, preicon, 0, 0);
+				iw = bounds2.X2;
 				iw += h * 0.15f;
-			}
 
-			if (!string.IsNullOrEmpty(preicon))
-			{
-				vg.FontSize(h * 1.3f);
-				vg.FontFace("icons");
 				vg.FillColor(new Color(255, 255, 255, 96));
-				vg.TextAlign(Alignment.Left | Alignment.Middle);
-				vg.Text(x + w * 0.5f - tw * 0.5f - iw * 0.75f, y + h * 0.5f, preicon);
+				vg.Text(fontIcons, preicon, x + w * 0.5f - tw * 0.5f - iw * 0.75f, y + h * 0.5f, TextHorizontalAlignment.Left, TextVerticalAlignment.Center);
 			}
 
-			vg.FontSize(20.0f);
-			vg.FontFace("sans-bold");
-			vg.TextAlign(Alignment.Left | Alignment.Middle);
 			vg.FillColor(new Color(0, 0, 0, 160));
-			vg.Text(x + w * 0.5f - tw * 0.5f + iw * 0.25f, y + h * 0.5f - 1, text);
+			vg.Text(fontBold20, text, x + w * 0.5f - tw * 0.5f + iw * 0.25f, y + h * 0.5f - 1, TextHorizontalAlignment.Left, TextVerticalAlignment.Center);
 			vg.FillColor(new Color(255, 255, 255, 160));
-			vg.Text(x + w * 0.5f - tw * 0.5f + iw * 0.25f, y + h * 0.5f, text);
+			vg.Text(fontBold20, text, x + w * 0.5f - tw * 0.5f + iw * 0.25f, y + h * 0.5f, TextHorizontalAlignment.Left, TextVerticalAlignment.Center);
 		}
 
 		public static void drawSlider(NvgContext vg, float pos, float x, float y, float w, float h)
@@ -508,7 +456,7 @@ namespace NvgSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		public static void drawThumbnails(NvgContext vg, float x, float y, float w, float h, int[] images, float t)
+		public static void drawThumbnails(NvgContext vg, float x, float y, float w, float h, Texture2D[] images, float t)
 		{
 			float cornerRadius = 3.0f;
 			Paint shadowPaint, imgPaint, fadePaint;
@@ -547,7 +495,7 @@ namespace NvgSharp.Samples.Demo
 			vg.Scissor(x, y, w, h);
 			vg.Translate(0, -(stackh - h) * u);
 
-			dv = 1.0f / (float)(images.Length - 1);
+			dv = 1.0f / (images.Length - 1);
 
 			for (i = 0; i < images.Length; i++)
 			{
@@ -556,18 +504,20 @@ namespace NvgSharp.Samples.Demo
 				ty = y + 10;
 				tx += (i % 2) * (thumb + 10);
 				ty += (i / 2) * (thumb + 10);
-				vg.ImageSize(images[i], out imgw, out imgh);
+
+				imgw = images[i].Width;
+				imgh = images[i].Height;
 				if (imgw < imgh)
 				{
 					iw = thumb;
-					ih = iw * (float)imgh / (float)imgw;
+					ih = iw * imgh / imgw;
 					ix = 0;
 					iy = -(ih - thumb) * 0.5f;
 				}
 				else
 				{
 					ih = thumb;
-					iw = ih * (float)imgw / (float)imgh;
+					iw = ih * imgw / imgh;
 					ix = -(iw - thumb) * 0.5f;
 					iy = 0;
 				}
@@ -793,18 +743,15 @@ namespace NvgSharp.Samples.Demo
 			vg.Restore();
 		}
 
-		private static int LoadFont(NvgContext vg, string name, string path)
+		private static FontSystem LoadFont(string path)
 		{
-			byte[] data;
-			var ms = new MemoryStream();
+			var result = new FontSystem();
 			using (var stream = TitleContainer.OpenStream(path))
 			{
-				stream.CopyTo(ms);
-
-				data = ms.ToArray();
+				result.AddFont(stream);
 			}
 
-			return vg.CreateFontMem(name, data);
+			return result;
 		}
 
 		public int loadDemoData(GraphicsDevice device, NvgContext vg)
@@ -817,158 +764,23 @@ namespace NvgSharp.Samples.Demo
 			for (i = 0; i < 12; i++)
 			{
 				var path = "Assets/images/image" + (i + 1).ToString() + ".jpg";
-
-				int width, height;
-				byte[] data;
 				using (var stream = File.OpenRead(path))
 				{
-					var texture = Texture2D.FromStream(device, stream);
-
-					width = texture.Width;
-					height = texture.Height;
-					data = new byte[texture.Width * texture.Height * 4];
-					texture.GetData(data);
+					images[i] = Texture2D.FromStream(device, stream);
 				}
-
-				images[i] = vg.CreateImageRGBA(width, height, 0, data);
 			}
 
-			fontIcons = LoadFont(vg, "icons", "Assets/entypo.ttf");
-			fontNormal = LoadFont(vg, "sans", "Assets/Roboto-Regular.ttf");
-			fontBold = LoadFont(vg, "sans-bold", "Assets/Roboto-Bold.ttf");
+			fontSystemIcons = LoadFont("Assets/entypo.ttf");
+			fontSystemNormal = LoadFont("Assets/Roboto-Regular.ttf");
+			fontSystemBold = LoadFont("Assets/Roboto-Bold.ttf");
+
+			fontSans18 = fontSystemNormal.GetFont(18);
+			fontSans20 = fontSystemNormal.GetFont(20);
+
+			fontBold18 = fontSystemBold.GetFont(18);
+			fontBold20 = fontSystemBold.GetFont(20);
 
 			return 0;
-		}
-
-		public static void drawParagraph(NvgContext vg, float x, float y, float width, float height, float mx, float my)
-		{
-			TextRow[] rows = new TextRow[3];
-			GlyphPosition[] glyphs = new GlyphPosition[100];
-			string text = "This is longer chunk of text.\n  \n  Would have used lorem ipsum but she    was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party.";
-			StringSegment start;
-			int nrows, i, nglyphs, j, lnum = 0;
-			float lineh;
-			float caretx, px;
-			Bounds bounds = new Bounds();
-			float a;
-			float gx = 0, gy = 0;
-			int gutter = 0;
-
-			for (i = 0; i < rows.Length; ++i)
-			{
-				rows[i] = new TextRow();
-			}
-
-			vg.Save();
-
-			vg.FontSize(18.0f);
-			vg.FontFace("sans");
-			vg.TextAlign(Alignment.Left | Alignment.Top);
-
-			float ascender, descender;
-			vg.TextMetrics(out ascender, out descender, out lineh);
-
-			// The text break API can be used to fill a large buffer of rows,
-			// or to iterate over the text just few lines (or just one) at a time.
-			// The "next" variable of the last returned item tells where to continue.
-			start = text;
-			while (true)
-			{
-				nrows = vg.TextBreakLines(start, width, rows, out start);
-
-				if (nrows <= 0)
-				{
-					break;
-				}
-				for (i = 0; i < nrows; i++)
-				{
-					TextRow row = rows[i];
-					var hit = mx > x && mx < (x + width) && my >= y && my < (y + lineh);
-
-					vg.BeginPath();
-					vg.FillColor(new Color(255, 255, 255, hit ? 64 : 16));
-					vg.Rect(x, y, row.Width, lineh);
-					vg.Fill();
-
-					vg.FillColor(new Color(255, 255, 255, 255));
-					vg.Text(x, y, row.Str);
-
-					if (hit)
-					{
-						caretx = (mx < x + row.Width / 2) ? x : x + row.Width;
-						px = x;
-						nglyphs = vg.TextGlyphPositions(x, y, row.Str, glyphs);
-						for (j = 0; j < nglyphs; j++)
-						{
-							float x0 = glyphs[j].X;
-							float x1 = (j + 1 < nglyphs) ? glyphs[j + 1].X : x + row.Width;
-							float gx2 = x0 * 0.3f + x1 * 0.7f;
-							if (mx >= px && mx < gx2)
-								caretx = glyphs[j].X;
-							px = gx2;
-						}
-						vg.BeginPath();
-						vg.FillColor(new Color(255, 192, 0, 255));
-						vg.Rect(caretx, y, 1, lineh);
-						vg.Fill();
-
-						gutter = lnum + 1;
-						gx = x - 10;
-						gy = y + lineh / 2;
-					}
-					lnum++;
-					y += lineh;
-				}
-			}
-
-			if (gutter > 0)
-			{
-				string txt = gutter.ToString();
-				vg.FontSize(13.0f);
-				vg.TextAlign(Alignment.Right | Alignment.Middle);
-
-				vg.TextBounds(gx, gy, txt, ref bounds);
-
-				vg.BeginPath();
-				vg.FillColor(new Color(255, 192, 0, 255));
-				vg.RoundedRect((int)bounds.b1 - 4, (int)bounds.b2 - 2,
-					(int)(bounds.b3 - bounds.b1) + 8,
-					(int)(bounds.b4 - bounds.b2) + 4,
-					((int)(bounds.b4 - bounds.b2) + 4) / 2 - 1);
-				vg.Fill();
-
-				vg.FillColor(new Color(32, 32, 32, 255));
-				vg.Text(gx, gy, txt);
-			}
-
-			y += 20.0f;
-
-			vg.FontSize(13.0f);
-			vg.TextAlign(Alignment.Left | Alignment.Top);
-			vg.TextLineHeight(1.2f);
-
-			vg.TextBoxBounds(x, y, 150, "Hover your mouse over the text to see calculated caret position.", ref bounds);
-
-			// Fade the tooltip out when close to it.
-			gx = (float)Math.Abs((mx - (bounds.b1 + bounds.b3) * 0.5f) / (bounds.b1 - bounds.b3));
-			gy = (float)Math.Abs((my - (bounds.b2 + bounds.b4) * 0.5f) / (bounds.b2 - bounds.b4));
-			a = maxf(gx, gy) - 0.5f;
-			a = clampf(a, 0, 1);
-			vg.GlobalAlpha(a);
-
-			vg.BeginPath();
-			vg.FillColor(new Color(220, 220, 220, 255));
-			vg.RoundedRect(bounds.b1 - 2, bounds.b2 - 2, (int)(bounds.b3 - bounds.b1) + 4, (int)(bounds.b4 - bounds.b2) + 4, 3);
-			px = (int)((bounds.b3 + bounds.b1) / 2);
-			vg.MoveTo(px, bounds.b2 - 10);
-			vg.LineTo(px + 7, bounds.b2 + 1);
-			vg.LineTo(px - 7, bounds.b2 + 1);
-			vg.Fill();
-
-			vg.FillColor(new Color(0, 0, 0, 220));
-			vg.TextBox(x, y, 150, "Hover your mouse over the text to see calculated caret position.");
-
-			vg.Restore();
 		}
 
 		public static void drawWidths(NvgContext vg, float x, float y, float width)
@@ -1067,7 +879,6 @@ namespace NvgSharp.Samples.Demo
 			float x, y, popy;
 
 			drawEyes(vg, width - 250, 50, 150, 100, mx, my, t);
-			drawParagraph(vg, width - 450, 50, 150, 100, mx, my);
 			drawGraph(vg, 0, height / 2, width, height / 2, t);
 			drawColorwheel(vg, width - 300, height - 300, 250.0f, 250.0f, t);
 
@@ -1124,6 +935,15 @@ namespace NvgSharp.Samples.Demo
 			drawThumbnails(vg, 365, popy - 30, 160, 300, images, t);
 
 			vg.Restore();
+
+			if (spriteBatch == null)
+			{
+				spriteBatch = new SpriteBatch(vg.GraphicsDevice);
+			}
+
+/*			spriteBatch.Begin();
+			spriteBatch.DrawString(fontSans20, "Search", new Vector2(156.25f, 97.5f), new Color(255, 255, 255, 128));
+			spriteBatch.End();*/
 		}
 	}
 }

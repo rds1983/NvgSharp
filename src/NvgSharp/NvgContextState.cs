@@ -15,12 +15,6 @@ namespace NvgSharp
 		public float Alpha;
 		public Transform Transform = new Transform();
 		public Scissor Scissor;
-		public float FontSize;
-		public float LetterSpacing;
-		public float LineHeight;
-		public float FontBlur;
-		public Alignment TextAlign;
-		public int FontId;
 
 		public NvgContextState Clone()
 		{
@@ -36,12 +30,6 @@ namespace NvgSharp
 				Alpha = Alpha,
 				Transform = Transform,
 				Scissor = Scissor,
-				FontSize = FontSize,
-				LetterSpacing = LetterSpacing,
-				LineHeight = LineHeight,
-				FontBlur = FontBlur,
-				TextAlign = TextAlign,
-				FontId = FontId
 			};
 		}
 	}

@@ -16,7 +16,7 @@ namespace NvgSharp.Samples.Demo
 		private NvgContext _context;
 		private SpriteBatch _spriteBatch;
 		private Demo _demo;
-		private readonly PerfGraph _perfGraph = new PerfGraph(PerfGraph.Style.GRAPH_RENDER_FPS, "Frame Time");
+		private PerfGraph _perfGraph;
 
 		public Game1()
 		{
@@ -40,14 +40,13 @@ namespace NvgSharp.Samples.Demo
 		/// </summary>
 		protected override void LoadContent()
 		{
-			var device = GraphicsDevice;
-
 			_context = new NvgContext(GraphicsDevice);
 
 			_demo = new Demo();
 			_demo.loadDemoData(GraphicsDevice, _context);
 
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
+			_perfGraph = new PerfGraph(PerfGraph.Style.GRAPH_RENDER_FPS, "Frame Time", _demo.fontSystemNormal);
 		}
 
 		/// <summary>

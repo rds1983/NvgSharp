@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace StbSharp
+namespace NvgSharp
 {
 	internal static unsafe class CRuntime
 	{
@@ -302,7 +302,6 @@ namespace StbSharp
 
 		public static ulong strlen(sbyte* str)
 		{
-			ulong res = 0;
 			var ptr = str;
 
 			while (*ptr != '\0')

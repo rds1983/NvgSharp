@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FontStashSharp;
+using Microsoft.Xna.Framework;
 
 namespace NvgSharp.Samples.Demo
 {
@@ -15,11 +16,13 @@ namespace NvgSharp.Samples.Demo
 		private string _name;
 		private float[] _values = new float[100];
 		private int _head;
+		private readonly FontSystem _fontSystem;
 
-		public PerfGraph(Style style, string name)
+		public PerfGraph(Style style, string name, FontSystem fontSystem)
 		{
 			_style = style;
 			_name = name;
+			_fontSystem = fontSystem;
 		}
 
 		public void Update(float frameTime)
@@ -35,7 +38,7 @@ namespace NvgSharp.Samples.Demo
 			{
 				avg += _values[i];
 			}
-			return avg / (float)_values.Length;
+			return avg / _values.Length;
 		}
 
 		public void Render(NvgContext vg, float x, float y)
@@ -99,45 +102,38 @@ namespace NvgSharp.Samples.Demo
 			vg.FillColor(new Color(255, 192, 0, 128));
 			vg.Fill();
 
-			vg.FontFace("sans");
-
 			if (!string.IsNullOrEmpty(_name))
 			{
-				vg.FontSize(14.0f);
-				vg.TextAlign(Alignment.Left | Alignment.Top);
+				var font = _fontSystem.GetFont(14);
 				vg.FillColor(new Color(240, 240, 240, 192));
-				vg.Text(x + 3, y + 1, _name);
+				vg.Text(font, _name, x + 3, y + 1, TextHorizontalAlignment.Left, TextVerticalAlignment.Top);
 			}
 
 			if (_style == Style.GRAPH_RENDER_FPS)
 			{
-				vg.FontSize(18.0f);
-				vg.TextAlign(Alignment.Right | Alignment.Top);
+				var font = _fontSystem.GetFont(18);
 				vg.FillColor(new Color(240, 240, 240, 255));
 				str = string.Format("{0:0.00} FPS", 1.0f / avg);
-				vg.Text(x + w - 3, y + 1, str);
+				vg.Text(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 
-				vg.FontSize(15.0f);
-				vg.TextAlign(Alignment.Right | Alignment.Bottom);
+				font = _fontSystem.GetFont(15);
 				vg.FillColor(new Color(240, 240, 240, 160));
 				str = string.Format("{0:0.00} ms", avg * 1000.0f);
-				vg.Text(x + w - 3, y + h - 1, str);
+				vg.Text(font, str, x + w - 3, y + h - 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Bottom);
 			}
 			else if (_style == Style.GRAPH_RENDER_PERCENT)
 			{
-				vg.FontSize(18.0f);
-				vg.TextAlign(Alignment.Right | Alignment.Top);
+				var font = _fontSystem.GetFont(18);
 				vg.FillColor(new Color(240, 240, 240, 255));
 				str = string.Format("{0:0.00} %%", avg);
-				vg.Text(x + w - 3, y + 1, str);
+				vg.Text(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 			}
 			else
 			{
-				vg.FontSize(18.0f);
-				vg.TextAlign(Alignment.Right | Alignment.Top);
+				var font = _fontSystem.GetFont(18);
 				vg.FillColor(new Color(240, 240, 240, 255));
 				str = string.Format("{0:0.00} ms", avg * 1000.0f);
-				vg.Text(x + w - 3, y + 1, str);
+				vg.Text(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 			}
 		}
 

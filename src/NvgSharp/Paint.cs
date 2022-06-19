@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace NvgSharp
 {
@@ -12,7 +13,7 @@ namespace NvgSharp
 		public float Feather;
 		public Color InnerColor;
 		public Color OuterColor;
-		public int Image;
+		public Texture2D Image;
 		
 		public Paint(Color color)
 		{
@@ -23,7 +24,7 @@ namespace NvgSharp
 			Feather = 1.0f;
 			InnerColor = color;
 			OuterColor = color;
-			Image = 0;
+			Image = null;
 		}
 
 		public void Zero()
@@ -34,7 +35,7 @@ namespace NvgSharp
 			Feather = 0;
 			InnerColor = Color.Transparent;
 			OuterColor = Color.Transparent;
-			Image = 0;
+			Image = null;
 		}
 	}
 }

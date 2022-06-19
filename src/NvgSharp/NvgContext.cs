@@ -1,22 +1,21 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using FontStashSharp;
+using FontStashSharp.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StbSharp;
 
 namespace NvgSharp
 {
-	public unsafe class NvgContext : IDisposable
+	public unsafe class NvgContext : IFontStashRenderer2
 	{
 		public const int MaxTextRows = 10;
-		private readonly int[] _fontImages = new int[4];
 
+		private readonly GraphicsDevice _device;
 		private readonly IRenderer _renderer;
-		private readonly TextRow[] _rows = new TextRow[MaxTextRows];
 		private readonly PathCache _cache;
-		private float* _commands;
-		private int _commandsCount;
-		private int _commandsNumber;
+		private readonly List<Command> _commands = new List<Command>();
 		private float _commandX;
 		private float _commandY;
 		private float _devicePxRatio;
@@ -24,8 +23,6 @@ namespace NvgSharp
 		private int _drawCallCount;
 		private readonly bool _edgeAntiAlias;
 		private int _fillTriCount;
-		private int _fontImageIdx;
-		private FontSystem _fontSystem;
 		private float _fringeWidth;
 		private readonly NvgContextState[] _states = new NvgContextState[32];
 		private int _statesNumber;
@@ -33,55 +30,18 @@ namespace NvgSharp
 		private float _tessTol;
 		private int _textTriCount;
 
-		
+		public GraphicsDevice GraphicsDevice => _device;
+
 		public NvgContext(GraphicsDevice device, bool edgeAntiAlias = true)
 		{
+			_device = device;
 			_renderer = new Renderer(device);
 
-			var fontParams = new FontSystemParams();
-
 			_edgeAntiAlias = edgeAntiAlias;
-			for (var i = 0; i < 4; i++)
-				_fontImages[i] = 0;
-			_commands = (float*)CRuntime.malloc((ulong)(sizeof(float) * 256));
-			_commandsNumber = 0;
-			_commandsCount = 256;
 			_cache = new PathCache();
 			Save();
 			Reset();
 			SetDevicePixelRatio(1.0f);
-			fontParams.Width = 512;
-			fontParams.Height = 512;
-			fontParams.Flags = FontSystem.FONS_ZERO_TOPLEFT;
-			_fontSystem = new FontSystem(fontParams);
-			_fontImages[0] = _renderer.CreateTexture(TextureType.Alpha, fontParams.Width, fontParams.Height, 0, null);
-			_fontImageIdx = 0;
-
-			for (var i = 0; i < _rows.Length; ++i)
-				_rows[i] = new TextRow();
-		}
-
-		public void Dispose()
-		{
-			var i = 0;
-			if (_commands != null)
-			{
-				CRuntime.free(_commands);
-				_commands = null;
-			}
-
-			if (_fontSystem != null)
-			{
-				_fontSystem.Dispose();
-				_fontSystem = null;
-			}
-
-			for (i = 0; i < 4; i++)
-				if (_fontImages[i] != 0)
-				{
-					DeleteImage(_fontImages[i]);
-					_fontImages[i] = 0;
-				}
 		}
 
 		public void BeginFrame(float windowWidth, float windowHeight, float devicePixelRatio)
@@ -102,35 +62,6 @@ namespace NvgSharp
 
 		public void EndFrame()
 		{
-			if (_fontImageIdx != 0)
-			{
-				var fontImage = _fontImages[_fontImageIdx];
-				var i = 0;
-				var j = 0;
-				var iw = 0;
-				var ih = 0;
-				if (fontImage == 0)
-					return;
-				ImageSize(fontImage, out iw, out ih);
-				for (i = j = 0; i < _fontImageIdx; i++)
-					if (_fontImages[i] != 0)
-					{
-						var nw = 0;
-						var nh = 0;
-						ImageSize(_fontImages[i], out nw, out nh);
-						if (nw < iw || nh < ih)
-							DeleteImage(_fontImages[i]);
-						else
-							_fontImages[j++] = _fontImages[i];
-					}
-
-				_fontImages[j++] = _fontImages[0];
-				_fontImages[0] = fontImage;
-				_fontImageIdx = 0;
-				for (i = j; i < 4; i++)
-					_fontImages[i] = 0;
-			}
-
 			_renderer.End();
 		}
 
@@ -166,12 +97,6 @@ namespace NvgSharp
 			state.Transform.SetIdentity();
 			state.Scissor.Extent.X = -1.0f;
 			state.Scissor.Extent.Y = -1.0f;
-			state.FontSize = 16.0f;
-			state.LetterSpacing = 0.0f;
-			state.LineHeight = 1.0f;
-			state.FontBlur = 0.0f;
-			state.TextAlign = Alignment.Left | Alignment.Baseline;
-			state.FontId = 0;
 		}
 
 		public void ShapeAntiAlias(int enabled)
@@ -303,29 +228,6 @@ namespace NvgSharp
 			state.Fill.Transform.Multiply(ref state.Transform);
 		}
 
-		public int CreateImageRGBA(int w, int h, ImageFlags imageFlags, byte[] data)
-		{
-			return _renderer.CreateTexture(TextureType.RGBA, w, h, imageFlags, data);
-		}
-
-		public void UpdateImage(int image, byte[] data)
-		{
-			var w = 0;
-			var h = 0;
-			_renderer.GetTextureSize(image, out w, out h);
-			_renderer.UpdateTexture(image, 0, 0, w, h, data);
-		}
-
-		public void ImageSize(int image, out int w, out int h)
-		{
-			_renderer.GetTextureSize(image, out w, out h);
-		}
-
-		public void DeleteImage(int image)
-		{
-			_renderer.DeleteTexture(image);
-		}
-
 		public Paint LinearGradient(float sx, float sy, float ex, float ey, Color icol, Color ocol)
 		{
 			var p = new Paint();
@@ -394,7 +296,7 @@ namespace NvgSharp
 			return p;
 		}
 
-		public Paint ImagePattern(float cx, float cy, float w, float h, float angle, int image, float alpha)
+		public Paint ImagePattern(float cx, float cy, float w, float h, float angle, Texture2D image, float alpha)
 		{
 			var p = new Paint();
 			p.Transform.SetRotate(angle);
@@ -457,76 +359,32 @@ namespace NvgSharp
 
 		public void BeginPath()
 		{
-			_commandsNumber = 0;
+			_commands.Clear();
 			__clearPathCache();
 		}
 
-		public void MoveTo(float x, float y)
-		{
-			var vals = stackalloc float[3];
-			vals[0] = (int)CommandType.MoveTo;
-			vals[1] = x;
-			vals[2] = y;
+		public void MoveTo(float x, float y) => AppendCommand(CommandType.MoveTo, x, y);
 
-			__appendCommands(vals, 3);
-		}
+		public void LineTo(float x, float y) => AppendCommand(CommandType.LineTo, x, y);
 
-		public void LineTo(float x, float y)
-		{
-			var vals = stackalloc float[3];
-			vals[0] = (int)CommandType.LineTo;
-			vals[1] = x;
-			vals[2] = y;
-
-			__appendCommands(vals, 3);
-		}
-
-		public void BezierTo(float c1x, float c1y, float c2x, float c2y, float x, float y)
-		{
-			var vals = stackalloc float[7];
-			vals[0] = (int)CommandType.BezierTo;
-			vals[1] = c1x;
-			vals[2] = c1y;
-			vals[3] = c2x;
-			vals[4] = c2y;
-			vals[5] = x;
-			vals[6] = y;
-
-			__appendCommands(vals, 7);
-		}
+		public void BezierTo(float c1x, float c1y, float c2x, float c2y, float x, float y) =>
+			AppendCommand(c1x, c1y, c2x, c2y, x, y);
 
 		public void QuadTo(float cx, float cy, float x, float y)
 		{
 			var x0 = _commandX;
 			var y0 = _commandY;
-			var vals = stackalloc float[7];
-			vals[0] = (int)CommandType.BezierTo;
-			vals[1] = x0 + 2.0f / 3.0f * (cx - x0);
-			vals[2] = y0 + 2.0f / 3.0f * (cy - y0);
-			vals[3] = x + 2.0f / 3.0f * (cx - x);
-			vals[4] = y + 2.0f / 3.0f * (cy - y);
-			vals[5] = x;
-			vals[6] = y;
 
-			__appendCommands(vals, 7);
+			AppendCommand(x0 + 2.0f / 3.0f * (cx - x0), y0 + 2.0f / 3.0f * (cy - y0),
+				x + 2.0f / 3.0f * (cx - x), y + 2.0f / 3.0f * (cy - y), x, y);
 		}
 
 		public void ArcTo(float x1, float y1, float x2, float y2, float radius)
 		{
 			var x0 = _commandX;
 			var y0 = _commandY;
-			float dx0 = 0;
-			float dy0 = 0;
-			float dx1 = 0;
-			float dy1 = 0;
-			float a = 0;
-			float d = 0;
-			float cx = 0;
-			float cy = 0;
-			float a0 = 0;
-			float a1 = 0;
-			Winding dir = Winding.CounterClockWise;
-			if (_commandsNumber == 0)
+
+			if (_commands.Count == 0)
 				return;
 
 			if (__ptEquals(x0, y0, x1, y1, _distTol) != 0 || __ptEquals(x1, y1, x2, y2, _distTol) != 0 ||
@@ -536,20 +394,22 @@ namespace NvgSharp
 				return;
 			}
 
-			dx0 = x0 - x1;
-			dy0 = y0 - y1;
-			dx1 = x2 - x1;
-			dy1 = y2 - y1;
+			var dx0 = x0 - x1;
+			var dy0 = y0 - y1;
+			var dx1 = x2 - x1;
+			var dy1 = y2 - y1;
 			NvgUtility.__normalize(&dx0, &dy0);
 			NvgUtility.__normalize(&dx1, &dy1);
-			a = NvgUtility.acosf(dx0 * dx1 + dy0 * dy1);
-			d = radius / NvgUtility.tanf(a / 2.0f);
+			var a = NvgUtility.acosf(dx0 * dx1 + dy0 * dy1);
+			var d = radius / NvgUtility.tanf(a / 2.0f);
 			if (d > 10000.0f)
 			{
 				LineTo(x1, y1);
 				return;
 			}
 
+			float cx, cy, a0, a1;
+			Winding dir;
 			if (NvgUtility.__cross(dx0, dy0, dx1, dy1) > 0.0f)
 			{
 				cx = x1 + dx0 * d + dy0 * radius;
@@ -570,22 +430,9 @@ namespace NvgSharp
 			Arc(cx, cy, radius, a0, a1, dir);
 		}
 
-		public void ClosePath()
-		{
-			var vals = stackalloc float[1];
-			vals[0] = (int)CommandType.Close;
+		public void ClosePath() => AppendCommand(CommandType.Close);
 
-			__appendCommands(vals, 1);
-		}
-
-		public void PathWinding(Solidity dir)
-		{
-			var vals = stackalloc float[2];
-			vals[0] = (int)CommandType.Winding;
-			vals[1] = (int)dir;
-
-			__appendCommands(vals, 2);
-		}
+		public void PathWinding(Solidity dir) => AppendCommand(dir);
 
 		public void Arc(float cx, float cy, float r, float a0, float a1, Winding dir)
 		{
@@ -606,8 +453,7 @@ namespace NvgSharp
 			var vals = stackalloc float[3 + 5 * 7 + 100];
 			var i = 0;
 			var ndivs = 0;
-			var nvals = 0;
-			var move = _commandsNumber > 0 ? CommandType.LineTo : CommandType.MoveTo;
+			var move = _commands.Count > 0 ? CommandType.LineTo : CommandType.MoveTo;
 			da = a1 - a0;
 			if (dir == Winding.ClockWise)
 			{
@@ -632,7 +478,6 @@ namespace NvgSharp
 			kappa = NvgUtility.__absf(4.0f / 3.0f * (1.0f - NvgUtility.cosf(hda)) / NvgUtility.sinf(hda));
 			if (dir == Winding.CounterClockWise)
 				kappa = -kappa;
-			nvals = 0;
 			for (i = 0; i <= ndivs; i++)
 			{
 				a = a0 + da * (i / (float)ndivs);
@@ -644,19 +489,11 @@ namespace NvgSharp
 				tany = dx * r * kappa;
 				if (i == 0)
 				{
-					vals[nvals++] = (int)move;
-					vals[nvals++] = x;
-					vals[nvals++] = y;
+					AppendCommand(move, x, y);
 				}
 				else
 				{
-					vals[nvals++] = (int)CommandType.BezierTo;
-					vals[nvals++] = px + ptanx;
-					vals[nvals++] = py + ptany;
-					vals[nvals++] = x - tanx;
-					vals[nvals++] = y - tany;
-					vals[nvals++] = x;
-					vals[nvals++] = y;
+					AppendCommand(px + ptanx, py + ptany, x - tanx, y - tany, x, y);
 				}
 
 				px = x;
@@ -664,28 +501,15 @@ namespace NvgSharp
 				ptanx = tanx;
 				ptany = tany;
 			}
-
-			__appendCommands(vals, nvals);
 		}
 
 		public void Rect(float x, float y, float w, float h)
 		{
-			var vals = stackalloc float[13];
-			vals[0] = (int)CommandType.MoveTo;
-			vals[1] = x;
-			vals[2] = y;
-			vals[3] = (int)CommandType.LineTo;
-			vals[4] = x;
-			vals[5] = y + h;
-			vals[6] = (int)CommandType.LineTo;
-			vals[7] = x + w;
-			vals[8] = y + h;
-			vals[9] = (int)CommandType.LineTo;
-			vals[10] = x + w;
-			vals[11] = y;
-			vals[12] = (int)CommandType.Close;
-
-			__appendCommands(vals, 13);
+			AppendCommand(CommandType.MoveTo, x, y);
+			AppendCommand(CommandType.LineTo, x, y + h);
+			AppendCommand(CommandType.LineTo, x + w, y + h);
+			AppendCommand(CommandType.LineTo, x + w, y);
+			AppendCommand(CommandType.Close);
 		}
 
 		public void RoundedRect(float x, float y, float w, float h, float r)
@@ -712,92 +536,27 @@ namespace NvgSharp
 				var ryTR = NvgUtility.__minf(radTopRight, halfh) * NvgUtility.__signf(h);
 				var rxTL = NvgUtility.__minf(radTopLeft, halfw) * NvgUtility.__signf(w);
 				var ryTL = NvgUtility.__minf(radTopLeft, halfh) * NvgUtility.__signf(h);
-				var vals = stackalloc float[44];
-				vals[0] = (int)CommandType.MoveTo;
-				vals[1] = x;
-				vals[2] = y + ryTL;
-				vals[3] = (int)CommandType.LineTo;
-				vals[4] = x;
-				vals[5] = y + h - ryBL;
-				vals[6] = (int)CommandType.BezierTo;
-				vals[7] = x;
-				vals[8] = y + h - ryBL * (1 - 0.5522847493f);
-				vals[9] = x + rxBL * (1 - 0.5522847493f);
-				vals[10] = y + h;
-				vals[11] = x + rxBL;
-				vals[12] = y + h;
-				vals[13] = (int)CommandType.LineTo;
-				vals[14] = x + w - rxBR;
-				vals[15] = y + h;
-				vals[16] = (int)CommandType.BezierTo;
-				vals[17] = x + w - rxBR * (1 - 0.5522847493f);
-				vals[18] = y + h;
-				vals[19] = x + w;
-				vals[20] = y + h - ryBR * (1 - 0.5522847493f);
-				vals[21] = x + w;
-				vals[22] = y + h - ryBR;
-				vals[23] = (int)CommandType.LineTo;
-				vals[24] = x + w;
-				vals[25] = y + ryTR;
-				vals[26] = (int)CommandType.BezierTo;
-				vals[27] = x + w;
-				vals[28] = y + ryTR * (1 - 0.5522847493f);
-				vals[29] = x + w - rxTR * (1 - 0.5522847493f);
-				vals[30] = y;
-				vals[31] = x + w - rxTR;
-				vals[32] = y;
-				vals[33] = (int)CommandType.LineTo;
-				vals[34] = x + rxTL;
-				vals[35] = y;
-				vals[36] = (int)CommandType.BezierTo;
-				vals[37] = x + rxTL * (1 - 0.5522847493f);
-				vals[38] = y;
-				vals[39] = x;
-				vals[40] = y + ryTL * (1 - 0.5522847493f);
-				vals[41] = x;
-				vals[42] = y + ryTL;
-				vals[43] = (int)CommandType.Close;
-				__appendCommands(vals, 44);
+				AppendCommand(CommandType.MoveTo, x, y + ryTL);
+				AppendCommand(CommandType.LineTo, x, y + h - ryBL);
+				AppendCommand(x, y + h - ryBL * (1 - 0.5522847493f), x + rxBL * (1 - 0.5522847493f), y + h, x + rxBL, y + h);
+				AppendCommand(CommandType.LineTo, x + w - rxBR, y + h);
+				AppendCommand(x + w - rxBR * (1 - 0.5522847493f), y + h, x + w, y + h - ryBR * (1 - 0.5522847493f), x + w, y + h - ryBR);
+				AppendCommand(CommandType.LineTo, x + w, y + ryTR);
+				AppendCommand(x + w, y + ryTR * (1 - 0.5522847493f), x + w - rxTR * (1 - 0.5522847493f), y, x + w - rxTR, y);
+				AppendCommand(CommandType.LineTo, x + rxTL, y);
+				AppendCommand(x + rxTL * (1 - 0.5522847493f), y, x, y + ryTL * (1 - 0.5522847493f), x, y + ryTL);
+				AppendCommand(CommandType.Close);
 			}
 		}
 
 		public void Ellipse(float cx, float cy, float rx, float ry)
 		{
-			var vals = stackalloc float[32];
-			vals[0] = (int)CommandType.MoveTo;
-			vals[1] = cx - rx;
-			vals[2] = cy;
-			vals[3] = (int)CommandType.BezierTo;
-			vals[4] = cx - rx;
-			vals[5] = cy + ry * 0.5522847493f;
-			vals[6] = cx - rx * 0.5522847493f;
-			vals[7] = cy + ry;
-			vals[8] = cx;
-			vals[9] = cy + ry;
-			vals[10] = (int)CommandType.BezierTo;
-			vals[11] = cx + rx * 0.5522847493f;
-			vals[12] = cy + ry;
-			vals[13] = cx + rx;
-			vals[14] = cy + ry * 0.5522847493f;
-			vals[15] = cx + rx;
-			vals[16] = cy;
-			vals[17] = (int)CommandType.BezierTo;
-			vals[18] = cx + rx;
-			vals[19] = cy - ry * 0.5522847493f;
-			vals[20] = cx + rx * 0.5522847493f;
-			vals[21] = cy - ry;
-			vals[22] = cx;
-			vals[23] = cy - ry;
-			vals[24] = (int)CommandType.BezierTo;
-			vals[25] = cx - rx * 0.5522847493f;
-			vals[26] = cy - ry;
-			vals[27] = cx - rx;
-			vals[28] = cy - ry * 0.5522847493f;
-			vals[29] = cx - rx;
-			vals[30] = cy;
-			vals[31] = (int)CommandType.Close;
-
-			__appendCommands(vals, 32);
+			AppendCommand(CommandType.MoveTo, cx - rx, cy);
+			AppendCommand(cx - rx, cy + ry * 0.5522847493f, cx - rx * 0.5522847493f, cy + ry, cx, cy + ry);
+			AppendCommand(cx + rx * 0.5522847493f, cy + ry, cx + rx, cy + ry * 0.5522847493f, cx + rx, cy);
+			AppendCommand(cx + rx, cy - ry * 0.5522847493f, cx + rx * 0.5522847493f, cy - ry, cx, cy - ry);
+			AppendCommand(cx - rx * 0.5522847493f, cy - ry, cx - rx, cy - ry * 0.5522847493f, cx - rx, cy);
+			AppendCommand(CommandType.Close);
 		}
 
 		public void Circle(float cx, float cy, float r)
@@ -904,548 +663,150 @@ namespace NvgSharp
 			}
 		}
 
-		public int CreateFontMem(string name, byte[] data)
+		private readonly Buffer<Vertex> _tempVerts = new Buffer<Vertex>(1024);
+		private Texture2D _lastTexture = null;
+
+		void IFontStashRenderer2.DrawQuad(Texture2D texture,
+			ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight,
+			ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
 		{
-			return _fontSystem.AddFontMem(name, data);
-		}
-
-		public int FindFont(string name)
-		{
-			if (name == null)
-				return -1;
-			return _fontSystem.GetFontByName(name);
-		}
-
-		public int AddFallbackFontId(int baseFont, int fallbackFont)
-		{
-			if (baseFont == -1 || fallbackFont == -1)
-				return 0;
-			return _fontSystem.AddFallbackFont(baseFont, fallbackFont);
-		}
-
-		public int AddFallbackFont(string baseFont, string fallbackFont)
-		{
-			return AddFallbackFontId(FindFont(baseFont), FindFont(fallbackFont));
-		}
-
-		public void FontSize(float size)
-		{
-			var state = GetState();
-			state.FontSize = size;
-		}
-
-		public void FontBlur(float blur)
-		{
-			var state = GetState();
-			state.FontBlur = blur;
-		}
-
-		public void TextLetterSpacing(float spacing)
-		{
-			var state = GetState();
-			state.LetterSpacing = spacing;
-		}
-
-		public void TextLineHeight(float lineHeight)
-		{
-			var state = GetState();
-			state.LineHeight = lineHeight;
-		}
-
-		public void TextAlign(Alignment align)
-		{
-			var state = GetState();
-			state.TextAlign = align;
-		}
-
-		public void FontFaceId(int font)
-		{
-			var state = GetState();
-			state.FontId = font;
-		}
-
-		public void FontFace(string font)
-		{
-			var state = GetState();
-			state.FontId = _fontSystem.GetFontByName(font);
-		}
-
-		public float Text(float x, float y, StringSegment _string_)
-		{
-			var state = GetState();
-			var iter = new FontTextIterator();
-			var prevIter = new FontTextIterator();
-			var q = new FontGlyphSquad();
-			var scale = __getFontScale(state) * _devicePxRatio;
-			var invscale = 1.0f / scale;
-			var cverts = 0;
-			var nverts = 0;
-			if (state.FontId == -1)
-				return x;
-			_fontSystem.SetSize(state.FontSize * scale);
-			_fontSystem.SetSpacing(state.LetterSpacing * scale);
-			_fontSystem.SetBlur(state.FontBlur * scale);
-			_fontSystem.SetAlign(state.TextAlign);
-			_fontSystem.SetFont(state.FontId);
-			cverts = NvgUtility.__maxi(2, _string_.Length) * 6;
-			var verts = __allocTempVerts(cverts);
-
-			_fontSystem.TextIterInit(iter, x * scale, y * scale, _string_, FontSystem.FONS_GLYPH_BITMAP_REQUIRED);
-			prevIter = iter;
-
-			while (_fontSystem.TextIterNext(iter, &q))
+			if (_lastTexture != null && _lastTexture != texture)
 			{
-				var c = stackalloc float[4 * 2];
-				if (iter.PrevGlyphIndex == -1)
-				{
-					if (nverts != 0)
-					{
-						var segment = new ArraySegment<Vertex>(verts.Array, verts.Offset, nverts);
-						__renderText(segment);
-						nverts = 0;
-					}
-
-					if (__allocTextAtlas() == 0)
-						break;
-					iter = prevIter;
-					_fontSystem.TextIterNext(iter, &q);
-					if (iter.PrevGlyphIndex == -1)
-						break;
-				}
-
-				prevIter = iter;
-				state.Transform.TransformPoint(out c[0], out c[1], q.X0 * invscale, q.Y0 * invscale);
-				state.Transform.TransformPoint(out c[2], out c[3], q.X1 * invscale, q.Y0 * invscale);
-				state.Transform.TransformPoint(out c[4], out c[5], q.X1 * invscale, q.Y1 * invscale);
-				state.Transform.TransformPoint(out c[6], out c[7], q.X0 * invscale, q.Y1 * invscale);
-				if (nverts + 6 <= cverts)
-				{
-					__vset(ref verts.Array[verts.Offset + nverts], c[0], c[1], q.S0, q.T0);
-					nverts++;
-					__vset(ref verts.Array[verts.Offset + nverts], c[4], c[5], q.S1, q.T1);
-					nverts++;
-					__vset(ref verts.Array[verts.Offset + nverts], c[2], c[3], q.S1, q.T0);
-					nverts++;
-					__vset(ref verts.Array[verts.Offset + nverts], c[0], c[1], q.S0, q.T0);
-					nverts++;
-					__vset(ref verts.Array[verts.Offset + nverts], c[6], c[7], q.S0, q.T1);
-					nverts++;
-					__vset(ref verts.Array[verts.Offset + nverts], c[4], c[5], q.S1, q.T1);
-					nverts++;
-				}
+				FlushText();
 			}
 
-			__flushTextTexture();
+			var state = GetState();
 
-			var segment2 = new ArraySegment<Vertex>(verts.Array, verts.Offset, nverts);
-			__renderText(segment2);
+			float px, py;
+			state.Transform.TransformPoint(out px, out py, topLeft.Position.X, topLeft.Position.Y);
+			var newTopLeft = new Vertex(px, py, topLeft.TextureCoordinate.X, topLeft.TextureCoordinate.Y);
 
-			return iter.NextX / scale;
+			state.Transform.TransformPoint(out px, out py, topRight.Position.X, topRight.Position.Y);
+			var newTopRight = new Vertex(px, py, topRight.TextureCoordinate.X, topRight.TextureCoordinate.Y);
+
+			state.Transform.TransformPoint(out px, out py, bottomRight.Position.X, bottomRight.Position.Y);
+			var newBottomRight = new Vertex(px, py, bottomRight.TextureCoordinate.X, bottomRight.TextureCoordinate.Y);
+
+			state.Transform.TransformPoint(out px, out py, bottomLeft.Position.X, bottomLeft.Position.Y);
+			var newBottomLeft = new Vertex(px, py, bottomLeft.TextureCoordinate.X, bottomLeft.TextureCoordinate.Y);
+
+			_tempVerts.Add(newTopLeft);
+			_tempVerts.Add(newBottomRight);
+			_tempVerts.Add(newTopRight);
+			_tempVerts.Add(newTopLeft);
+			_tempVerts.Add(newBottomLeft);
+			_tempVerts.Add(newBottomRight);
+
+			_lastTexture = texture;
 		}
 
-		public void TextBox(float x, float y, float breakRowWidth, StringSegment _string_)
+		private void FlushText()
 		{
-			var state = GetState();
-			var i = 0;
-			var oldAlign = state.TextAlign;
-			var haling = state.TextAlign & (Alignment.Left | Alignment.Center | Alignment.Right);
-			var valign = state.TextAlign & (Alignment.Top | Alignment.Middle | Alignment.Bottom | Alignment.Baseline);
-			var lineh = (float)0;
-			if (state.FontId == -1)
+			if (_lastTexture == null || _tempVerts.Count == 0)
+			{
 				return;
-			float ascender, descender;
-			TextMetrics(out ascender, out descender, out lineh);
-			state.TextAlign = Alignment.Left | valign;
-			while (true)
-			{
-				var nrows = TextBreakLines(_string_, breakRowWidth, _rows, out _string_);
-
-				if (nrows <= 0)
-					break;
-				for (i = 0; i < nrows; i++)
-				{
-					var row = _rows[i];
-					if ((haling & Alignment.Left) != 0)
-						Text(x, y, row.Str);
-					else if ((haling & Alignment.Center) != 0)
-						Text(x + breakRowWidth * 0.5f - row.Width * 0.5f, y, row.Str);
-					else if ((haling & Alignment.Right) != 0)
-						Text(x + breakRowWidth - row.Width, y, row.Str);
-					y += lineh * state.LineHeight;
-				}
 			}
 
-			state.TextAlign = oldAlign;
+			var state = GetState();
+			var paint = state.Fill;
+			paint.Image = _lastTexture;
+
+			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
+			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
+
+			_renderer.RenderTriangles(ref paint, ref state.Scissor, _tempVerts.ToArraySegment());
+			_drawCallCount++;
+			_textTriCount += _tempVerts.Count / 3;
+
+			_lastTexture = null;
+			_tempVerts.Clear();
 		}
 
-		public int TextGlyphPositions(float x, float y, StringSegment _string_, GlyphPosition[] positions)
+		private void Text(SpriteFontBase font, TextSource text, float x, float y,
+			TextHorizontalAlignment horizontalAlignment, TextVerticalAlignment verticalAlignment,
+			float layerDepth, float characterSpacing, float lineSpacing)
 		{
-			var state = GetState();
-			var scale = __getFontScale(state) * _devicePxRatio;
-			var invscale = 1.0f / scale;
-			var iter = new FontTextIterator();
-			var prevIter = new FontTextIterator();
-			var q = new FontGlyphSquad();
-			var npos = 0;
-			if (state.FontId == -1)
-				return 0;
-
-			if (_string_.IsNullOrEmpty)
-				return 0;
-
-			_fontSystem.SetSize(state.FontSize * scale);
-			_fontSystem.SetSpacing(state.LetterSpacing * scale);
-			_fontSystem.SetBlur(state.FontBlur * scale);
-			_fontSystem.SetAlign(state.TextAlign);
-			_fontSystem.SetFont(state.FontId);
-			_fontSystem.TextIterInit(iter, x * scale, y * scale, _string_, FontSystem.FONS_GLYPH_BITMAP_OPTIONAL);
-			prevIter = iter;
-			while (_fontSystem.TextIterNext(iter, &q))
+			if (text.IsNull)
 			{
-				if (iter.PrevGlyphIndex < 0 && __allocTextAtlas() != 0)
-				{
-					iter = prevIter;
-					_fontSystem.TextIterNext(iter, &q);
-				}
-
-				prevIter = iter;
-				positions[npos].Str = iter.Str;
-				positions[npos].X = iter.X * invscale;
-				positions[npos].MinX = NvgUtility.__minf(iter.X, q.X0) * invscale;
-				positions[npos].MaxX = NvgUtility.__maxf(iter.NextX, q.X1) * invscale;
-				npos++;
-				if (npos >= positions.Length)
-					break;
+				return;
 			}
 
-			return npos;
-		}
+			_tempVerts.Clear();
 
-		public int TextBreakLines(StringSegment _string_, float breakRowWidth, TextRow[] rows,
-			out StringSegment remaining)
-		{
-			remaining = StringSegment.Null;
-
-			var state = GetState();
-			var scale = __getFontScale(state) * _devicePxRatio;
-			var invscale = 1.0f / scale;
-			var iter = new FontTextIterator();
-			var prevIter = new FontTextIterator();
-			var q = new FontGlyphSquad();
-			var nrows = 0;
-			var rowStartX = (float)0;
-			var rowWidth = (float)0;
-			var rowMinX = (float)0;
-			var rowMaxX = (float)0;
-			int? rowStart = null;
-			int? rowEnd = null;
-			int? wordStart = null;
-			int? breakEnd = null;
-			var wordStartX = (float)0;
-			var wordMinX = (float)0;
-			var breakWidth = (float)0;
-			var breakMaxX = (float)0;
-			var type = CodepointType.Space;
-			var ptype = CodepointType.Space;
-			var pcodepoint = 0;
-
-			if (state.FontId == -1)
-				return 0;
-
-			if (_string_.IsNullOrEmpty)
-				return 0;
-			_fontSystem.SetSize(state.FontSize * scale);
-			_fontSystem.SetSpacing(state.LetterSpacing * scale);
-			_fontSystem.SetBlur(state.FontBlur * scale);
-			_fontSystem.SetAlign(state.TextAlign);
-			_fontSystem.SetFont(state.FontId);
-			breakRowWidth *= scale;
-			_fontSystem.TextIterInit(iter, 0, 0, _string_, FontSystem.FONS_GLYPH_BITMAP_OPTIONAL);
-			prevIter = iter;
-			while (_fontSystem.TextIterNext(iter, &q))
+			if (horizontalAlignment != TextHorizontalAlignment.Left)
 			{
-				if (iter.PrevGlyphIndex < 0 && __allocTextAtlas() != 0)
+				Vector2 sz;
+				if (text.StringText != null)
 				{
-					iter = prevIter;
-					_fontSystem.TextIterNext(iter, &q);
-				}
-
-				prevIter = iter;
-				switch (iter.Codepoint)
-				{
-					case 9:
-					case 11:
-					case 12:
-					case 32:
-					case 0x00a0:
-						type = CodepointType.Space;
-						break;
-					case 10:
-						type = pcodepoint == 13 ? CodepointType.Space : CodepointType.Newline;
-						break;
-					case 13:
-						type = pcodepoint == 10 ? CodepointType.Space : CodepointType.Newline;
-						break;
-					case 0x0085:
-						type = CodepointType.Newline;
-						break;
-					default:
-						if (iter.Codepoint >= 0x4E00 && iter.Codepoint <= 0x9FFF ||
-							iter.Codepoint >= 0x3000 && iter.Codepoint <= 0x30FF ||
-							iter.Codepoint >= 0xFF00 && iter.Codepoint <= 0xFFEF ||
-							iter.Codepoint >= 0x1100 && iter.Codepoint <= 0x11FF ||
-							iter.Codepoint >= 0x3130 && iter.Codepoint <= 0x318F ||
-							iter.Codepoint >= 0xAC00 && iter.Codepoint <= 0xD7AF)
-							type = CodepointType.CjkChar;
-						else
-							type = CodepointType.Char;
-						break;
-				}
-
-				if (type == CodepointType.Newline)
-				{
-					rows[nrows].Str = rowStart == null ? iter.Str : new StringSegment(iter.Str, rowStart.Value);
-					if (rowEnd != null)
-						rows[nrows].Str.Length = rowEnd.Value - rows[nrows].Str.Location;
-					else
-						rows[nrows].Str.Length = 0;
-					rows[nrows].Width = rowWidth * invscale;
-					rows[nrows].MinX = rowMinX * invscale;
-					rows[nrows].MaxX = rowMaxX * invscale;
-					remaining = iter.Next;
-					nrows++;
-					if (nrows >= rows.Length)
-						return nrows;
-					breakEnd = rowStart;
-					breakWidth = (float)0.0;
-					breakMaxX = (float)0.0;
-					rowStart = null;
-					rowEnd = null;
-					rowWidth = 0;
-					rowMinX = rowMaxX = 0;
+					sz = font.MeasureString(text.StringText);
 				}
 				else
 				{
-					if (rowStart == null)
-					{
-						if (type == CodepointType.Char || type == CodepointType.CjkChar)
-						{
-							rowStartX = iter.X;
-							rowStart = iter.Str.Location;
-							rowEnd = iter.Str.Location + 1;
-							rowWidth = iter.NextX - rowStartX;
-							rowMinX = q.X0 - rowStartX;
-							rowMaxX = q.X1 - rowStartX;
-							wordStart = iter.Str.Location;
-							wordStartX = iter.X;
-							wordMinX = q.X0 - rowStartX;
-							breakEnd = rowStart;
-							breakWidth = (float)0.0;
-							breakMaxX = (float)0.0;
-						}
-					}
-					else
-					{
-						var nextWidth = iter.NextX - rowStartX;
-						if (type == CodepointType.Char || type == CodepointType.CjkChar)
-						{
-							rowEnd = iter.Str.Location + 1;
-							rowWidth = iter.NextX - rowStartX;
-							rowMaxX = q.X1 - rowStartX;
-						}
-
-						if ((ptype == CodepointType.Char || ptype == CodepointType.CjkChar) && type == CodepointType.Space || type == CodepointType.CjkChar)
-						{
-							breakEnd = iter.Str.Location;
-							breakWidth = rowWidth;
-							breakMaxX = rowMaxX;
-						}
-
-						if (ptype == CodepointType.Space && (type == CodepointType.Char || type == CodepointType.CjkChar) || type == CodepointType.CjkChar)
-						{
-							wordStart = iter.Str.Location;
-							wordStartX = iter.X;
-							wordMinX = q.X0 - rowStartX;
-						}
-
-						if ((type == CodepointType.Char || type == CodepointType.CjkChar) && nextWidth > breakRowWidth)
-						{
-							if (breakEnd == rowStart)
-							{
-								rows[nrows].Str = new StringSegment(_string_, rowStart.Value, iter.Str.Location);
-								rows[nrows].Width = rowWidth * invscale;
-								rows[nrows].MinX = rowMinX * invscale;
-								rows[nrows].MaxX = rowMaxX * invscale;
-								remaining = iter.Str;
-								nrows++;
-								if (nrows >= rows.Length)
-									return nrows;
-								rowStartX = iter.X;
-								rowStart = iter.Str.Location;
-								rowEnd = iter.Str.Location + 1;
-								rowWidth = iter.NextX - rowStartX;
-								rowMinX = q.X0 - rowStartX;
-								rowMaxX = q.X1 - rowStartX;
-								wordStart = iter.Str.Location;
-								wordStartX = iter.X;
-								wordMinX = q.X0 - rowStartX;
-							}
-							else
-							{
-								rows[nrows].Str = new StringSegment(_string_, rowStart.Value,
-									breakEnd.Value - rowStart.Value);
-								rows[nrows].Width = breakWidth * invscale;
-								rows[nrows].MinX = rowMinX * invscale;
-								rows[nrows].MaxX = breakMaxX * invscale;
-								remaining = new StringSegment(_string_, wordStart.Value);
-
-								nrows++;
-								if (nrows >= rows.Length)
-									return nrows;
-								rowStartX = wordStartX;
-								rowStart = wordStart;
-								rowEnd = iter.Str.Location + 1;
-								rowWidth = iter.NextX - rowStartX;
-								rowMinX = wordMinX;
-								rowMaxX = q.X1 - rowStartX;
-							}
-
-							breakEnd = rowStart;
-							breakWidth = (float)0.0;
-							breakMaxX = (float)0.0;
-						}
-					}
+					sz = font.MeasureString(text.StringBuilderText);
 				}
 
-				pcodepoint = iter.Codepoint;
-				ptype = type;
-			}
-
-			if (rowStart != null)
-			{
-				rows[nrows].Str = new StringSegment(_string_, rowStart.Value, rowEnd.Value - rowStart.Value);
-				rows[nrows].Width = rowWidth * invscale;
-				rows[nrows].MinX = rowMinX * invscale;
-				rows[nrows].MaxX = rowMaxX * invscale;
-				remaining = StringSegment.Null;
-
-				nrows++;
-			}
-
-			return nrows;
-		}
-
-		public float TextBounds(float x, float y, string _string_, ref Bounds bounds)
-		{
-			var state = GetState();
-			var scale = __getFontScale(state) * _devicePxRatio;
-			var invscale = 1.0f / scale;
-			float width = 0;
-			if (state.FontId == -1)
-				return 0;
-			_fontSystem.SetSize(state.FontSize * scale);
-			_fontSystem.SetSpacing(state.LetterSpacing * scale);
-			_fontSystem.SetBlur(state.FontBlur * scale);
-			_fontSystem.SetAlign(state.TextAlign);
-			_fontSystem.SetFont(state.FontId);
-			width = _fontSystem.TextBounds(x * scale, y * scale, _string_, ref bounds);
-			_fontSystem.LineBounds(y * scale, ref bounds.b2, ref bounds.b4);
-			bounds.b1 *= invscale;
-			bounds.b2 *= invscale;
-			bounds.b3 *= invscale;
-			bounds.b4 *= invscale;
-
-			return width * invscale;
-		}
-
-		public void TextBoxBounds(float x, float y, float breakRowWidth, StringSegment _string_, ref Bounds bounds)
-		{
-			var state = GetState();
-			var scale = __getFontScale(state) * _devicePxRatio;
-			var invscale = 1.0f / scale;
-			var i = 0;
-			var oldAlign = state.TextAlign;
-			var haling = state.TextAlign & (Alignment.Left | Alignment.Center | Alignment.Right);
-			var valign = state.TextAlign & (Alignment.Top | Alignment.Middle | Alignment.Bottom | Alignment.Baseline);
-			var lineh = (float)0;
-			var rminy = (float)0;
-			var rmaxy = (float)0;
-			float minx = 0;
-			float miny = 0;
-			float maxx = 0;
-			float maxy = 0;
-			if (state.FontId == -1)
-			{
-				bounds.b1 = bounds.b2 = bounds.b3 = bounds.b4 = 0.0f;
-				return;
-			}
-
-			float ascender, descender;
-			TextMetrics(out ascender, out descender, out lineh);
-			state.TextAlign = Alignment.Left | valign;
-			minx = maxx = x;
-			miny = maxy = y;
-			_fontSystem.SetSize(state.FontSize * scale);
-			_fontSystem.SetSpacing(state.LetterSpacing * scale);
-			_fontSystem.SetBlur(state.FontBlur * scale);
-			_fontSystem.SetAlign(state.TextAlign);
-			_fontSystem.SetFont(state.FontId);
-			_fontSystem.LineBounds(0, ref rminy, ref rmaxy);
-			rminy *= invscale;
-			rmaxy *= invscale;
-			while (true)
-			{
-				var nrows = TextBreakLines(_string_, breakRowWidth, _rows, out _string_);
-				if (nrows <= 0)
-					break;
-				for (i = 0; i < nrows; i++)
+				if (horizontalAlignment == TextHorizontalAlignment.Center)
 				{
-					var row = _rows[i];
-					float rminx = 0;
-					float rmaxx = 0;
-					var dx = (float)0;
-					if ((haling & Alignment.Left) != 0)
-						dx = 0;
-					else if ((haling & Alignment.Center) != 0)
-						dx = breakRowWidth * 0.5f - row.Width * 0.5f;
-					else if ((haling & Alignment.Right) != 0)
-						dx = breakRowWidth - row.Width;
-					rminx = x + row.MinX + dx;
-					rmaxx = x + row.MaxX + dx;
-					minx = NvgUtility.__minf(minx, rminx);
-					maxx = NvgUtility.__maxf(maxx, rmaxx);
-					miny = NvgUtility.__minf(miny, y + rminy);
-					maxy = NvgUtility.__maxf(maxy, y + rmaxy);
-					y += lineh * state.LineHeight;
+					x -= sz.X / 2.0f;
+				}
+				else if (horizontalAlignment == TextHorizontalAlignment.Right)
+				{
+					x -= sz.X;
 				}
 			}
 
-			state.TextAlign = oldAlign;
-			bounds.b1 = minx;
-			bounds.b2 = miny;
-			bounds.b3 = maxx;
-			bounds.b4 = maxy;
+			if (verticalAlignment == TextVerticalAlignment.Center)
+			{
+				y -= font.LineHeight / 2.0f;
+			} else if (verticalAlignment == TextVerticalAlignment.Bottom)
+			{
+				y -= font.LineHeight;
+			}
+
+			if (text.StringText != null)
+			{
+				font.DrawText(this, text.StringText, new Vector2(x, y), Color.White,
+					layerDepth: layerDepth, characterSpacing: characterSpacing, lineSpacing: lineSpacing);
+			}
+			else
+			{
+				font.DrawText(this, text.StringBuilderText, new Vector2(x, y), Color.White,
+					layerDepth: layerDepth, characterSpacing: characterSpacing, lineSpacing: lineSpacing);
+			}
+
+			FlushText();
 		}
 
-		public void TextMetrics(out float ascender, out float descender, out float lineh)
+		public void Text(SpriteFontBase font, string text, float x, float y,
+			TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
+			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f) => 
+			Text(font, new TextSource(text), x, y, horizontalAlignment, verticalAlignment, layerDepth, characterSpacing, lineSpacing);
+
+		public void Text(SpriteFontBase font, StringBuilder text, float x, float y,
+			TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
+			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
+			Text(font, new TextSource(text), x, y, horizontalAlignment, verticalAlignment, layerDepth, characterSpacing, lineSpacing);
+
+		private Bounds TextBounds(SpriteFontBase font, TextSource text, float x, float y, float characterSpacing, float lineSpacing)
 		{
-			ascender = descender = lineh = 0;
+			Bounds result;
+			if (text.StringText != null)
+			{
+				result = font.TextBounds(text.StringText, new Vector2(x, y), characterSpacing: characterSpacing, lineSpacing: lineSpacing);
+			}
+			else
+			{
+				result = font.TextBounds(text.StringBuilderText, new Vector2(x, y), characterSpacing: characterSpacing, lineSpacing: lineSpacing);
+			}
 
-			var state = GetState();
-			var scale = __getFontScale(state) * _devicePxRatio;
-			var invscale = 1.0f / scale;
-			if (state.FontId == -1)
-				return;
-			_fontSystem.SetSize(state.FontSize * scale);
-			_fontSystem.SetSpacing(state.LetterSpacing * scale);
-			_fontSystem.SetBlur(state.FontBlur * scale);
-			_fontSystem.SetAlign(state.TextAlign);
-			_fontSystem.SetFont(state.FontId);
-			_fontSystem.VertMetrics(out ascender, out descender, out lineh);
-			ascender *= invscale;
-			descender *= invscale;
-			lineh *= invscale;
+			return result;
 		}
+
+		public Bounds TextBounds(SpriteFontBase font, string text, float x, float y, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
+			TextBounds(font, new TextSource(text), x, y, characterSpacing, lineSpacing);
+
+		public Bounds TextBounds(SpriteFontBase font, StringBuilder text, float x, float y, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
+			TextBounds(font, new TextSource(text), x, y, characterSpacing, lineSpacing);
 
 		private void SetDevicePixelRatio(float ratio)
 		{
@@ -1460,62 +821,37 @@ namespace NvgSharp
 			return _states[_statesNumber - 1];
 		}
 
-		private void __appendCommands(float* vals, int nvals)
+		private void AppendCommand(Command command)
 		{
 			var state = GetState();
-			var i = 0;
-			if (_commandsNumber + nvals > _commandsCount)
+
+			if (command.Type != CommandType.Close && command.Type != CommandType.Winding)
 			{
-				float* commands;
-				var ccommands = _commandsNumber + nvals + _commandsCount / 2;
-				commands = (float*)CRuntime.realloc(_commands, (ulong)(sizeof(float) * ccommands));
-				if (commands == null)
-					return;
-				_commands = commands;
-				_commandsCount = ccommands;
+				_commandX = command.P1;
+				_commandY = command.P2;
 			}
 
-			if (vals[0] != (int)CommandType.Close && vals[0] != (int)CommandType.Winding)
+			switch (command.Type)
 			{
-				_commandX = vals[nvals - 2];
-				_commandY = vals[nvals - 1];
+				case CommandType.LineTo:
+				case CommandType.MoveTo:
+					state.Transform.TransformPoint(out command.P1, out command.P2, command.P1, command.P2);
+					break;
+				case CommandType.BezierTo:
+					state.Transform.TransformPoint(out command.P1, out command.P2, command.P1, command.P2);
+					state.Transform.TransformPoint(out command.P3, out command.P4, command.P3, command.P4);
+					state.Transform.TransformPoint(out command.P5, out command.P6, command.P5, command.P6);
+					break;
 			}
 
-			i = 0;
-			while (i < nvals)
-			{
-				var cmd = vals[i];
-				switch ((CommandType)cmd)
-				{
-					case CommandType.MoveTo:
-						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], vals[i + 1], vals[i + 2]);
-						i += 3;
-						break;
-					case CommandType.LineTo:
-						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], vals[i + 1], vals[i + 2]);
-						i += 3;
-						break;
-					case CommandType.BezierTo:
-						state.Transform.TransformPoint(out vals[i + 1], out vals[i + 2], vals[i + 1], vals[i + 2]);
-						state.Transform.TransformPoint(out vals[i + 3], out vals[i + 4], vals[i + 3], vals[i + 4]);
-						state.Transform.TransformPoint(out vals[i + 5], out vals[i + 6], vals[i + 5], vals[i + 6]);
-						i += 7;
-						break;
-					case CommandType.Close:
-						i++;
-						break;
-					case CommandType.Winding:
-						i += 2;
-						break;
-					default:
-						i++;
-						break;
-				}
-			}
-
-			CRuntime.memcpy(&_commands[_commandsNumber], vals, (ulong)(nvals * sizeof(float)));
-			_commandsNumber += nvals;
+			_commands.Add(command);
 		}
+
+		private void AppendCommand(CommandType type) => AppendCommand(new Command(type));
+		private void AppendCommand(Solidity solidity) => AppendCommand(new Command(solidity));
+		private void AppendCommand(CommandType type, float p1, float p2) => AppendCommand(new Command(type, p1, p2));
+		private void AppendCommand(float p1, float p2, float p3, float p4, float p5, float p6) => 
+			AppendCommand(new Command(p1, p2, p3, p4, p5, p6));
 
 		private void __clearPathCache()
 		{
@@ -1656,71 +992,49 @@ namespace NvgSharp
 
 		private void __flattenPaths()
 		{
-			NvgPoint* last;
-			NvgPoint* p0;
-			NvgPoint* p1;
-			NvgPoint* pts;
-			Path path;
-			var i = 0;
-			var j = 0;
-			float* cp1;
-			float* cp2;
-			float* p;
-			float area = 0;
 			if (_cache.Paths.Count > 0)
 				return;
-			i = 0;
-			while (i < _commandsNumber)
+
+			for(var i = 0; i < _commands.Count; ++i)
 			{
-				var cmd = _commands[i];
-				switch ((CommandType)cmd)
+				switch (_commands[i].Type)
 				{
 					case CommandType.MoveTo:
 						__addPath();
-						p = &_commands[i + 1];
-						__addPoint(p[0], p[1], PointFlags.Corner);
-						i += 3;
+						__addPoint(_commands[i].P1, _commands[i].P2, PointFlags.Corner);
 						break;
 					case CommandType.LineTo:
-						p = &_commands[i + 1];
-						__addPoint(p[0], p[1], PointFlags.Corner);
-						i += 3;
+						__addPoint(_commands[i].P1, _commands[i].P2, PointFlags.Corner);
 						break;
 					case CommandType.BezierTo:
-						last = __lastPoint();
+						var last = __lastPoint();
 						if (last != null)
 						{
-							cp1 = &_commands[i + 1];
-							cp2 = &_commands[i + 3];
-							p = &_commands[i + 5];
-							__tesselateBezier(last->X, last->Y, cp1[0], cp1[1], cp2[0], cp2[1], p[0], p[1], 0,
-								PointFlags.Corner);
+							__tesselateBezier(last->X, last->Y,
+								_commands[i].P1, _commands[i].P2,
+								_commands[i].P3, _commands[i].P4,
+								_commands[i].P5, _commands[i].P6, 
+								0, PointFlags.Corner);
 						}
 
-						i += 7;
 						break;
 					case CommandType.Close:
 						__closePath();
-						i++;
 						break;
 					case CommandType.Winding:
-						__pathWinding((Winding)_commands[i + 1]);
-						i += 2;
-						break;
-					default:
-						i++;
+						__pathWinding((Winding)_commands[i].P1);
 						break;
 				}
 			}
 
-			_cache.Bounds.b1 = _cache.Bounds.b2 = 1e6f;
-			_cache.Bounds.b3 = _cache.Bounds.b4 = -1e6f;
-			for (j = 0; j < _cache.Paths.Count; j++)
+			_cache.Bounds.Y = _cache.Bounds.Y = 1e6f;
+			_cache.Bounds.X2 = _cache.Bounds.Y2 = -1e6f;
+			for (var j = 0; j < _cache.Paths.Count; j++)
 			{
-				path = _cache.Paths[j];
-				pts = &_cache.Points[path.First];
-				p0 = &pts[path.Count - 1];
-				p1 = &pts[0];
+				var path = _cache.Paths[j];
+				var pts = &_cache.Points[path.First];
+				var p0 = &pts[path.Count - 1];
+				var p1 = &pts[0];
 				if (__ptEquals(p0->X, p0->Y, p1->X, p1->Y, _distTol) != 0)
 				{
 					path.Count--;
@@ -1730,22 +1044,22 @@ namespace NvgSharp
 
 				if (path.Count > 2)
 				{
-					area = __polyArea(pts, path.Count);
+					var area = __polyArea(pts, path.Count);
 					if (path.Winding == Winding.CounterClockWise && area < 0.0f)
 						__polyReverse(pts, path.Count);
 					if (path.Winding == Winding.ClockWise && area > 0.0f)
 						__polyReverse(pts, path.Count);
 				}
 
-				for (i = 0; i < path.Count; i++)
+				for (var i = 0; i < path.Count; i++)
 				{
 					p0->DeltaX = p1->X - p0->X;
 					p0->DeltaY = p1->Y - p0->Y;
 					p0->Length = NvgUtility.__normalize(&p0->DeltaX, &p0->DeltaY);
-					_cache.Bounds.b1 = NvgUtility.__minf(_cache.Bounds.b1, p0->X);
-					_cache.Bounds.b2 = NvgUtility.__minf(_cache.Bounds.b2, p0->Y);
-					_cache.Bounds.b3 = NvgUtility.__maxf(_cache.Bounds.b3, p0->X);
-					_cache.Bounds.b4 = NvgUtility.__maxf(_cache.Bounds.b4, p0->Y);
+					_cache.Bounds.X = NvgUtility.__minf(_cache.Bounds.X, p0->X);
+					_cache.Bounds.Y = NvgUtility.__minf(_cache.Bounds.Y, p0->Y);
+					_cache.Bounds.X2 = NvgUtility.__maxf(_cache.Bounds.X2, p0->X);
+					_cache.Bounds.Y2 = NvgUtility.__maxf(_cache.Bounds.Y2, p0->Y);
 					p0 = p1++;
 				}
 			}
@@ -2093,69 +1407,6 @@ namespace NvgSharp
 			return 1;
 		}
 
-
-		private void __flushTextTexture()
-		{
-			var dirty = stackalloc int[4];
-			if (_fontSystem.ValidateTexture(dirty) != 0)
-			{
-				var fontImage = _fontImages[_fontImageIdx];
-				if (fontImage != 0)
-				{
-					var iw = 0;
-					var ih = 0;
-					var data = _fontSystem.GetTextureData(&iw, &ih);
-					var x = dirty[0];
-					var y = dirty[1];
-					var w = dirty[2] - dirty[0];
-					var h = dirty[3] - dirty[1];
-					_renderer.UpdateTexture(fontImage, x, y, w, h, data);
-				}
-			}
-		}
-
-		private int __allocTextAtlas()
-		{
-			var iw = 0;
-			var ih = 0;
-			__flushTextTexture();
-			if (_fontImageIdx >= 4 - 1)
-				return 0;
-			if (_fontImages[_fontImageIdx + 1] != 0)
-			{
-				ImageSize(_fontImages[_fontImageIdx + 1], out iw, out ih);
-			}
-			else
-			{
-				ImageSize(_fontImages[_fontImageIdx], out iw, out ih);
-				if (iw > ih)
-					ih *= 2;
-				else
-					iw *= 2;
-				if (iw > 2048 || ih > 2048)
-					iw = ih = 2048;
-				_fontImages[_fontImageIdx + 1] = _renderer.CreateTexture(TextureType.Alpha, iw, ih, 0, null);
-			}
-
-			++_fontImageIdx;
-			_fontSystem.ResetAtlas(iw, ih);
-			return 1;
-		}
-
-		private void __renderText(ArraySegment<Vertex> verts)
-		{
-			var state = GetState();
-			var paint = state.Fill;
-			paint.Image = _fontImages[_fontImageIdx];
-
-			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
-			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
-
-			_renderer.RenderTriangles(ref paint, ref state.Scissor, verts);
-			_drawCallCount++;
-			_textTriCount += verts.Count / 3;
-		}
-
 		private static float __triarea2(float ax, float ay, float bx, float by, float cx, float cy)
 		{
 			var abx = bx - ax;
@@ -2251,16 +1502,6 @@ namespace NvgSharp
 				*x1 = p1->X + p1->dmx * w;
 				*y1 = p1->Y + p1->dmy * w;
 			}
-		}
-
-		private static float __quantize(float a, float d)
-		{
-			return (int)(a / d + 0.5f) * d;
-		}
-
-		private static float __getFontScale(NvgContextState state)
-		{
-			return NvgUtility.__minf(__quantize(__getAverageScale(ref state.Transform), 0.01f), 4.0f);
 		}
 
 		private static Vertex* __roundJoin(Vertex* dst, NvgPoint* p0, NvgPoint* p1, float lw, float rw, float lu,

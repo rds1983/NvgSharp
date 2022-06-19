@@ -1,6 +1,5 @@
 ﻿using System;
 using FontStashSharp;
-using StbSharp;
 
 namespace NvgSharp
 {

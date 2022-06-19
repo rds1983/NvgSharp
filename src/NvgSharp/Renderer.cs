@@ -67,11 +67,13 @@ namespace NvgSharp
 		private Transform _scissorTransform;
 		private float _strokeMult;
 
-		private readonly EffectParameter _viewSizeParam;
+		private readonly EffectParameter _transformMatParam;
 		private readonly EffectParameter _scissorMatParam;
 		private readonly EffectParameter _scissorExtParam;
 		private readonly EffectParameter _scissorScaleParam;
 		private readonly EffectParameter _paintMatParam;
+
+		public GraphicsDevice GraphicsDevice => _device;
 
 		public Renderer(GraphicsDevice device)
 		{
@@ -82,7 +84,7 @@ namespace NvgSharp
 
 			_effect = new Effect(device, Resources.NvgEffectSource);
 
-			_viewSizeParam = _effect.Parameters["viewSize"];
+			_transformMatParam = _effect.Parameters["transformMat"];
 			_scissorMatParam = _effect.Parameters["scissorMat"];
 			_scissorExtParam = _effect.Parameters["scissorExt"];
 			_scissorScaleParam = _effect.Parameters["scissorScale"];
@@ -98,57 +100,6 @@ namespace NvgSharp
 				_techniques[(int)param] = _effect.Techniques[param.ToString()];
 		}
 
-		public int CreateTexture(TextureType type, int w, int h, ImageFlags imageFlags, byte[] d)
-		{
-			var texture = new Texture2D(_device, w, h);
-
-			if (d != null)
-				texture.SetData(d);
-
-			_textures.Add(texture);
-
-			return _textures.Count;
-		}
-
-		public void DeleteTexture(int image)
-		{
-			var texture = GetTextureById(image);
-			_textures.Remove(texture);
-			texture.Dispose();
-		}
-
-		public void UpdateTexture(int image, int x, int y, int w, int h, byte[] d)
-		{
-			var texture = GetTextureById(image);
-
-			if (d != null)
-			{
-				var b = new byte[texture.Width * texture.Height * 4];
-
-				texture.GetData(b);
-				for (var xx = x; xx < x + w; ++xx)
-					for (var yy = y; yy < y + h; ++yy)
-					{
-						var destPos = yy * texture.Width + xx;
-
-						for (var k = 0; k < 3; ++k)
-							b[destPos * 4 + k] = 255;
-
-						b[destPos * 4 + 3] = d[destPos];
-					}
-
-				texture.SetData(b);
-			}
-		}
-
-		public void GetTextureSize(int image, out int w, out int h)
-		{
-			var texture = GetTextureById(image);
-
-			w = texture.Width;
-			h = texture.Height;
-		}
-
 		public void Viewport(float width, float height, float devicePixelRatio)
 		{
 			// TO DO
@@ -162,7 +113,7 @@ namespace NvgSharp
 			RenderingType renderingType;
 			if (isConvex)
 			{
-				renderingType = paint.Image != 0 ? RenderingType.FillImage : RenderingType.FillGradient;
+				renderingType = paint.Image != null ? RenderingType.FillImage : RenderingType.FillGradient;
 			}
 			else
 			{
@@ -192,10 +143,10 @@ namespace NvgSharp
 				_device.BlendState = BlendState.AlphaBlend;
 				_device.DepthStencilState = _stencilStateFill2;
 
-				_vertexes.Add(new Vertex(bounds.b1, bounds.b2, 0.5f, 1.0f));
-				_vertexes.Add(new Vertex(bounds.b3, bounds.b2, 0.5f, 1.0f));
-				_vertexes.Add(new Vertex(bounds.b1, bounds.b4, 0.5f, 1.0f));
-				_vertexes.Add(new Vertex(bounds.b3, bounds.b4, 0.5f, 1.0f));
+				_vertexes.Add(new Vertex(bounds.X, bounds.Y, 0.5f, 1.0f));
+				_vertexes.Add(new Vertex(bounds.X2, bounds.Y, 0.5f, 1.0f));
+				_vertexes.Add(new Vertex(bounds.X, bounds.Y2, 0.5f, 1.0f));
+				_vertexes.Add(new Vertex(bounds.X2, bounds.Y2, 0.5f, 1.0f));
 
 				RenderTriangles(ref paint, ref scissor, fringe, fringe, -1.0f,
 					RenderingType.FillGradient, _vertexes.ToArraySegment(), PrimitiveType.TriangleStrip, false);
@@ -220,7 +171,7 @@ namespace NvgSharp
 
 					RenderTriangles(ref paint, ref scissor,
 						strokeWidth, fringe, -1.0f,
-						paint.Image != 0 ? RenderingType.FillImage : RenderingType.FillGradient,
+						paint.Image != null ? RenderingType.FillImage : RenderingType.FillGradient,
 						_vertexes.ToArraySegment(),
 						PrimitiveType.TriangleStrip,
 						false);
@@ -317,8 +268,11 @@ namespace NvgSharp
 
 			var transformMatrix = transform.ToMatrix();
 
-			_viewSizeParam.SetValue(new Vector2(_device.PresentationParameters.Bounds.Width,
-				_device.PresentationParameters.Bounds.Height));
+			Matrix projection;
+			Matrix.CreateOrthographicOffCenter(0, _device.PresentationParameters.Bounds.Width,
+				_device.PresentationParameters.Bounds.Height, 0, 0, -1, out projection);
+
+			_transformMatParam.SetValue(projection);
 			_scissorMatParam.SetValue(_scissorTransform.ToMatrix());
 			_scissorExtParam.SetValue(_scissorExt);
 			_scissorScaleParam.SetValue(_scissorScale);
@@ -330,10 +284,9 @@ namespace NvgSharp
 			_outerColParam.SetValue(outerColor.ToVector4());
 			// _effect.Parameters["strokeMult"].SetValue(new Vector4(_strokeMult, 0.0f, 0.0f, 0.0f));
 
-			if (paint.Image > 0)
+			if (paint.Image != null)
 			{
-				var texture = GetTextureById(paint.Image);
-				_textureParam.SetValue(texture);
+				_textureParam.SetValue(paint.Image);
 			}
 
 			var technique = _techniques[(int)renderingType];

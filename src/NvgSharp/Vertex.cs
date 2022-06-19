@@ -13,8 +13,8 @@ namespace NvgSharp
 		public static readonly VertexDeclaration VertexDeclaration;
 		public Vertex(float x, float y, float u, float v)
 		{
-			Position.X = x;
-			Position.Y = y;
+			Position.X = (int)x;
+			Position.Y = (int)y;
 			TextureCoordinate.X = u;
 			TextureCoordinate.Y = v;
 		}

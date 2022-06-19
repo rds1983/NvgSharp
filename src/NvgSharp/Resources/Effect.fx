@@ -4,7 +4,6 @@ DECLARE_TEXTURE(g_texture, 0);
 
 BEGIN_CONSTANTS
 
-    float2 viewSize;    
     float4 scissorExt;
     float4 scissorScale;
     float4 extent;
@@ -19,6 +18,7 @@ MATRIX_CONSTANTS
     float4x4 dummy;
     float4x4 scissorMat;
     float4x4 paintMat;
+	float4x4 transformMat;
 
 END_CONSTANTS
 
@@ -42,7 +42,7 @@ VS_OUTPUT VSMain(float2 pt : POSITION, float2 tex : TEXCOORD0)
     VS_OUTPUT Output;
     Output.ftcoord = tex;
     Output.fpos = pt;
-    Output.position = float4(2.0 * pt.x / viewSize.x - 1.0, 1.0 - 2.0 * pt.y / viewSize.y, 0, 1);
+    Output.position = mul(float4(pt.x, pt.y, 0, 1), transformMat);
      
     return Output;
 }
@@ -154,7 +154,6 @@ float4 PSMainTriangles(PS_INPUT input) : SV_TARGET
 #endif
 	// Textured tris
 	float4 color = SAMPLE_TEXTURE(g_texture, input.ftcoord);
-	color = float4(color.xyz*color.w,color.w);
 	color *= scissor;
 	result = (color * innerCol);
 #ifdef EDGE_AA

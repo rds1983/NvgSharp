@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\NvgSharp.FNA\NvgSharp.FNA.csproj" />
-    <ProjectReference Include="..\..\src\XNA\NvgSharp.FNA.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Assets\**\*.*">
