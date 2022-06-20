@@ -1,49 +1,17 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>C# port of https://github.com/memononen/nanovg</Description>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
-    <PackageId>NvgSharp.MonoGame</PackageId>
-    <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="$(DefineConstants.Contains('FNA'))">
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
-    <PackageId>NvgSharp.FNA</PackageId>
-    <OutputPath>bin\FNA\$(Configuration)</OutputPath>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="$(DefineConstants.Contains('XENKO'))">
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>NvgSharp.Xenko</PackageId>
-    <OutputPath>bin\Xenko\$(Configuration)</OutputPath>
+    <Description>Platform-Agnostic Version of NvgSharp</Description>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants);PLATFORM_AGNOSTIC</DefineConstants>
   </PropertyGroup>
   
-  <ItemGroup Condition="$(DefineConstants.Contains('MONOGAME'))">
-    <PackageReference Include="MonoGame.Framework.Portable" PrivateAssets="All" Version="3.6.0.1625" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(DefineConstants.Contains('FNA'))">
-    <ProjectReference Include="$(FNAProj)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(DefineConstants.Contains('XENKO'))">
-    <PackageReference Include="Xenko.Engine" Version="3.1.0.1-beta01-0349" PrivateAssets="contentfiles;analyzers" />
-    <PackageReference Include="Xenko.Core" Version="3.1.0.1-beta01-0349" PrivateAssets="contentfiles;analyzers" />
-  </ItemGroup>
-
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>   
+  
   <ItemGroup>
-    <None Remove="Resources\Effect.dx11.mgfxo" />
-    <None Remove="Resources\Effect.fxb" />
-    <None Remove="Resources\Effect.ogl.mgfxo" />
+    <PackageReference Include="FontStashSharp" Version="$(FontStashSharpVersion)" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\Effect.dx11.mgfxo" />
-    <EmbeddedResource Include="Resources\Effect.fxb" />
-    <EmbeddedResource Include="Resources\Effect.ogl.mgfxo" />
-  </ItemGroup>  
 </Project>

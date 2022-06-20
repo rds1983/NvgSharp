@@ -3,8 +3,17 @@ using System.Collections.Generic;
 using System.Text;
 using FontStashSharp;
 using FontStashSharp.Interfaces;
+
+#if MONOGAME || FNA
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+#elif STRIDE
+using Stride.Core.Mathematics;
+#else
+using System.Numerics;
+using System.Drawing;
+using Texture2D = System.Object;
+#endif
 
 namespace NvgSharp
 {
@@ -17,7 +26,6 @@ namespace NvgSharp
 
 		public const int MaxTextRows = 10;
 
-		private readonly GraphicsDevice _device;
 		private readonly IRenderer _renderer;
 		private readonly PathCache _cache;
 		private readonly List<Command> _commands = new List<Command>();
@@ -36,13 +44,21 @@ namespace NvgSharp
 		private int _textTriCount;
 		private Texture2D _lastTextTexture = null;
 
-		public GraphicsDevice GraphicsDevice => _device;
+#if MONOGAME || FNA || STRIDE
+		public GraphicsDevice GraphicsDevice => _renderer.GraphicsDevice;
+#else
+		public ITexture2DManager TextureManager => _renderer.TextureManager;
+#endif
 
+#if MONOGAME || FNA || STRIDE
 		public NvgContext(GraphicsDevice device, bool edgeAntiAlias = true)
 		{
-			_device = device;
 			_renderer = new Renderer(device);
-
+#else
+		public NvgContext(IRenderer renderer, bool edgeAntiAlias = true)
+		{
+			_renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
+#endif
 			_edgeAntiAlias = edgeAntiAlias;
 			_cache = new PathCache();
 			Save();
@@ -311,7 +327,7 @@ namespace NvgSharp
 			p.Extent.X = w;
 			p.Extent.Y = h;
 			p.Image = image;
-			p.InnerColor = p.OuterColor = new Color(1.0f, 1.0f, 1.0f, alpha);
+			p.InnerColor = p.OuterColor = NvgUtility.FromRGBA(255, 255, 255, (byte)(int)(255 * alpha));
 			return p;
 		}
 
@@ -595,9 +611,9 @@ namespace NvgSharp
 
 		private static void MultiplyAlpha(ref Color c, float alpha)
 		{
-			var na = (int)(c.A * alpha);
+			var na = (byte)(int)(c.A * alpha);
 
-			c = new Color(c.R, c.G, c.B, na);
+			c = NvgUtility.FromRGBA(c.R, c.G, c.B, na);
 		}
 
 		public void Fill()

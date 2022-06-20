@@ -1,8 +1,6 @@
-﻿using System.Runtime.InteropServices;
-
-namespace NvgSharp
+﻿namespace NvgSharp
 {
-	internal class NvgPoint
+	public class NvgPoint
 	{
 		public float X;
 		public float Y;

@@ -1,6 +1,15 @@
 ﻿using System.Runtime.InteropServices;
+
+#if MONOGAME || FNA
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+#elif STRIDE
+using Stride.Core.Mathematics;
+#else
+using System.Numerics;
+using System.Drawing;
+using Texture2D = System.Object;
+#endif
 
 namespace NvgSharp
 {

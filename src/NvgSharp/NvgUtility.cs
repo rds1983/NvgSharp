@@ -1,5 +1,12 @@
 using System;
+
+#if MONOGAME || FNA
 using Microsoft.Xna.Framework;
+#elif STRIDE
+using Stride.Core.Mathematics;
+#else
+using System.Drawing;
+#endif
 
 namespace NvgSharp
 {
@@ -120,22 +127,20 @@ namespace NvgSharp
 
 		public static Color HSLA(float h, float s, float l, byte a)
 		{
-			float m1 = 0;
-			float m2 = 0;
 			h = (float)(__modf((float)(h), (float)(1.0f)));
 			if ((h) < (0.0f))
 				h += (float)(1.0f);
 			s = (float)(__clampf((float)(s), (float)(0.0f), (float)(1.0f)));
 			l = (float)(__clampf((float)(l), (float)(0.0f), (float)(1.0f)));
-			m2 = (float)(l <= 0.5f ? (l * (1 + s)) : (l + s - l * s));
-			m1 = (float)(2 * l - m2);
+			var m2 = (float)(l <= 0.5f ? (l * (1 + s)) : (l + s - l * s));
+			var m1 = (float)(2 * l - m2);
 
 			float fr = (float)(__clampf((float)(Hue((float)(h + 1.0f / 3.0f), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
 			float fg = (float)(__clampf((float)(Hue((float)(h), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
 			float fb = (float)(__clampf((float)(Hue((float)(h - 1.0f / 3.0f), (float)(m1), (float)(m2))), (float)(0.0f), (float)(1.0f)));
 			float fa = (float)(a / 255.0f);
 
-			return new Color(fr, fg, fb, fa);
+			return FromRGBA((byte)(int)(fr * 255), (byte)(int)(fg * 255), (byte)(int)(fb * 255), (byte)(int)(fa * 255));
 		}
 
 		public static float DegToRad(float deg)
@@ -147,5 +152,15 @@ namespace NvgSharp
 		{
 			return (float)(rad / 3.14159274 * 180.0f);
 		}
+
+		public static Color FromRGBA(byte r, byte g, byte b, byte a)
+		{
+#if MONOGAME || FNA || STRIDE
+			return new Color(r, g, b, a);
+#else
+			return Color.FromArgb(r, g, b, a);
+#endif
+		}
+
 	}
 }

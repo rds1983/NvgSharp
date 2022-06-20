@@ -1,5 +1,13 @@
 ﻿using System.Runtime.InteropServices;
+
+#if MONOGAME || FNA
 using Microsoft.Xna.Framework;
+#elif STRIDE
+using Stride.Core.Mathematics;
+#else
+using System.Numerics;
+using Matrix = System.Numerics.Matrix3x2;
+#endif
 
 namespace NvgSharp
 {
@@ -135,26 +143,6 @@ namespace NvgSharp
 		public void TransformVector(out Vector2 v, Vector2 s)
 		{
 			TransformPoint(out v.X, out v.Y, s.X, s.Y);
-		}
-
-		public Matrix ToMatrix()
-		{
-			var m3 = Matrix.Identity;
-
-			m3.M11 = T1;
-			m3.M21 = T2;
-			m3.M31 = 0.0f;
-			m3.M41 = 0.0f;
-			m3.M12 = T3;
-			m3.M22 = T4;
-			m3.M32 = 0.0f;
-			m3.M42 = 0.0f;
-			m3.M13 = T5;
-			m3.M23 = T6;
-			m3.M33 = 1.0f;
-			m3.M43 = 0.0f;
-
-			return m3;
 		}
 	}
 }

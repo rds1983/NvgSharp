@@ -2,14 +2,28 @@ namespace NvgSharp
 {
 	public enum Winding
 	{
-		CounterClockWise = 1,            // Winding for solid shapes
-		ClockWise = 2,             // Winding for holes
+		/// <summary>
+		/// Winding for solid shapes
+		/// </summary>
+		CounterClockWise = 1,
+
+		/// <summary>
+		/// Winding for holes
+		/// </summary>
+		ClockWise = 2,
 	};
 
 	public enum Solidity
 	{
-		Solid = 1,          // CCW
-		Hole = 2,           // CW
+		/// <summary>
+		/// CCW
+		/// </summary>
+		Solid = 1,
+
+		/// <summary>
+		/// CW
+		/// </summary>
+		Hole = 2,
 	};
 
 	public enum LineCap
@@ -59,12 +73,35 @@ namespace NvgSharp
 
 	public enum ImageFlags
 	{
-		GenerateMipMaps = 1 << 0,     // Generate mipmaps during creation of the image.
-		RepeatX = 1 << 1,     // Repeat image in X direction.
-		RepeatY = 1 << 2,     // Repeat image in Y direction.
-		FlipY = 1 << 3,       // Flips (inverses) image in Y direction when rendered.
-		Premultiplied = 1 << 4,       // Image data has premultiplied alpha.
-		Nearest = 1 << 5,     // Image interpolation is Nearest instead Linear
+		/// <summary>
+		/// Generate mipmaps during creation of the image
+		/// </summary>
+		GenerateMipMaps = 1 << 0,
+
+		/// <summary>
+		/// Repeat image in X direction
+		/// </summary>
+		RepeatX = 1 << 1,
+
+		/// <summary>
+		/// Repeat image in Y direction
+		/// </summary>
+		RepeatY = 1 << 2,
+
+		/// <summary>
+		/// Flips (inverses) image in Y direction when rendered
+		/// </summary>
+		FlipY = 1 << 3,
+
+		/// <summary>
+		/// Image data has premultiplied alpha
+		/// </summary>
+		Premultiplied = 1 << 4,
+
+		/// <summary>
+		/// Image interpolation is Nearest instead Linear
+		/// </summary>
+		Nearest = 1 << 5,
 	};
 
 	internal enum CommandType

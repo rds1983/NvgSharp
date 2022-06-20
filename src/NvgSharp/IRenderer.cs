@@ -1,12 +1,22 @@
 ﻿using System;
 using FontStashSharp;
+using FontStashSharp.Interfaces;
+
+#if MONOGAME || FNA
 using Microsoft.Xna.Framework.Graphics;
+#elif STRIDE
+using Stride.Graphics;
+#endif
 
 namespace NvgSharp
 {
-	internal interface IRenderer
+	public interface IRenderer
 	{
+#if MONOGAME || FNA || STRIDE
 		GraphicsDevice GraphicsDevice { get; }
+#else
+		ITexture2DManager TextureManager { get; }
+#endif
 
 		void Begin();
 		void End();

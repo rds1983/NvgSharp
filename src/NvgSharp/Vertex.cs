@@ -1,16 +1,25 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Runtime.InteropServices;
+
+#if MONOGAME || FNA
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Runtime.InteropServices;
+#elif STRIDE
+using Stride.Core.Mathematics;
+#else
+using System.Numerics;
+#endif
 
 namespace NvgSharp
 {
 	[StructLayout(LayoutKind.Sequential, Pack = 1)]
-	internal struct Vertex : IVertexType
+	public struct Vertex
+#if MONOGAME || FNA || STRIDE
+		: IVertexType
+#endif
 	{
 		public Vector2 Position;
 		public Vector2 TextureCoordinate;
 
-		public static readonly VertexDeclaration VertexDeclaration;
 		public Vertex(float x, float y, float u, float v)
 		{
 			Position.X = (int)x;
@@ -18,6 +27,10 @@ namespace NvgSharp
 			TextureCoordinate.X = u;
 			TextureCoordinate.Y = v;
 		}
+
+#if MONOGAME || FNA || STRIDE
+
+		public static readonly VertexDeclaration VertexDeclaration;
 
 		VertexDeclaration IVertexType.VertexDeclaration
 		{
@@ -36,5 +49,6 @@ namespace NvgSharp
 			VertexDeclaration declaration = new VertexDeclaration(elements);
 			VertexDeclaration = declaration;
 		}
+#endif
 	}
 }
