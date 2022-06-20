@@ -10,6 +10,11 @@ namespace NvgSharp
 {
 	public unsafe class NvgContext : IFontStashRenderer2
 	{
+		/// <summary>
+		/// Length proportional to radius of a cubic bezier handle for 90deg arcs
+		/// </summary>
+		private const float NVG_KAPPA90 = 0.5522847493f;
+
 		public const int MaxTextRows = 10;
 
 		private readonly GraphicsDevice _device;
@@ -29,6 +34,7 @@ namespace NvgSharp
 		private int _strokeTriCount;
 		private float _tessTol;
 		private int _textTriCount;
+		private Texture2D _lastTextTexture = null;
 
 		public GraphicsDevice GraphicsDevice => _device;
 
@@ -398,8 +404,8 @@ namespace NvgSharp
 			var dy0 = y0 - y1;
 			var dx1 = x2 - x1;
 			var dy1 = y2 - y1;
-			NvgUtility.__normalize(&dx0, &dy0);
-			NvgUtility.__normalize(&dx1, &dy1);
+			NvgUtility.__normalize(ref dx0, ref dy0);
+			NvgUtility.__normalize(ref dx1, ref dy1);
 			var a = NvgUtility.acosf(dx0 * dx1 + dy0 * dy1);
 			var d = radius / NvgUtility.tanf(a / 2.0f);
 			if (d > 10000.0f)
@@ -512,10 +518,7 @@ namespace NvgSharp
 			AppendCommand(CommandType.Close);
 		}
 
-		public void RoundedRect(float x, float y, float w, float h, float r)
-		{
-			RoundedRectVarying(x, y, w, h, r, r, r, r);
-		}
+		public void RoundedRect(float x, float y, float w, float h, float r) => RoundedRectVarying(x, y, w, h, r, r, r, r);
 
 		public void RoundedRectVarying(float x, float y, float w, float h, float radTopLeft, float radTopRight,
 			float radBottomRight, float radBottomLeft)
@@ -538,13 +541,13 @@ namespace NvgSharp
 				var ryTL = NvgUtility.__minf(radTopLeft, halfh) * NvgUtility.__signf(h);
 				AppendCommand(CommandType.MoveTo, x, y + ryTL);
 				AppendCommand(CommandType.LineTo, x, y + h - ryBL);
-				AppendCommand(x, y + h - ryBL * (1 - 0.5522847493f), x + rxBL * (1 - 0.5522847493f), y + h, x + rxBL, y + h);
+				AppendCommand(x, y + h - ryBL * (1 - NVG_KAPPA90), x + rxBL * (1 - NVG_KAPPA90), y + h, x + rxBL, y + h);
 				AppendCommand(CommandType.LineTo, x + w - rxBR, y + h);
-				AppendCommand(x + w - rxBR * (1 - 0.5522847493f), y + h, x + w, y + h - ryBR * (1 - 0.5522847493f), x + w, y + h - ryBR);
+				AppendCommand(x + w - rxBR * (1 - NVG_KAPPA90), y + h, x + w, y + h - ryBR * (1 - NVG_KAPPA90), x + w, y + h - ryBR);
 				AppendCommand(CommandType.LineTo, x + w, y + ryTR);
-				AppendCommand(x + w, y + ryTR * (1 - 0.5522847493f), x + w - rxTR * (1 - 0.5522847493f), y, x + w - rxTR, y);
+				AppendCommand(x + w, y + ryTR * (1 - NVG_KAPPA90), x + w - rxTR * (1 - NVG_KAPPA90), y, x + w - rxTR, y);
 				AppendCommand(CommandType.LineTo, x + rxTL, y);
-				AppendCommand(x + rxTL * (1 - 0.5522847493f), y, x, y + ryTL * (1 - 0.5522847493f), x, y + ryTL);
+				AppendCommand(x + rxTL * (1 - NVG_KAPPA90), y, x, y + ryTL * (1 - NVG_KAPPA90), x, y + ryTL);
 				AppendCommand(CommandType.Close);
 			}
 		}
@@ -552,17 +555,14 @@ namespace NvgSharp
 		public void Ellipse(float cx, float cy, float rx, float ry)
 		{
 			AppendCommand(CommandType.MoveTo, cx - rx, cy);
-			AppendCommand(cx - rx, cy + ry * 0.5522847493f, cx - rx * 0.5522847493f, cy + ry, cx, cy + ry);
-			AppendCommand(cx + rx * 0.5522847493f, cy + ry, cx + rx, cy + ry * 0.5522847493f, cx + rx, cy);
-			AppendCommand(cx + rx, cy - ry * 0.5522847493f, cx + rx * 0.5522847493f, cy - ry, cx, cy - ry);
-			AppendCommand(cx - rx * 0.5522847493f, cy - ry, cx - rx, cy - ry * 0.5522847493f, cx - rx, cy);
+			AppendCommand(cx - rx, cy + ry * NVG_KAPPA90, cx - rx * NVG_KAPPA90, cy + ry, cx, cy + ry);
+			AppendCommand(cx + rx * NVG_KAPPA90, cy + ry, cx + rx, cy + ry * NVG_KAPPA90, cx + rx, cy);
+			AppendCommand(cx + rx, cy - ry * NVG_KAPPA90, cx + rx * NVG_KAPPA90, cy - ry, cx, cy - ry);
+			AppendCommand(cx - rx * NVG_KAPPA90, cy - ry, cx - rx, cy - ry * NVG_KAPPA90, cx - rx, cy);
 			AppendCommand(CommandType.Close);
 		}
 
-		public void Circle(float cx, float cy, float r)
-		{
-			Ellipse(cx, cy, r, r);
-		}
+		public void Circle(float cx, float cy, float r) => Ellipse(cx, cy, r, r);
 
 		/*		public void DebugDumpPathCache()
                 {
@@ -663,14 +663,12 @@ namespace NvgSharp
 			}
 		}
 
-		private readonly Buffer<Vertex> _tempVerts = new Buffer<Vertex>(1024);
-		private Texture2D _lastTexture = null;
 
 		void IFontStashRenderer2.DrawQuad(Texture2D texture,
 			ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight,
 			ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
 		{
-			if (_lastTexture != null && _lastTexture != texture)
+			if (_lastTextTexture != null && _lastTextTexture != texture)
 			{
 				FlushText();
 			}
@@ -690,36 +688,38 @@ namespace NvgSharp
 			state.Transform.TransformPoint(out px, out py, bottomLeft.Position.X, bottomLeft.Position.Y);
 			var newBottomLeft = new Vertex(px, py, bottomLeft.TextureCoordinate.X, bottomLeft.TextureCoordinate.Y);
 
-			_tempVerts.Add(newTopLeft);
-			_tempVerts.Add(newBottomRight);
-			_tempVerts.Add(newTopRight);
-			_tempVerts.Add(newTopLeft);
-			_tempVerts.Add(newBottomLeft);
-			_tempVerts.Add(newBottomRight);
+			var verts = _cache.Vertexes;
+			verts.Add(newTopLeft);
+			verts.Add(newBottomRight);
+			verts.Add(newTopRight);
+			verts.Add(newTopLeft);
+			verts.Add(newBottomLeft);
+			verts.Add(newBottomRight);
 
-			_lastTexture = texture;
+			_lastTextTexture = texture;
 		}
 
 		private void FlushText()
 		{
-			if (_lastTexture == null || _tempVerts.Count == 0)
+			var verts = _cache.Vertexes;
+			if (_lastTextTexture == null || verts.Count == 0)
 			{
 				return;
 			}
 
 			var state = GetState();
 			var paint = state.Fill;
-			paint.Image = _lastTexture;
+			paint.Image = _lastTextTexture;
 
 			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
 			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
 
-			_renderer.RenderTriangles(ref paint, ref state.Scissor, _tempVerts.ToArraySegment());
+			_renderer.RenderTriangles(ref paint, ref state.Scissor, verts.ToArraySegment());
 			_drawCallCount++;
-			_textTriCount += _tempVerts.Count / 3;
+			_textTriCount += verts.Count / 3;
 
-			_lastTexture = null;
-			_tempVerts.Clear();
+			_lastTextTexture = null;
+			verts.Clear();
 		}
 
 		private void Text(SpriteFontBase font, TextSource text, float x, float y,
@@ -731,7 +731,7 @@ namespace NvgSharp
 				return;
 			}
 
-			_tempVerts.Clear();
+			_cache.Vertexes.Clear();
 
 			if (horizontalAlignment != TextHorizontalAlignment.Left)
 			{
@@ -856,81 +856,65 @@ namespace NvgSharp
 		private void __clearPathCache()
 		{
 			_cache.Paths.Clear();
-			_cache.PointsNumber = 0;
 		}
 
-		private Path __lastPath()
+		private Path GetLastPath()
 		{
 			if (_cache.Paths.Count > 0)
 				return _cache.Paths[_cache.Paths.Count - 1];
 			return null;
 		}
 
-		private void __addPath()
+		private Path __addPath()
 		{
 			var newPath = new Path
 			{
-				First = _cache.PointsNumber,
 				Winding = Winding.CounterClockWise
 			};
 
 			_cache.Paths.Add(newPath);
-		}
 
-		private NvgPoint* __lastPoint()
-		{
-			if (_cache.PointsNumber > 0)
-				return &_cache.Points[_cache.PointsNumber - 1];
-			return null;
+			return newPath;
 		}
 
 		private void __addPoint(float x, float y, PointFlags flags)
 		{
-			var path = __lastPath();
-			NvgPoint* pt;
+			var path = GetLastPath();
 			if (path == null)
-				return;
-			if (path.Count > 0 && _cache.PointsNumber > 0)
 			{
-				pt = __lastPoint();
-				if (__ptEquals(pt->X, pt->Y, x, y, _distTol) != 0)
+				return;
+			}
+
+			NvgPoint pt;
+			if (path.Points.Count > 0)
+			{
+				pt = path.LastPoint;
+				if (__ptEquals(pt.X, pt.Y, x, y, _distTol) != 0)
 				{
-					pt->flags |= (byte)flags;
+					pt.flags |= (byte)flags;
 					return;
 				}
 			}
 
-			if (_cache.PointsNumber + 1 > _cache.PointsCount)
-			{
-				NvgPoint* points;
-				var cpoints = _cache.PointsNumber + 1 + _cache.PointsCount / 2;
-				points = (NvgPoint*)CRuntime.realloc(_cache.Points, (ulong)(sizeof(NvgPoint) * cpoints));
-				if (points == null)
-					return;
-				_cache.Points = points;
-				_cache.PointsCount = cpoints;
-			}
-
-			pt = &_cache.Points[_cache.PointsNumber];
-			pt->Reset();
-			pt->X = x;
-			pt->Y = y;
-			pt->flags = (byte)flags;
-			_cache.PointsNumber++;
-			path.Count++;
+			pt = new NvgPoint();
+			pt.Reset();
+			pt.X = x;
+			pt.Y = y;
+			pt.flags = (byte)flags;
+			path.Points.Add(pt);
 		}
 
 		private void __closePath()
 		{
-			var path = __lastPath();
+			var path = GetLastPath();
 			if (path == null)
 				return;
-			path.Closed = 1;
+			path.Closed = true;
 		}
 
 		private void __pathWinding(Winding winding)
 		{
-			var path = __lastPath();
+			var path = GetLastPath();
 			if (path == null)
 				return;
 			path.Winding = winding;
@@ -946,46 +930,30 @@ namespace NvgSharp
 		private void __tesselateBezier(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4,
 			int level, PointFlags type)
 		{
-			float x12 = 0;
-			float y12 = 0;
-			float x23 = 0;
-			float y23 = 0;
-			float x34 = 0;
-			float y34 = 0;
-			float x123 = 0;
-			float y123 = 0;
-			float x234 = 0;
-			float y234 = 0;
-			float x1234 = 0;
-			float y1234 = 0;
-			float dx = 0;
-			float dy = 0;
-			float d2 = 0;
-			float d3 = 0;
 			if (level > 10)
 				return;
-			x12 = (x1 + x2) * 0.5f;
-			y12 = (y1 + y2) * 0.5f;
-			x23 = (x2 + x3) * 0.5f;
-			y23 = (y2 + y3) * 0.5f;
-			x34 = (x3 + x4) * 0.5f;
-			y34 = (y3 + y4) * 0.5f;
-			x123 = (x12 + x23) * 0.5f;
-			y123 = (y12 + y23) * 0.5f;
-			dx = x4 - x1;
-			dy = y4 - y1;
-			d2 = NvgUtility.__absf((x2 - x4) * dy - (y2 - y4) * dx);
-			d3 = NvgUtility.__absf((x3 - x4) * dy - (y3 - y4) * dx);
+			var x12 = (x1 + x2) * 0.5f;
+			var y12 = (y1 + y2) * 0.5f;
+			var x23 = (x2 + x3) * 0.5f;
+			var y23 = (y2 + y3) * 0.5f;
+			var x34 = (x3 + x4) * 0.5f;
+			var y34 = (y3 + y4) * 0.5f;
+			var x123 = (x12 + x23) * 0.5f;
+			var y123 = (y12 + y23) * 0.5f;
+			var dx = x4 - x1;
+			var dy = y4 - y1;
+			var d2 = NvgUtility.__absf((x2 - x4) * dy - (y2 - y4) * dx);
+			var d3 = NvgUtility.__absf((x3 - x4) * dy - (y3 - y4) * dx);
 			if ((d2 + d3) * (d2 + d3) < _tessTol * (dx * dx + dy * dy))
 			{
 				__addPoint(x4, y4, type);
 				return;
 			}
 
-			x234 = (x23 + x34) * 0.5f;
-			y234 = (y23 + y34) * 0.5f;
-			x1234 = (x123 + x234) * 0.5f;
-			y1234 = (y123 + y234) * 0.5f;
+			var x234 = (x23 + x34) * 0.5f;
+			var y234 = (y23 + y34) * 0.5f;
+			var x1234 = (x123 + x234) * 0.5f;
+			var y1234 = (y123 + y234) * 0.5f;
 			__tesselateBezier(x1, y1, x12, y12, x123, y123, x1234, y1234, level + 1, 0);
 			__tesselateBezier(x1234, y1234, x234, y234, x34, y34, x4, y4, level + 1, type);
 		}
@@ -995,22 +963,23 @@ namespace NvgSharp
 			if (_cache.Paths.Count > 0)
 				return;
 
+			Path lastPath = null;
 			for(var i = 0; i < _commands.Count; ++i)
 			{
 				switch (_commands[i].Type)
 				{
 					case CommandType.MoveTo:
-						__addPath();
+						lastPath = __addPath();
 						__addPoint(_commands[i].P1, _commands[i].P2, PointFlags.Corner);
 						break;
 					case CommandType.LineTo:
 						__addPoint(_commands[i].P1, _commands[i].P2, PointFlags.Corner);
 						break;
 					case CommandType.BezierTo:
-						var last = __lastPoint();
-						if (last != null)
+						if (lastPath != null && lastPath.Points.Count > 0)
 						{
-							__tesselateBezier(last->X, last->Y,
+							var last = lastPath.LastPoint;
+							__tesselateBezier(last.X, last.Y,
 								_commands[i].P1, _commands[i].P2,
 								_commands[i].P3, _commands[i].P4,
 								_commands[i].P5, _commands[i].P6, 
@@ -1027,40 +996,42 @@ namespace NvgSharp
 				}
 			}
 
-			_cache.Bounds.Y = _cache.Bounds.Y = 1e6f;
+			_cache.Bounds.X = _cache.Bounds.Y = 1e6f;
 			_cache.Bounds.X2 = _cache.Bounds.Y2 = -1e6f;
 			for (var j = 0; j < _cache.Paths.Count; j++)
 			{
 				var path = _cache.Paths[j];
-				var pts = &_cache.Points[path.First];
-				var p0 = &pts[path.Count - 1];
-				var p1 = &pts[0];
-				if (__ptEquals(p0->X, p0->Y, p1->X, p1->Y, _distTol) != 0)
+
+				var p0Index = path.Count - 1;
+				var p1Index = 0;
+				if (__ptEquals(path.LastPoint.X, path.LastPoint.Y, path.FirstPoint.X, path.FirstPoint.Y, _distTol) != 0)
 				{
-					path.Count--;
-					p0 = &pts[path.Count - 1];
-					path.Closed = 1;
+					path.Points.RemoveAt(path.Points.Count - 1);
+					--p0Index;
+					path.Closed = true;
 				}
 
-				if (path.Count > 2)
+				if (path.Points.Count > 2)
 				{
-					var area = __polyArea(pts, path.Count);
+					var area = __polyArea(path.Points);
 					if (path.Winding == Winding.CounterClockWise && area < 0.0f)
-						__polyReverse(pts, path.Count);
+						__polyReverse(path.Points);
 					if (path.Winding == Winding.ClockWise && area > 0.0f)
-						__polyReverse(pts, path.Count);
+						__polyReverse(path.Points);
 				}
 
-				for (var i = 0; i < path.Count; i++)
+				for (var i = 0; i < path.Points.Count; i++)
 				{
-					p0->DeltaX = p1->X - p0->X;
-					p0->DeltaY = p1->Y - p0->Y;
-					p0->Length = NvgUtility.__normalize(&p0->DeltaX, &p0->DeltaY);
-					_cache.Bounds.X = NvgUtility.__minf(_cache.Bounds.X, p0->X);
-					_cache.Bounds.Y = NvgUtility.__minf(_cache.Bounds.Y, p0->Y);
-					_cache.Bounds.X2 = NvgUtility.__maxf(_cache.Bounds.X2, p0->X);
-					_cache.Bounds.Y2 = NvgUtility.__maxf(_cache.Bounds.Y2, p0->Y);
-					p0 = p1++;
+					var p0 = path[p0Index];
+					var p1 = path[p1Index];
+					p0.DeltaX = p1.X - p0.X;
+					p0.DeltaY = p1.Y - p0.Y;
+					p0.Length = NvgUtility.__normalize(ref p0.DeltaX, ref p0.DeltaY);
+					_cache.Bounds.X = NvgUtility.__minf(_cache.Bounds.X, p0.X);
+					_cache.Bounds.Y = NvgUtility.__minf(_cache.Bounds.Y, p0.Y);
+					_cache.Bounds.X2 = NvgUtility.__maxf(_cache.Bounds.X2, p0.X);
+					_cache.Bounds.Y2 = NvgUtility.__maxf(_cache.Bounds.Y2, p0.Y);
+					p0Index = p1Index++;
 				}
 			}
 		}
@@ -1075,60 +1046,55 @@ namespace NvgSharp
 			for (i = 0; i < _cache.Paths.Count; i++)
 			{
 				var path = _cache.Paths[i];
-				var pts = &_cache.Points[path.First];
-				var p0 = &pts[path.Count - 1];
-				var p1 = &pts[0];
+				var p0Index = path.Count - 1;
+				var p1Index = 0;
 				var nleft = 0;
 				path.BevelCount = 0;
-				for (j = 0; j < path.Count; j++)
+				for (j = 0; j < path.Points.Count; j++)
 				{
-					float dlx0 = 0;
-					float dly0 = 0;
-					float dlx1 = 0;
-					float dly1 = 0;
-					float dmr2 = 0;
-					float cross = 0;
-					float limit = 0;
-					dlx0 = p0->DeltaY;
-					dly0 = -p0->DeltaX;
-					dlx1 = p1->DeltaY;
-					dly1 = -p1->DeltaX;
-					p1->dmx = (dlx0 + dlx1) * 0.5f;
-					p1->dmy = (dly0 + dly1) * 0.5f;
-					dmr2 = p1->dmx * p1->dmx + p1->dmy * p1->dmy;
+					var p0 = path[p0Index];
+					var p1 = path[p1Index];
+
+					var dlx0 = p0.DeltaY;
+					var dly0 = -p0.DeltaX;
+					var dlx1 = p1.DeltaY;
+					var dly1 = -p1.DeltaX;
+					p1.dmx = (dlx0 + dlx1) * 0.5f;
+					p1.dmy = (dly0 + dly1) * 0.5f;
+					var dmr2 = p1.dmx * p1.dmx + p1.dmy * p1.dmy;
 					if (dmr2 > 0.000001f)
 					{
 						var scale = 1.0f / dmr2;
 						if (scale > 600.0f)
 							scale = 600.0f;
-						p1->dmx *= scale;
-						p1->dmy *= scale;
+						p1.dmx *= scale;
+						p1.dmy *= scale;
 					}
 
-					p1->flags = (byte)((p1->flags & (byte)PointFlags.Corner) != 0 ? PointFlags.Corner : 0);
-					cross = p1->DeltaX * p0->DeltaY - p0->DeltaX * p1->DeltaY;
+					p1.flags = (byte)((p1.flags & (byte)PointFlags.Corner) != 0 ? PointFlags.Corner : 0);
+					var cross = p1.DeltaX * p0.DeltaY - p0.DeltaX * p1.DeltaY;
 					if (cross > 0.0f)
 					{
 						nleft++;
-						p1->flags |= (byte)PointFlags.Left;
+						p1.flags |= (byte)PointFlags.Left;
 					}
 
-					limit = NvgUtility.__maxf(1.01f, NvgUtility.__minf(p0->Length, p1->Length) * iw);
+					var limit = NvgUtility.__maxf(1.01f, NvgUtility.__minf(p0.Length, p1.Length) * iw);
 					if (dmr2 * limit * limit < 1.0f)
-						p1->flags |= (byte)PointFlags.InnerBevel;
-					if ((p1->flags & (byte)PointFlags.Corner) != 0)
+						p1.flags |= (byte)PointFlags.InnerBevel;
+					if ((p1.flags & (byte)PointFlags.Corner) != 0)
 						if (dmr2 * miterLimit * miterLimit < 1.0f || lineJoin == NvgSharp.LineCap.Bevel || lineJoin == NvgSharp.LineCap.Round)
-							p1->flags |= (byte)PointFlags.Bevel;
-					if ((p1->flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
+							p1.flags |= (byte)PointFlags.Bevel;
+					if ((p1.flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
 						path.BevelCount++;
-					p0 = p1++;
+					p0Index = p1Index++;
 				}
 
-				path.Convex = nleft == path.Count ? 1 : 0;
+				path.Convex = nleft == path.Points.Count;
 			}
 		}
 
-		private int __expandStroke(float w, float fringe, LineCap lineCap, LineCap lineJoin, float miterLimit)
+		private void __expandStroke(float w, float fringe, LineCap lineCap, LineCap lineJoin, float miterLimit)
 		{
 			var cverts = 0;
 			var i = 0;
@@ -1149,12 +1115,12 @@ namespace NvgSharp
 			for (i = 0; i < _cache.Paths.Count; i++)
 			{
 				var path = _cache.Paths[i];
-				var loop = path.Closed == 0 ? 0 : 1;
+				var loop = path.Closed;
 				if (lineJoin == NvgSharp.LineCap.Round)
-					cverts += (path.Count + path.BevelCount * (ncap + 2) + 1) * 2;
+					cverts += (path.Points.Count + path.BevelCount * (ncap + 2) + 1) * 2;
 				else
-					cverts += (path.Count + path.BevelCount * 5 + 1) * 2;
-				if (loop == 0)
+					cverts += (path.Points.Count + path.BevelCount * 5 + 1) * 2;
+				if (!loop)
 				{
 					if (lineCap == NvgSharp.LineCap.Round)
 						cverts += (ncap * 2 + 2) * 2;
@@ -1167,39 +1133,39 @@ namespace NvgSharp
 			for (i = 0; i < _cache.Paths.Count; i++)
 			{
 				var path = _cache.Paths[i];
-				var pts = &_cache.Points[path.First];
-				NvgPoint* p0;
-				NvgPoint* p1;
 				var s = 0;
 				var e = 0;
-				var loop = 0;
+				var loop = false;
 				float dx = 0;
 				float dy = 0;
 				path.Fill = null;
-				loop = path.Closed == 0 ? 0 : 1;
+				loop = path.Closed;
 				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
 				{
 					var dst = dst2;
-					if (loop != 0)
+					int p0Index, p1Index;
+					if (loop)
 					{
-						p0 = &pts[path.Count - 1];
-						p1 = &pts[0];
+						p0Index = path.Count - 1;
+						p1Index = 0;
 						s = 0;
-						e = path.Count;
+						e = path.Points.Count;
 					}
 					else
 					{
-						p0 = &pts[0];
-						p1 = &pts[1];
+						p0Index = 0;
+						p1Index = 1;
 						s = 1;
-						e = path.Count - 1;
+						e = path.Points.Count - 1;
 					}
 
-					if (loop == 0)
+					var p0 = path[p0Index];
+					var p1 = path[p1Index];
+					if (!loop)
 					{
-						dx = p1->X - p0->X;
-						dy = p1->Y - p0->Y;
-						NvgUtility.__normalize(&dx, &dy);
+						dx = p1.X - p0.X;
+						dy = p1.Y - p0.Y;
+						NvgUtility.__normalize(ref dx, ref dy);
 						if (lineCap == NvgSharp.LineCap.Butt)
 							dst = __buttCapStart(dst, p0, dx, dy, w, -aa * 0.5f, aa, u0, u1);
 						else if (lineCap == NvgSharp.LineCap.Butt || lineCap == NvgSharp.LineCap.Square)
@@ -1210,7 +1176,9 @@ namespace NvgSharp
 
 					for (j = s; j < e; ++j)
 					{
-						if ((p1->flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
+						p0 = path[p0Index];
+						p1 = path[p1Index];
+						if ((p1.flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
 						{
 							if (lineJoin == NvgSharp.LineCap.Round)
 								dst = __roundJoin(dst, p0, p1, w, w, u0, u1, ncap, aa);
@@ -1219,16 +1187,16 @@ namespace NvgSharp
 						}
 						else
 						{
-							__vset(dst, p1->X + p1->dmx * w, p1->Y + p1->dmy * w, u0, 1);
+							__vset(dst, p1.X + p1.dmx * w, p1.Y + p1.dmy * w, u0, 1);
 							dst++;
-							__vset(dst, p1->X - p1->dmx * w, p1->Y - p1->dmy * w, u1, 1);
+							__vset(dst, p1.X - p1.dmx * w, p1.Y - p1.dmy * w, u1, 1);
 							dst++;
 						}
 
-						p0 = p1++;
+						p0Index = p1Index++;
 					}
 
-					if (loop != 0)
+					if (loop)
 					{
 						__vset(dst, verts.Array[verts.Offset].Position.X, verts.Array[verts.Offset].Position.Y, u0, 1);
 						dst++;
@@ -1238,9 +1206,12 @@ namespace NvgSharp
 					}
 					else
 					{
-						dx = p1->X - p0->X;
-						dy = p1->Y - p0->Y;
-						NvgUtility.__normalize(&dx, &dy);
+						p0 = path[p0Index];
+						p1 = path[p1Index];
+
+						dx = p1.X - p0.X;
+						dy = p1.Y - p0.Y;
+						NvgUtility.__normalize(ref dx, ref dy);
 						if (lineCap == NvgSharp.LineCap.Butt)
 							dst = __buttCapEnd(dst, p1, dx, dy, w, -aa * 0.5f, aa, u0, u1);
 						else if (lineCap == NvgSharp.LineCap.Butt || lineCap == NvgSharp.LineCap.Square)
@@ -1255,36 +1226,30 @@ namespace NvgSharp
 					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
 				}
 			}
-
-			return 1;
 		}
 
-		private int __expandFill(float w, LineCap lineJoin, float miterLimit)
+		private void __expandFill(float w, LineCap lineJoin, float miterLimit)
 		{
 			var cverts = 0;
-			var convex = 0;
 			var i = 0;
 			var j = 0;
 			var aa = _fringeWidth;
-			var fringe = w > 0.0f ? 1 : 0;
+			var fringe = w > 0.0f;
 			__calculateJoins(w, lineJoin, miterLimit);
 			cverts = 0;
 			for (i = 0; i < _cache.Paths.Count; i++)
 			{
 				var path = _cache.Paths[i];
-				cverts += path.Count + path.BevelCount + 1;
-				if (fringe != 0)
-					cverts += (path.Count + path.BevelCount * 5 + 1) * 2;
+				cverts += path.Points.Count + path.BevelCount + 1;
+				if (fringe)
+					cverts += (path.Points.Count + path.BevelCount * 5 + 1) * 2;
 			}
 
 			var verts = __allocTempVerts(cverts);
-			convex = _cache.Paths.Count == 1 && _cache.Paths[0].Convex != 0 ? 1 : 0;
+			var convex = _cache.Paths.Count == 1 && _cache.Paths[0].Convex;
 			for (i = 0; i < _cache.Paths.Count; i++)
 			{
 				var path = _cache.Paths[i];
-				var pts = &_cache.Points[path.First];
-				NvgPoint* p0;
-				NvgPoint* p1;
 				float rw = 0;
 				float lw = 0;
 				float woff = 0;
@@ -1294,31 +1259,34 @@ namespace NvgSharp
 				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
 				{
 					var dst = dst2;
-					if (fringe != 0)
+					if (fringe)
 					{
-						p0 = &pts[path.Count - 1];
-						p1 = &pts[0];
-						for (j = 0; j < path.Count; ++j)
+						var p0Index = path.Count - 1;
+						var p1Index = 0;
+						for (j = 0; j < path.Points.Count; ++j)
 						{
-							if ((p1->flags & (byte)PointFlags.Bevel) != 0)
+							var p0 = path[p0Index];
+							var p1 = path[p1Index];
+
+							if ((p1.flags & (byte)PointFlags.Bevel) != 0)
 							{
-								var dlx0 = p0->DeltaY;
-								var dly0 = -p0->DeltaX;
-								var dlx1 = p1->DeltaY;
-								var dly1 = -p1->DeltaX;
-								if ((p1->flags & (byte)PointFlags.Left) != 0)
+								var dlx0 = p0.DeltaY;
+								var dly0 = -p0.DeltaX;
+								var dlx1 = p1.DeltaY;
+								var dly1 = -p1.DeltaX;
+								if ((p1.flags & (byte)PointFlags.Left) != 0)
 								{
-									var lx = p1->X + p1->dmx * woff;
-									var ly = p1->Y + p1->dmy * woff;
+									var lx = p1.X + p1.dmx * woff;
+									var ly = p1.Y + p1.dmy * woff;
 									__vset(dst, lx, ly, 0.5f, 1);
 									dst++;
 								}
 								else
 								{
-									var lx0 = p1->X + dlx0 * woff;
-									var ly0 = p1->Y + dly0 * woff;
-									var lx1 = p1->X + dlx1 * woff;
-									var ly1 = p1->Y + dly1 * woff;
+									var lx0 = p1.X + dlx0 * woff;
+									var ly0 = p1.Y + dly0 * woff;
+									var lx1 = p1.X + dlx1 * woff;
+									var ly1 = p1.Y + dly1 * woff;
 									__vset(dst, lx0, ly0, 0.5f, 1);
 									dst++;
 									__vset(dst, lx1, ly1, 0.5f, 1);
@@ -1327,18 +1295,19 @@ namespace NvgSharp
 							}
 							else
 							{
-								__vset(dst, p1->X + p1->dmx * woff, p1->Y + p1->dmy * woff, 0.5f, 1);
+								__vset(dst, p1.X + p1.dmx * woff, p1.Y + p1.dmy * woff, 0.5f, 1);
 								dst++;
 							}
 
-							p0 = p1++;
+							p0Index = p1Index++;
 						}
 					}
 					else
 					{
 						for (j = 0; j < path.Count; ++j)
 						{
-							__vset(dst, pts[j].X, pts[j].Y, 0.5f, 1);
+							var p = path[j];
+							__vset(dst, p.X, p.Y, 0.5f, 1);
 							dst++;
 						}
 					}
@@ -1349,7 +1318,7 @@ namespace NvgSharp
 					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
 				}
 
-				if (fringe != 0)
+				if (fringe)
 				{
 					lw = w + woff;
 					rw = w - woff;
@@ -1358,29 +1327,32 @@ namespace NvgSharp
 					fixed (Vertex* dst2 = &verts.Array[verts.Offset])
 					{
 						var dst = dst2;
-						if (convex != 0)
+						if (convex)
 						{
 							lw = woff;
 							lu = 0.5f;
 						}
 
-						p0 = &pts[path.Count - 1];
-						p1 = &pts[0];
-						for (j = 0; j < path.Count; ++j)
+						var p0Index = path.Count - 1;
+						var p1Index = 0;
+						for (j = 0; j < path.Points.Count; ++j)
 						{
-							if ((p1->flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
+							var p0 = path[p0Index];
+							var p1 = path[p1Index];
+
+							if ((p1.flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
 							{
 								dst = __bevelJoin(dst, p0, p1, lw, rw, lu, ru, _fringeWidth);
 							}
 							else
 							{
-								__vset(dst, p1->X + p1->dmx * lw, p1->Y + p1->dmy * lw, lu, 1);
+								__vset(dst, p1.X + p1.dmx * lw, p1.Y + p1.dmy * lw, lu, 1);
 								dst++;
-								__vset(dst, p1->X - p1->dmx * rw, p1->Y - p1->dmy * rw, ru, 1);
+								__vset(dst, p1.X - p1.dmx * rw, p1.Y - p1.dmy * rw, ru, 1);
 								dst++;
 							}
 
-							p0 = p1++;
+							p0Index = p1Index++;
 						}
 
 						__vset(dst, verts.Array[verts.Offset].Position.X,
@@ -1403,8 +1375,6 @@ namespace NvgSharp
 					path.Stroke = null;
 				}
 			}
-
-			return 1;
 		}
 
 		private static float __triarea2(float ax, float ay, float bx, float by, float cx, float cy)
@@ -1416,29 +1386,28 @@ namespace NvgSharp
 			return acx * aby - abx * acy;
 		}
 
-		private static float __polyArea(NvgPoint* pts, int npts)
+		private static float __polyArea(List<NvgPoint> pts)
 		{
 			var i = 0;
 			var area = (float)0;
-			for (i = 2; i < npts; i++)
+			for (i = 2; i < pts.Count; i++)
 			{
-				var a = &pts[0];
-				var b = &pts[i - 1];
-				var c = &pts[i];
-				area += __triarea2(a->X, a->Y, b->X, b->Y, c->X, c->Y);
+				var a = pts[0];
+				var b = pts[i - 1];
+				var c = pts[i];
+				area += __triarea2(a.X, a.Y, b.X, b.Y, c.X, c.Y);
 			}
 
 			return area * 0.5f;
 		}
 
-		internal static void __polyReverse(NvgPoint* pts, int npts)
+		internal static void __polyReverse(List<NvgPoint> pts)
 		{
-			var tmp = new NvgPoint();
 			var i = 0;
-			var j = npts - 1;
+			var j = pts.Count - 1;
 			while (i < j)
 			{
-				tmp = pts[i];
+				var tmp = pts[i];
 				pts[i] = pts[j];
 				pts[j] = tmp;
 				i++;
@@ -1485,35 +1454,35 @@ namespace NvgSharp
 			return NvgUtility.__maxi(2, (int)NvgUtility.ceilf(arc / da));
 		}
 
-		private static void __chooseBevel(int bevel, NvgPoint* p0, NvgPoint* p1, float w, float* x0, float* y0,
+		private static void __chooseBevel(int bevel, NvgPoint p0, NvgPoint p1, float w, float* x0, float* y0,
 			float* x1, float* y1)
 		{
 			if (bevel != 0)
 			{
-				*x0 = p1->X + p0->DeltaY * w;
-				*y0 = p1->Y - p0->DeltaX * w;
-				*x1 = p1->X + p1->DeltaY * w;
-				*y1 = p1->Y - p1->DeltaX * w;
+				*x0 = p1.X + p0.DeltaY * w;
+				*y0 = p1.Y - p0.DeltaX * w;
+				*x1 = p1.X + p1.DeltaY * w;
+				*y1 = p1.Y - p1.DeltaX * w;
 			}
 			else
 			{
-				*x0 = p1->X + p1->dmx * w;
-				*y0 = p1->Y + p1->dmy * w;
-				*x1 = p1->X + p1->dmx * w;
-				*y1 = p1->Y + p1->dmy * w;
+				*x0 = p1.X + p1.dmx * w;
+				*y0 = p1.Y + p1.dmy * w;
+				*x1 = p1.X + p1.dmx * w;
+				*y1 = p1.Y + p1.dmy * w;
 			}
 		}
 
-		private static Vertex* __roundJoin(Vertex* dst, NvgPoint* p0, NvgPoint* p1, float lw, float rw, float lu,
+		private static Vertex* __roundJoin(Vertex* dst, NvgPoint p0, NvgPoint p1, float lw, float rw, float lu,
 			float ru, int ncap, float fringe)
 		{
 			var i = 0;
 			var n = 0;
-			var dlx0 = p0->DeltaY;
-			var dly0 = -p0->DeltaX;
-			var dlx1 = p1->DeltaY;
-			var dly1 = -p1->DeltaX;
-			if ((p1->flags & (byte)PointFlags.Left) != 0)
+			var dlx0 = p0.DeltaY;
+			var dly0 = -p0.DeltaX;
+			var dlx1 = p1.DeltaY;
+			var dly1 = -p1.DeltaX;
+			if ((p1.flags & (byte)PointFlags.Left) != 0)
 			{
 				float lx0 = 0;
 				float ly0 = 0;
@@ -1521,23 +1490,23 @@ namespace NvgSharp
 				float ly1 = 0;
 				float a0 = 0;
 				float a1 = 0;
-				__chooseBevel(p1->flags & (byte)PointFlags.InnerBevel, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
+				__chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
 				a0 = NvgUtility.atan2f(-dly0, -dlx0);
 				a1 = NvgUtility.atan2f(-dly1, -dlx1);
 				if (a1 > a0)
 					a1 -= (float)(3.14159274 * 2);
 				__vset(dst, lx0, ly0, lu, 1);
 				dst++;
-				__vset(dst, p1->X - dlx0 * rw, p1->Y - dly0 * rw, ru, 1);
+				__vset(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
 				dst++;
 				n = NvgUtility.__clampi((int)NvgUtility.ceilf((float)((a0 - a1) / 3.14159274 * ncap)), 2, ncap);
 				for (i = 0; i < n; i++)
 				{
 					var u = i / (float)(n - 1);
 					var a = a0 + u * (a1 - a0);
-					var rx = p1->X + NvgUtility.cosf(a) * rw;
-					var ry = p1->Y + NvgUtility.sinf(a) * rw;
-					__vset(dst, p1->X, p1->Y, 0.5f, 1);
+					var rx = p1.X + NvgUtility.cosf(a) * rw;
+					var ry = p1.Y + NvgUtility.sinf(a) * rw;
+					__vset(dst, p1.X, p1.Y, 0.5f, 1);
 					dst++;
 					__vset(dst, rx, ry, ru, 1);
 					dst++;
@@ -1545,7 +1514,7 @@ namespace NvgSharp
 
 				__vset(dst, lx1, ly1, lu, 1);
 				dst++;
-				__vset(dst, p1->X - dlx1 * rw, p1->Y - dly1 * rw, ru, 1);
+				__vset(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
 				dst++;
 			}
 			else
@@ -1556,12 +1525,12 @@ namespace NvgSharp
 				float ry1 = 0;
 				float a0 = 0;
 				float a1 = 0;
-				__chooseBevel(p1->flags & (byte)PointFlags.InnerBevel, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
+				__chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
 				a0 = NvgUtility.atan2f(dly0, dlx0);
 				a1 = NvgUtility.atan2f(dly1, dlx1);
 				if (a1 < a0)
 					a1 += (float)(3.14159274 * 2);
-				__vset(dst, p1->X + dlx0 * rw, p1->Y + dly0 * rw, lu, 1);
+				__vset(dst, p1.X + dlx0 * rw, p1.Y + dly0 * rw, lu, 1);
 				dst++;
 				__vset(dst, rx0, ry0, ru, 1);
 				dst++;
@@ -1570,15 +1539,15 @@ namespace NvgSharp
 				{
 					var u = i / (float)(n - 1);
 					var a = a0 + u * (a1 - a0);
-					var lx = p1->X + NvgUtility.cosf(a) * lw;
-					var ly = p1->Y + NvgUtility.sinf(a) * lw;
+					var lx = p1.X + NvgUtility.cosf(a) * lw;
+					var ly = p1.Y + NvgUtility.sinf(a) * lw;
 					__vset(dst, lx, ly, lu, 1);
 					dst++;
-					__vset(dst, p1->X, p1->Y, 0.5f, 1);
+					__vset(dst, p1.X, p1.Y, 0.5f, 1);
 					dst++;
 				}
 
-				__vset(dst, p1->X + dlx1 * rw, p1->Y + dly1 * rw, lu, 1);
+				__vset(dst, p1.X + dlx1 * rw, p1.Y + dly1 * rw, lu, 1);
 				dst++;
 				__vset(dst, rx1, ry1, ru, 1);
 				dst++;
@@ -1587,7 +1556,7 @@ namespace NvgSharp
 			return dst;
 		}
 
-		private static Vertex* __bevelJoin(Vertex* dst, NvgPoint* p0, NvgPoint* p1, float lw, float rw, float lu,
+		private static Vertex* __bevelJoin(Vertex* dst, NvgPoint p0, NvgPoint p1, float lw, float rw, float lu,
 			float ru, float fringe)
 		{
 			float rx0 = 0;
@@ -1598,88 +1567,88 @@ namespace NvgSharp
 			float ly0 = 0;
 			float lx1 = 0;
 			float ly1 = 0;
-			var dlx0 = p0->DeltaY;
-			var dly0 = -p0->DeltaX;
-			var dlx1 = p1->DeltaY;
-			var dly1 = -p1->DeltaX;
-			if ((p1->flags & (byte)PointFlags.Left) != 0)
+			var dlx0 = p0.DeltaY;
+			var dly0 = -p0.DeltaX;
+			var dlx1 = p1.DeltaY;
+			var dly1 = -p1.DeltaX;
+			if ((p1.flags & (byte)PointFlags.Left) != 0)
 			{
-				__chooseBevel(p1->flags & (byte)PointFlags.InnerBevel, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
+				__chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
 				__vset(dst, lx0, ly0, lu, 1);
 				dst++;
-				__vset(dst, p1->X - dlx0 * rw, p1->Y - dly0 * rw, ru, 1);
+				__vset(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
 				dst++;
-				if ((p1->flags & (byte)PointFlags.Bevel) != 0)
+				if ((p1.flags & (byte)PointFlags.Bevel) != 0)
 				{
 					__vset(dst, lx0, ly0, lu, 1);
 					dst++;
-					__vset(dst, p1->X - dlx0 * rw, p1->Y - dly0 * rw, ru, 1);
+					__vset(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
 					dst++;
 					__vset(dst, lx1, ly1, lu, 1);
 					dst++;
-					__vset(dst, p1->X - dlx1 * rw, p1->Y - dly1 * rw, ru, 1);
+					__vset(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
 					dst++;
 				}
 				else
 				{
-					rx0 = p1->X - p1->dmx * rw;
-					ry0 = p1->Y - p1->dmy * rw;
-					__vset(dst, p1->X, p1->Y, 0.5f, 1);
+					rx0 = p1.X - p1.dmx * rw;
+					ry0 = p1.Y - p1.dmy * rw;
+					__vset(dst, p1.X, p1.Y, 0.5f, 1);
 					dst++;
-					__vset(dst, p1->X - dlx0 * rw, p1->Y - dly0 * rw, ru, 1);
-					dst++;
-					__vset(dst, rx0, ry0, ru, 1);
+					__vset(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
 					dst++;
 					__vset(dst, rx0, ry0, ru, 1);
 					dst++;
-					__vset(dst, p1->X, p1->Y, 0.5f, 1);
+					__vset(dst, rx0, ry0, ru, 1);
 					dst++;
-					__vset(dst, p1->X - dlx1 * rw, p1->Y - dly1 * rw, ru, 1);
+					__vset(dst, p1.X, p1.Y, 0.5f, 1);
+					dst++;
+					__vset(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
 					dst++;
 				}
 
 				__vset(dst, lx1, ly1, lu, 1);
 				dst++;
-				__vset(dst, p1->X - dlx1 * rw, p1->Y - dly1 * rw, ru, 1);
+				__vset(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
 				dst++;
 			}
 			else
 			{
-				__chooseBevel(p1->flags & (byte)PointFlags.InnerBevel, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
-				__vset(dst, p1->X + dlx0 * lw, p1->Y + dly0 * lw, lu, 1);
+				__chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
+				__vset(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
 				dst++;
 				__vset(dst, rx0, ry0, ru, 1);
 				dst++;
-				if ((p1->flags & (byte)PointFlags.Bevel) != 0)
+				if ((p1.flags & (byte)PointFlags.Bevel) != 0)
 				{
-					__vset(dst, p1->X + dlx0 * lw, p1->Y + dly0 * lw, lu, 1);
+					__vset(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
 					dst++;
 					__vset(dst, rx0, ry0, ru, 1);
 					dst++;
-					__vset(dst, p1->X + dlx1 * lw, p1->Y + dly1 * lw, lu, 1);
+					__vset(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
 					dst++;
 					__vset(dst, rx1, ry1, ru, 1);
 					dst++;
 				}
 				else
 				{
-					lx0 = p1->X + p1->dmx * lw;
-					ly0 = p1->Y + p1->dmy * lw;
-					__vset(dst, p1->X + dlx0 * lw, p1->Y + dly0 * lw, lu, 1);
+					lx0 = p1.X + p1.dmx * lw;
+					ly0 = p1.Y + p1.dmy * lw;
+					__vset(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
 					dst++;
-					__vset(dst, p1->X, p1->Y, 0.5f, 1);
-					dst++;
-					__vset(dst, lx0, ly0, lu, 1);
+					__vset(dst, p1.X, p1.Y, 0.5f, 1);
 					dst++;
 					__vset(dst, lx0, ly0, lu, 1);
 					dst++;
-					__vset(dst, p1->X + dlx1 * lw, p1->Y + dly1 * lw, lu, 1);
+					__vset(dst, lx0, ly0, lu, 1);
 					dst++;
-					__vset(dst, p1->X, p1->Y, 0.5f, 1);
+					__vset(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
+					dst++;
+					__vset(dst, p1.X, p1.Y, 0.5f, 1);
 					dst++;
 				}
 
-				__vset(dst, p1->X + dlx1 * lw, p1->Y + dly1 * lw, lu, 1);
+				__vset(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
 				dst++;
 				__vset(dst, rx1, ry1, ru, 1);
 				dst++;
@@ -1688,11 +1657,11 @@ namespace NvgSharp
 			return dst;
 		}
 
-		private static Vertex* __buttCapStart(Vertex* dst, NvgPoint* p, float dx, float dy, float w, float d, float aa,
+		private static Vertex* __buttCapStart(Vertex* dst, NvgPoint p, float dx, float dy, float w, float d, float aa,
 			float u0, float u1)
 		{
-			var px = p->X - dx * d;
-			var py = p->Y - dy * d;
+			var px = p.X - dx * d;
+			var py = p.Y - dy * d;
 			var dlx = dy;
 			var dly = -dx;
 			__vset(dst, px + dlx * w - dx * aa, py + dly * w - dy * aa, u0, 0);
@@ -1706,11 +1675,11 @@ namespace NvgSharp
 			return dst;
 		}
 
-		private static Vertex* __buttCapEnd(Vertex* dst, NvgPoint* p, float dx, float dy, float w, float d, float aa,
+		private static Vertex* __buttCapEnd(Vertex* dst, NvgPoint p, float dx, float dy, float w, float d, float aa,
 			float u0, float u1)
 		{
-			var px = p->X + dx * d;
-			var py = p->Y + dy * d;
+			var px = p.X + dx * d;
+			var py = p.Y + dy * d;
 			var dlx = dy;
 			var dly = -dx;
 			__vset(dst, px + dlx * w, py + dly * w, u0, 1);
@@ -1724,15 +1693,14 @@ namespace NvgSharp
 			return dst;
 		}
 
-		private static Vertex* __roundCapStart(Vertex* dst, NvgPoint* p, float dx, float dy, float w, int ncap,
+		private static Vertex* __roundCapStart(Vertex* dst, NvgPoint p, float dx, float dy, float w, int ncap,
 			float aa, float u0, float u1)
 		{
-			var i = 0;
-			var px = p->X;
-			var py = p->Y;
+			var px = p.X;
+			var py = p.Y;
 			var dlx = dy;
 			var dly = -dx;
-			for (i = 0; i < ncap; i++)
+			for (var i = 0; i < ncap; i++)
 			{
 				var a = (float)(i / (float)(ncap - 1) * 3.14159274);
 				var ax = NvgUtility.cosf(a) * w;
@@ -1750,12 +1718,12 @@ namespace NvgSharp
 			return dst;
 		}
 
-		private static Vertex* __roundCapEnd(Vertex* dst, NvgPoint* p, float dx, float dy, float w, int ncap, float aa,
+		private static Vertex* __roundCapEnd(Vertex* dst, NvgPoint p, float dx, float dy, float w, int ncap, float aa,
 			float u0, float u1)
 		{
 			var i = 0;
-			var px = p->X;
-			var py = p->Y;
+			var px = p.X;
+			var py = p.Y;
 			var dlx = dy;
 			var dly = -dx;
 			__vset(dst, px + dlx * w, py + dly * w, u0, 1);

@@ -7,32 +7,22 @@ namespace NvgSharp
 		private T[] _array;
 		private int _count = 0;
 
-		public T[] Array
-		{
-			get { return _array; }
-		}
+		public T[] Array => _array;
 
-		public int Count
-		{
-			get { return _count; }
-			set { _count = value; }
-		}
+		public int Count => _count;
 
-		public int Capacity
-		{
-			get { return _array.Length; }
-		}
+		public int Capacity => _array.Length;
 
 		public T this[int index]
 		{
-			get { return _array[index]; }
-			set { _array[index] = value; }
+			get => _array[index];
+			set => _array[index] = value;
 		}
 
 		public T this[ulong index]
 		{
-			get { return _array[index]; }
-			set { _array[index] = value; }
+			get => _array[index];
+			set => _array[index] = value;
 		}
 
 		public Buffer(int capacity)

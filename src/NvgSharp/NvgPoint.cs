@@ -2,8 +2,7 @@
 
 namespace NvgSharp
 {
-	[StructLayout(LayoutKind.Sequential)]
-	internal struct NvgPoint
+	internal class NvgPoint
 	{
 		public float X;
 		public float Y;

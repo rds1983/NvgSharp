@@ -108,7 +108,7 @@ namespace NvgSharp
 		public void RenderFill(ref Paint paint, ref Scissor scissor, float fringe, Bounds bounds,
 			ArraySegment<Path> paths)
 		{
-			var isConvex = paths.Count == 1 && paths.Array[paths.Offset].Convex == 1;
+			var isConvex = paths.Count == 1 && paths.Array[paths.Offset].Convex;
 
 			RenderingType renderingType;
 			if (isConvex)
@@ -167,7 +167,9 @@ namespace NvgSharp
 					var stroke = path.Stroke.Value;
 
 					for (var j = 0; j < stroke.Count; ++j)
+					{
 						_vertexes.Add(stroke.Array[stroke.Offset + j]);
+					}
 
 					RenderTriangles(ref paint, ref scissor,
 						strokeWidth, fringe, -1.0f,
