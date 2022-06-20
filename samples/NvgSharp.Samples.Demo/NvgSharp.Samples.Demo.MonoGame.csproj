@@ -1,12 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputPath>bin\FNA\$(Configuration)</OutputPath>
-    <DefineConstants>$(DefineConstants);FNA</DefineConstants>
+    <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\XNA\NvgSharp.FNA.csproj" />
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\XNA\NvgSharp.MonoGame.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Assets\**\*.*">

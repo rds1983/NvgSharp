@@ -173,17 +173,15 @@ namespace NvgSharp.Samples.Demo
 
 		public void drawEditBoxNum(NvgContext vg, string text, string units, float x, float y, float w, float h)
 		{
-			float uw;
-
 			drawEditBoxBase(vg, x, y, w, h);
 
-			var bounds = vg.TextBounds(fontSans18, units, 0, 0);
+			var sz = fontSans18.MeasureString(units);
 
 			vg.FillColor(new Color(255, 255, 255, 64));
 			vg.Text(fontSans18, units, x + w - h * 0.3f, y + h * 0.5f, TextHorizontalAlignment.Right, TextVerticalAlignment.Center);
 
 			vg.FillColor(new Color(255, 255, 255, 128));
-			vg.Text(fontSans20, text, x + w - bounds.X2 - h * 0.5f, y + h * 0.5f, TextHorizontalAlignment.Right, TextVerticalAlignment.Center);
+			vg.Text(fontSans20, text, x + w - sz.X - h * 0.5f, y + h * 0.5f, TextHorizontalAlignment.Right, TextVerticalAlignment.Center);
 		}
 
 		public void drawCheckBox(NvgContext vg, string text, float x, float y, float w, float h)
@@ -226,13 +224,13 @@ namespace NvgSharp.Samples.Demo
 			vg.StrokeColor(new Color(0, 0, 0, 48));
 			vg.Stroke();
 
-			var bounds = vg.TextBounds(fontBold20, text, 0, 0);
-			tw = bounds.X2;
+			var sz = fontBold20.MeasureString(text);
+			tw = sz.X;
 			if (!string.IsNullOrEmpty(preicon))
 			{
 				var fontIcons = fontSystemIcons.GetFont((int)(h * 1.3f));
-				var bounds2 = vg.TextBounds(fontIcons, preicon, 0, 0);
-				iw = bounds2.X2;
+				sz = fontIcons.MeasureString(preicon);
+				iw = sz.X;
 				iw += h * 0.15f;
 
 				vg.FillColor(new Color(255, 255, 255, 96));

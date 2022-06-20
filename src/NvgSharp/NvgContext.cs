@@ -787,27 +787,6 @@ namespace NvgSharp
 			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
 			Text(font, new TextSource(text), x, y, horizontalAlignment, verticalAlignment, layerDepth, characterSpacing, lineSpacing);
 
-		private Bounds TextBounds(SpriteFontBase font, TextSource text, float x, float y, float characterSpacing, float lineSpacing)
-		{
-			Bounds result;
-			if (text.StringText != null)
-			{
-				result = font.TextBounds(text.StringText, new Vector2(x, y), characterSpacing: characterSpacing, lineSpacing: lineSpacing);
-			}
-			else
-			{
-				result = font.TextBounds(text.StringBuilderText, new Vector2(x, y), characterSpacing: characterSpacing, lineSpacing: lineSpacing);
-			}
-
-			return result;
-		}
-
-		public Bounds TextBounds(SpriteFontBase font, string text, float x, float y, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
-			TextBounds(font, new TextSource(text), x, y, characterSpacing, lineSpacing);
-
-		public Bounds TextBounds(SpriteFontBase font, StringBuilder text, float x, float y, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
-			TextBounds(font, new TextSource(text), x, y, characterSpacing, lineSpacing);
-
 		private void SetDevicePixelRatio(float ratio)
 		{
 			_tessTol = 0.25f / ratio;

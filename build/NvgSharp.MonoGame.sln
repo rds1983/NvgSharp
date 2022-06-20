@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{ADFCD11E-96DF-4C72-A428-D96BA161223E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvgSharp.MonoGame", "..\src\XNA\NvgSharp.MonoGame.csproj", "{6AFF5FD8-43AE-4144-918B-6D37C570BFA4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvgSharp.Samples.Demo.MonoGame", "..\samples\NvgSharp.Samples.Demo\NvgSharp.Samples.Demo.MonoGame.csproj", "{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6AFF5FD8-43AE-4144-918B-6D37C570BFA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AFF5FD8-43AE-4144-918B-6D37C570BFA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AFF5FD8-43AE-4144-918B-6D37C570BFA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AFF5FD8-43AE-4144-918B-6D37C570BFA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428} = {ADFCD11E-96DF-4C72-A428-D96BA161223E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A9C9D369-EE58-4E9D-B9FE-63023B644741}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Myra.UIEditor\Myra.UIEditor.csproj
+	EndGlobalSection
+EndGlobal
