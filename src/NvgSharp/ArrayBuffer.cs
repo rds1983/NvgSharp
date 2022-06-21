@@ -2,7 +2,7 @@
 
 namespace NvgSharp
 {
-	internal class Buffer<T>
+	public class ArrayBuffer<T>
 	{
 		private T[] _array;
 		private int _count = 0;
@@ -25,7 +25,7 @@ namespace NvgSharp
 			set => _array[index] = value;
 		}
 
-		public Buffer(int capacity)
+		public ArrayBuffer(int capacity)
 		{
 			_array = new T[capacity];
 		}
@@ -61,9 +61,18 @@ namespace NvgSharp
 			++_count;
 		}
 
-		public ArraySegment<T> ToArraySegment()
+		public void Add(ArraySegment<T> data)
 		{
-			return new ArraySegment<T>(Array, 0, Count);
+			if (data.Count == 0)
+			{
+				return;
+			}
+
+			EnsureSize(_count + data.Count);
+			System.Array.Copy(data.Array, data.Offset, _array, _count, data.Count);
+			_count += data.Count;
 		}
+
+		public ArraySegment<T> ToArraySegment() => new ArraySegment<T>(Array, 0, Count);
 	}
 }

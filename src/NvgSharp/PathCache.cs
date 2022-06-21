@@ -4,8 +4,8 @@ namespace NvgSharp
 {
 	internal unsafe class PathCache
 	{
-		public readonly Buffer<Path> Paths = new Buffer<Path>(16);
-		public readonly Buffer<Vertex> Vertexes = new Buffer<Vertex>(256);
+		public readonly ArrayBuffer<Path> Paths = new ArrayBuffer<Path>(16);
+		public readonly ArrayBuffer<Vertex> Vertexes = new ArrayBuffer<Vertex>(256);
 		public Bounds Bounds = new Bounds();
 	}
 }

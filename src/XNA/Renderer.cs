@@ -48,7 +48,6 @@ namespace NvgSharp
 		};
 
 		private readonly EffectTechnique[] _techniques = new EffectTechnique[4];
-		private readonly List<Texture2D> _textures = new List<Texture2D>();
 		private readonly Buffer<Vertex> _vertexes = new Buffer<Vertex>(1024);
 		private readonly EffectParameter _extentParam;
 		private readonly EffectParameter _radiusParam;
@@ -210,11 +209,6 @@ namespace NvgSharp
 			_device.BlendState = _oldBlendState;
 			_device.DepthStencilState = _oldDepthStencilState;
 			_device.RasterizerState = _oldRasterizerState;
-		}
-
-		private Texture2D GetTextureById(int id)
-		{
-			return _textures[id - 1];
 		}
 
 		private Color premultiplyColor(Color src)

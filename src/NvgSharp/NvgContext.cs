@@ -74,8 +74,8 @@ namespace NvgSharp
 			SetDevicePixelRatio(devicePixelRatio);
 
 			_renderer.Begin();
-
 			_renderer.Viewport(windowWidth, windowHeight, devicePixelRatio);
+			
 			_drawCallCount = 0;
 			_fillTriCount = 0;
 			_strokeTriCount = 0;
@@ -730,7 +730,7 @@ namespace NvgSharp
 			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
 			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
 
-			_renderer.RenderTriangles(ref paint, ref state.Scissor, verts.ToArraySegment());
+			_renderer.RenderTriangles(ref paint, ref state.Scissor, _fringeWidth, verts.ToArraySegment());
 			_drawCallCount++;
 			_textTriCount += verts.Count / 3;
 

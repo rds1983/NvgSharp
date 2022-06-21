@@ -1,0 +1,89 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="..\NvgSharp.Samples.Demo\Demo.cs" Link="Demo.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\Assets\images\image1.jpg" Link="Assets\images\image1.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image10.jpg" Link="Assets\images\image10.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image11.jpg" Link="Assets\images\image11.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image12.jpg" Link="Assets\images\image12.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image2.jpg" Link="Assets\images\image2.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image3.jpg" Link="Assets\images\image3.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image4.jpg" Link="Assets\images\image4.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image5.jpg" Link="Assets\images\image5.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image6.jpg" Link="Assets\images\image6.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image7.jpg" Link="Assets\images\image7.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image8.jpg" Link="Assets\images\image8.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image9.jpg" Link="Assets\images\image9.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\Assets\entypo.ttf" Link="Assets\entypo.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images.txt" Link="Assets\images.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\Roboto-Bold.ttf" Link="Assets\Roboto-Bold.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\Roboto-Light.ttf" Link="Assets\Roboto-Light.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\Roboto-Regular.ttf" Link="Assets\Roboto-Regular.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Silk.NET.Input" Version="2.15.0" />
+      <PackageReference Include="Silk.NET.OpenGL" Version="2.15.0" />
+      <PackageReference Include="Silk.NET.Windowing" Version="2.15.0" />
+    </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\NvgSharp\NvgSharp.csproj" />
+		<None Update="Shader.frag">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Shader.vert">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Assets\images\" />
+	</ItemGroup>
+</Project>
