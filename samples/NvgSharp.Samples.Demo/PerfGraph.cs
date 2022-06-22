@@ -1,5 +1,13 @@
 ﻿using FontStashSharp;
+
+#if MONOGAME || FNA
 using Microsoft.Xna.Framework;
+#elif STRIDE
+using Stride.Core.Mathematics;
+#else
+using System.Drawing;
+using Texture2D = System.Object;
+#endif
 
 namespace NvgSharp.Samples.Demo
 {
@@ -54,7 +62,7 @@ namespace NvgSharp.Samples.Demo
 
 			vg.BeginPath();
 			vg.Rect(x, y, w, h);
-			vg.FillColor(new Color(0, 0, 0, 128));
+			vg.FillColor(Utility.FromRGBA(0, 0, 0, 128));
 			vg.Fill();
 
 			vg.BeginPath();
@@ -99,39 +107,39 @@ namespace NvgSharp.Samples.Demo
 				}
 			}
 			vg.LineTo(x + w, y + h);
-			vg.FillColor(new Color(255, 192, 0, 128));
+			vg.FillColor(Utility.FromRGBA(255, 192, 0, 128));
 			vg.Fill();
 
 			if (!string.IsNullOrEmpty(_name))
 			{
 				var font = _fontSystem.GetFont(14);
-				vg.FillColor(new Color(240, 240, 240, 192));
+				vg.FillColor(Utility.FromRGBA(240, 240, 240, 192));
 				vg.Text(font, _name, x + 3, y + 1, TextHorizontalAlignment.Left, TextVerticalAlignment.Top);
 			}
 
 			if (_style == Style.GRAPH_RENDER_FPS)
 			{
 				var font = _fontSystem.GetFont(18);
-				vg.FillColor(new Color(240, 240, 240, 255));
+				vg.FillColor(Utility.FromRGBA(240, 240, 240, 255));
 				str = string.Format("{0:0.00} FPS", 1.0f / avg);
 				vg.Text(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 
 				font = _fontSystem.GetFont(15);
-				vg.FillColor(new Color(240, 240, 240, 160));
+				vg.FillColor(Utility.FromRGBA(240, 240, 240, 160));
 				str = string.Format("{0:0.00} ms", avg * 1000.0f);
 				vg.Text(font, str, x + w - 3, y + h - 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Bottom);
 			}
 			else if (_style == Style.GRAPH_RENDER_PERCENT)
 			{
 				var font = _fontSystem.GetFont(18);
-				vg.FillColor(new Color(240, 240, 240, 255));
+				vg.FillColor(Utility.FromRGBA(240, 240, 240, 255));
 				str = string.Format("{0:0.00} %%", avg);
 				vg.Text(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 			}
 			else
 			{
 				var font = _fontSystem.GetFont(18);
-				vg.FillColor(new Color(240, 240, 240, 255));
+				vg.FillColor(Utility.FromRGBA(240, 240, 240, 255));
 				str = string.Format("{0:0.00} ms", avg * 1000.0f);
 				vg.Text(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 			}

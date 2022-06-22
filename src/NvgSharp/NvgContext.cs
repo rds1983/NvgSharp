@@ -55,7 +55,7 @@ namespace NvgSharp
 		{
 			_renderer = new Renderer(device);
 #else
-		public NvgContext(IRenderer renderer, bool edgeAntiAlias = true)
+		public NvgContext(IRenderer renderer, bool edgeAntiAlias = false)
 		{
 			_renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
 #endif

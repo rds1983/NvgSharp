@@ -4,6 +4,8 @@ using Silk.NET.Windowing;
 using Silk.NET.Maths;
 using NvgSharp.Samples.Demo;
 using NvgSharp.Platform;
+using System;
+using System.Diagnostics;
 
 namespace NvgSharp
 {
@@ -11,12 +13,21 @@ namespace NvgSharp
 	{
 		private static IWindow window;
 		private static NvgContext nvgContext;
+		private static PerfGraph _perfGraph;
 		private static Demo demo;
+		private static Stopwatch gameTimer;
+		private static long startTicks;
+		private static long previousTicks;
 
 		private static void Main(string[] args)
 		{
+			gameTimer = Stopwatch.StartNew();
+			startTicks = gameTimer.Elapsed.Ticks;
+
 			var options = WindowOptions.Default;
 			options.Size = new Vector2D<int>(1200, 800);
+			options.PreferredDepthBufferBits = 24;
+			options.PreferredStencilBufferBits = 8;
 			options.Title = "FontStashSharp.Silk.NET";
 			window = Window.Create(options);
 
@@ -37,17 +48,31 @@ namespace NvgSharp
 
 			Env.Gl = GL.GetApi(window);
 			var renderer = new Renderer();
-			nvgContext = new NvgContext(renderer);
+			nvgContext = new NvgContext(renderer, true);
+
 			demo = new Demo(nvgContext);
+			_perfGraph = new PerfGraph(PerfGraph.Style.GRAPH_RENDER_FPS, "Frame Time", demo.fontSystemNormal);
 		}
 
 		private static unsafe void OnRender(double obj)
 		{
-			Env.Gl.Clear((uint)ClearBufferMask.ColorBufferBit);
+			Env.Gl.ClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+			Env.Gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit));
 
 			nvgContext.BeginFrame(window.Size.X, window.Size.Y, 1.0f);
 
-			demo.renderDemo(nvgContext, 0, 0, window.Size.X, window.Size.Y, 0.0f, false);
+			long currentTicks = gameTimer.Elapsed.Ticks;
+
+			var elapsedTime = (float)TimeSpan.FromTicks(currentTicks - previousTicks).TotalSeconds;
+			_perfGraph.Update(elapsedTime);
+
+			previousTicks = currentTicks;
+
+			IInputContext input = window.CreateInput();
+
+			var totalElapsedTime = (float)TimeSpan.FromTicks(currentTicks - startTicks).TotalSeconds;
+			demo.renderDemo(nvgContext, input.Mice[0].Position.X, input.Mice[0].Position.Y, window.Size.X, window.Size.Y, totalElapsedTime, false);
+			_perfGraph.Render(nvgContext, 5, 5);
 
 			nvgContext.EndFrame();
 		}

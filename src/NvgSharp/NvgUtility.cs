@@ -158,7 +158,7 @@ namespace NvgSharp
 #if MONOGAME || FNA || STRIDE
 			return new Color(r, g, b, a);
 #else
-			return Color.FromArgb(r, g, b, a);
+			return Color.FromArgb(a, r, g, b);
 #endif
 		}
 

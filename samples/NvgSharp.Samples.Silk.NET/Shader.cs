@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Text;
 using Silk.NET.OpenGL;
 
 namespace NvgSharp
@@ -9,10 +11,10 @@ namespace NvgSharp
 	{
 		private uint _handle;
 
-		public Shader(string vertexPath, string fragmentPath)
+		public Shader(string vertexPath, string fragmentPath, Dictionary<string, string> defines)
 		{
-			uint vertex = LoadShader(ShaderType.VertexShader, vertexPath);
-			uint fragment = LoadShader(ShaderType.FragmentShader, fragmentPath);
+			uint vertex = LoadShader(ShaderType.VertexShader, vertexPath, defines);
+			uint fragment = LoadShader(ShaderType.FragmentShader, fragmentPath, defines);
 			_handle = Env.Gl.CreateProgram();
 			GLUtility.CheckError();
 
@@ -64,6 +66,28 @@ namespace NvgSharp
 			GLUtility.CheckError();
 		}
 
+		public void SetUniform(string name, Vector2 value)
+		{
+			int location = Env.Gl.GetUniformLocation(_handle, name);
+			if (location == -1)
+			{
+				throw new Exception($"{name} uniform not found on shader.");
+			}
+			Env.Gl.Uniform2(location, ref value);
+			GLUtility.CheckError();
+		}
+
+		public void SetUniform(string name, Vector4 value)
+		{
+			int location = Env.Gl.GetUniformLocation(_handle, name);
+			if (location == -1)
+			{
+				throw new Exception($"{name} uniform not found on shader.");
+			}
+			Env.Gl.Uniform4(location, ref value);
+			GLUtility.CheckError();
+		}
+
 		public unsafe void SetUniform(string name, Matrix4x4 value)
 		{
 			int location = Env.Gl.GetUniformLocation(_handle, name);
@@ -81,13 +105,25 @@ namespace NvgSharp
 			Env.Gl.DeleteProgram(_handle);
 		}
 
-		private uint LoadShader(ShaderType type, string path)
+		private uint LoadShader(ShaderType type, string path, Dictionary<string, string> defines)
 		{
+			var sb = new StringBuilder();
+
+			if (defines != null)
+			{
+				foreach(var pair in defines)
+				{
+					sb.Append("#define " + pair.Key + " " + pair.Value + "\n");
+				}
+			}
+
 			string src = File.ReadAllText(path);
+			sb.Append(src);
+
 			uint handle = Env.Gl.CreateShader(type);
 			GLUtility.CheckError();
 
-			Env.Gl.ShaderSource(handle, src);
+			Env.Gl.ShaderSource(handle, sb.ToString());
 			GLUtility.CheckError();
 
 			Env.Gl.CompileShader(handle);

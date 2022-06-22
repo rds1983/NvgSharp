@@ -47,12 +47,14 @@ namespace NvgSharp
 	internal struct ColorInfo
 	{
 		public float R, G, B, A;
+
+		public Vector4 ToVector4() => new Vector4(R, G, B, A);
 	}
 
 	internal struct UniformInfo
 	{
-		public Matrix3x2 scissorMat;
-		public Matrix3x2 paintMat;
+		public Matrix4x4 scissorMat;
+		public Matrix4x4 paintMat;
 		public ColorInfo innerCol;
 		public ColorInfo outerCol;
 		public Vector2 scissorExt;
@@ -62,8 +64,8 @@ namespace NvgSharp
 		public float feather;
 		public float strokeMult;
 		public float strokeThr;
-		public float texType;
-		public float type;
+		public int texType;
+		public int type;
 	}
 
 	internal struct CallInfo

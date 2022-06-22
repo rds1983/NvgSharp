@@ -48,7 +48,7 @@ namespace NvgSharp
 		};
 
 		private readonly EffectTechnique[] _techniques = new EffectTechnique[4];
-		private readonly Buffer<Vertex> _vertexes = new Buffer<Vertex>(1024);
+		private readonly ArrayBuffer<Vertex> _vertexes = new ArrayBuffer<Vertex>(1024);
 		private readonly EffectParameter _extentParam;
 		private readonly EffectParameter _radiusParam;
 		private readonly EffectParameter _featherParam;
@@ -180,7 +180,7 @@ namespace NvgSharp
 			}
 		}
 
-		public void RenderTriangles(ref Paint paint, ref Scissor scissor, ArraySegment<Vertex> verts)
+		public void RenderTriangles(ref Paint paint, ref Scissor scissor, float fringe, ArraySegment<Vertex> verts)
 		{
 			RenderTriangles(ref paint, ref scissor,
 				1.0f, 1.0f, -1.0f,

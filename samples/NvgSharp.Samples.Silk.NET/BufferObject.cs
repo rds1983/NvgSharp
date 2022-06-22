@@ -10,6 +10,8 @@ namespace NvgSharp
 		private readonly BufferTargetARB _bufferType;
 		private readonly int _size;
 
+		public int Size => _size;
+
 		public unsafe BufferObject(int size, BufferTargetARB bufferType, bool isDynamic)
 		{
 			_bufferType = bufferType;

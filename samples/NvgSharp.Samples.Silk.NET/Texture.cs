@@ -1,4 +1,5 @@
 using Silk.NET.OpenGL;
+using StbImageSharp;
 using System;
 using System.Drawing;
 
@@ -10,6 +11,8 @@ namespace NvgSharp
 
 		public readonly int Width;
 		public readonly int Height;
+
+		public uint Handle => _handle;
 
 		public Texture(int width, int height)
 		{
@@ -66,6 +69,7 @@ namespace NvgSharp
 
 		public void SetData(Rectangle bounds, byte[] data)
 		{
+			Bind();
 			fixed (byte* ptr = data)
 			{
 				Env.Gl.TexSubImage2D(
@@ -81,6 +85,28 @@ namespace NvgSharp
 				);
 				GLUtility.CheckError();
 			}
+		}
+
+		public ImageResult GetData()
+		{
+			var result = new ImageResult
+			{
+				Width = Width,
+				Height = Height,
+				Data = new byte[Width * Height * 4]
+			};
+
+			fixed (byte* ptr = result.Data)
+			{
+				Env.Gl.GetTexImage(
+						target: TextureTarget.Texture2D,
+						level: 0,
+						format: PixelFormat.Rgba,
+						type: PixelType.UnsignedByte,
+						ptr);
+			}
+
+			return result;
 		}
 	}
 }

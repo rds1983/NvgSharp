@@ -42,8 +42,7 @@ namespace NvgSharp.Samples.Demo
 		{
 			_context = new NvgContext(GraphicsDevice);
 
-			_demo = new Demo();
-			_demo.loadDemoData(GraphicsDevice, _context);
+			_demo = new Demo(_context);
 
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 			_perfGraph = new PerfGraph(PerfGraph.Style.GRAPH_RENDER_FPS, "Frame Time", _demo.fontSystemNormal);

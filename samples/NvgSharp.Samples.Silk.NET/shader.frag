@@ -7,8 +7,8 @@
 
 // Uniforms
 uniform sampler2D tex;
-uniform mat3 scissorMat;
-uniform mat3 paintMat;
+uniform mat4 scissorMat;
+uniform mat4 paintMat;
 uniform vec4 innerCol;
 uniform vec4 outerCol;
 uniform vec2 scissorExt;
@@ -33,7 +33,7 @@ float sdroundrect(vec2 pt, vec2 ext, float rad) {
 
 // Scissoring
 float scissorMask(vec2 p) {
-	vec2 sc = (abs((scissorMat * vec3(p,1.0)).xy) - scissorExt);
+	vec2 sc = (abs((scissorMat * vec4(p,0,1)).xy) - scissorExt);
 	sc = vec2(0.5,0.5) - sc * scissorScale;
 	return clamp(sc.x,0.0,1.0) * clamp(sc.y,0.0,1.0);
 }
@@ -56,26 +56,35 @@ void main(void) {
 	if (type == 0) {
 		// Gradient
 		// Calculate gradient color using box gradient
-		vec2 pt = (paintMat * vec3(fpos,1.0)).xy;
+		vec2 pt = (paintMat * vec4(fpos,0,1)).xy;
 		float d = clamp((sdroundrect(pt, extent, radius) + feather*0.5) / feather, 0.0, 1.0);
 		vec4 color = mix(innerCol,outerCol,d);
+
 		// Combine alpha
 		color *= strokeAlpha * scissor;
 		result = color;
-	} else if (type == 1) {		// Image
+	} else if (type == 1) {
+		// Image
 		// Calculate color fron texture
-		vec2 pt = (paintMat * vec3(fpos,1.0)).xy / extent;
+		vec2 pt = (paintMat * vec4(fpos,0,1)).xy / extent;
 		vec4 color = texture2D(tex, pt);
-		if (texType == 1) color = vec4(color.xyz*color.w,color.w);		if (texType == 2) color = vec4(color.x);		// Apply color tint and alpha.
+		if (texType == 1) color = vec4(color.xyz*color.w,color.w);
+		if (texType == 2) color = vec4(color.x);
+		
+		// Apply color tint and alpha.
 		color *= innerCol;
 		// Combine alpha
 		color *= strokeAlpha * scissor;
 		result = color;
-	} else if (type == 2) {		// Stencil fill
+	} else if (type == 2) {
+		// Stencil fill
 		result = vec4(1,1,1,1);
-	} else if (type == 3) {		// Textured tris
+	} else if (type == 3) {
+		// Textured tris
 		vec4 color = texture2D(tex, ftcoord);
-		if (texType == 1) color = vec4(color.xyz*color.w,color.w);		if (texType == 2) color = vec4(color.x);		color *= scissor;
+		if (texType == 1) color = color;
+		if (texType == 2) color = vec4(color.x);
+		color *= scissor;
 		result = color * innerCol;
 	}
 
