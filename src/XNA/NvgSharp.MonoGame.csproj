@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>NvgSharp for MonoGame</Description>
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
@@ -12,12 +12,6 @@
     <Compile Remove="..\NvgSharp\obj\**\*.cs" LinkBase="NvgSharp" />
   </ItemGroup>
   
-  <ItemGroup>
-    <None Remove="Resources\Effect.dx11.mgfxo" />
-    <None Remove="Resources\Effect.ogl.mgfxo" />
-  </ItemGroup>
-  
- 
   <ItemGroup>
     <EmbeddedResource Include="Resources\Effect.dx11.mgfxo" />
     <EmbeddedResource Include="Resources\Effect.ogl.mgfxo" />

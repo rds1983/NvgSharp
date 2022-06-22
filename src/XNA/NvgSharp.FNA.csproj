@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>NvgSharp.FNA</PackageId>
     <AssemblyName>NvgSharp.FNA</AssemblyName>
     <Description>NvgSharp for FNA</Description>

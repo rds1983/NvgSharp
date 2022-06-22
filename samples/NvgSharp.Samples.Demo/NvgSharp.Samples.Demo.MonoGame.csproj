@@ -2,12 +2,9 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <OutputPath>bin\FNA\$(Configuration)</OutputPath>
+    <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\XNA\NvgSharp.MonoGame.csproj" />
-  </ItemGroup>
     <ItemGroup>
       <None Include="..\Assets\images\image1.jpg" Link="Assets\images\image1.jpg">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -63,5 +60,13 @@
       <None Include="..\Assets\Roboto-Regular.ttf" Link="Assets\Roboto-Regular.ttf">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\XNA\NvgSharp.MonoGame.csproj" />
     </ItemGroup>
 </Project>
