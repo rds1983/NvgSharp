@@ -76,7 +76,7 @@ namespace NvgSharp
 		private DepthStencilState _oldDepthStencilState;
 		private RasterizerState _oldRasterizerState;
 		private SamplerState _oldSamplerState;
-		private readonly bool _antiAliasing;
+		private readonly bool _edgeAntiAlias;
 		private float _width, _height, _devicePx;
 
 		private readonly EffectParameter _transformMatParam;
@@ -88,14 +88,14 @@ namespace NvgSharp
 
 		public GraphicsDevice GraphicsDevice => _device;
 
-		public Renderer(GraphicsDevice device, bool antiAliasing)
+		public Renderer(GraphicsDevice device, bool edgeAntiAlias)
 		{
 			if (device == null)
 				throw new ArgumentNullException("device");
 
 			_device = device;
-			_antiAliasing = antiAliasing;
-			_effect = new Effect(device, Resources.GetNvgEffectSource(antiAliasing));
+			_edgeAntiAlias = edgeAntiAlias;
+			_effect = new Effect(device, Resources.GetNvgEffectSource(edgeAntiAlias));
 
 			_transformMatParam = _effect.Parameters["transformMat"];
 			_scissorMatParam = _effect.Parameters["scissorMat"];
@@ -109,7 +109,7 @@ namespace NvgSharp
 			_outerColParam = _effect.Parameters["outerCol"];
 			_textureParam = _effect.Parameters["g_texture"];
 
-			if (_antiAliasing)
+			if (_edgeAntiAlias)
 			{
 				_strokeThrParam = _effect.Parameters["strokeThr"];
 				_strokeMultParam = _effect.Parameters["strokeMult"];
@@ -191,7 +191,7 @@ namespace NvgSharp
 			_featherParam.SetValue(uniform.feather);
 			_textureParam.SetValue(texture);
 
-			if (_antiAliasing)
+			if (_edgeAntiAlias)
 			{
 				_strokeMultParam.SetValue(uniform.strokeMult);
 				_strokeThrParam.SetValue(uniform.strokeThr);
@@ -282,7 +282,7 @@ namespace NvgSharp
 
 				SetUniform(ref uniformInfo2, paint.Image);
 
-				if (_antiAliasing)
+				if (_edgeAntiAlias)
 				{
 					_device.DepthStencilState = _stencilStateFill2;
 					renderingType = paint.Image != null ? RenderingType.FillImage : RenderingType.FillGradient;

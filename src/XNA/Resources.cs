@@ -13,14 +13,14 @@ namespace NvgSharp
 		private static bool? _isOpenGL;
 #endif
 
-		public static byte[] GetNvgEffectSource(bool antiAliasing)
+		public static byte[] GetNvgEffectSource(bool edgeAntiAlias)
 		{
-			if (_effectSource != null && !antiAliasing)
+			if (_effectSource != null && !edgeAntiAlias)
 			{
 				return _effectSource;
 			}
 
-			if (_effectWithAASource != null && antiAliasing)
+			if (_effectWithAASource != null && edgeAntiAlias)
 			{
 				return _effectWithAASource;
 			}
@@ -28,7 +28,7 @@ namespace NvgSharp
 			var assembly = typeof(Resources).Assembly;
 
 			var name = "Effect";
-			if (antiAliasing)
+			if (edgeAntiAlias)
 			{
 				name += "_AA";
 			}
@@ -48,7 +48,7 @@ namespace NvgSharp
 				result = ms.ToArray();
 			}
 
-			if (antiAliasing)
+			if (edgeAntiAlias)
 			{
 				_effectWithAASource = result;
 			}

@@ -20,8 +20,9 @@
  
   <ItemGroup>
     <EmbeddedResource Include="Resources\Effect.dx11.mgfxo" />
-    <EmbeddedResource Include="Resources\Effect.fxb" />
     <EmbeddedResource Include="Resources\Effect.ogl.mgfxo" />
+    <EmbeddedResource Include="Resources\Effect_AA.dx11.mgfxo" />
+    <EmbeddedResource Include="Resources\Effect_AA.ogl.mgfxo" />
   </ItemGroup>
   
  

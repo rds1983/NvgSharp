@@ -18,21 +18,21 @@ namespace NvgSharp.Platform
 		private readonly ArrayBuffer<PathInfo> _paths = new ArrayBuffer<PathInfo>(1024);
 		private readonly ArrayBuffer<CallInfo> _calls = new ArrayBuffer<CallInfo>(1024);
 		private float _width, _height, _devicePx;
-		private readonly bool _antiAlias, _stencilStrokes;	
+		private readonly bool _edgeAntiAlias, _stencilStrokes;	
 
 		private readonly Texture2DManager _textureManager = new Texture2DManager();
 
-		public bool AntiAlias => _antiAlias;
+		public bool EdgeAntiAlias => _edgeAntiAlias;
 
 		public ITexture2DManager TextureManager => _textureManager;
 
-		public unsafe Renderer(bool antiAlias = true, bool stencilStrokes = true)
+		public unsafe Renderer(bool edgeAntiAlias = true, bool stencilStrokes = true)
 		{
-			_antiAlias = antiAlias;
+			_edgeAntiAlias = edgeAntiAlias;
 			_stencilStrokes = stencilStrokes;
 
 			var defines = new Dictionary<string, string>();
-			if (antiAlias)
+			if (edgeAntiAlias)
 			{
 				defines["EDGE_AA"] = "1";
 			}
@@ -92,7 +92,7 @@ namespace NvgSharp.Platform
 
 			_shader.SetUniform("tex", 0);
 
-			if (_antiAlias)
+			if (_edgeAntiAlias)
 			{
 				_shader.SetUniform("strokeMult", uniform.strokeMult);
 				_shader.SetUniform("strokeThr", uniform.strokeThr);
@@ -139,7 +139,7 @@ namespace NvgSharp.Platform
 
 			SetUniform(ref call.UniformInfo2, call.Image);
 
-			if (_antiAlias)
+			if (_edgeAntiAlias)
 			{
 				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
 				GLUtility.CheckError();
