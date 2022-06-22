@@ -6,20 +6,23 @@
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>     
+
   <ItemGroup>
     <Compile Include="..\NvgSharp\**\*.cs" LinkBase="NvgSharp" />
     <Compile Remove="..\NvgSharp\obj\**\*.cs" LinkBase="NvgSharp" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <EmbeddedResource Include="Resources\Effect.dx11.mgfxo" />
     <EmbeddedResource Include="Resources\Effect.ogl.mgfxo" />
     <EmbeddedResource Include="Resources\Effect_AA.dx11.mgfxo" />
     <EmbeddedResource Include="Resources\Effect_AA.ogl.mgfxo" />
   </ItemGroup>
-  
- 
+
   <ItemGroup>
     <PackageReference Include="FontStashSharp.MonoGame" Version="$(FontStashSharpVersion)" />
     <PackageReference Include="MonoGame.Framework.Portable" Version="3.7.1.189" />
