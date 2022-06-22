@@ -16,4 +16,5 @@ C# port of https://github.com/memononen/nanovg for MonoGame and FNA.
 * [nanovg](https://github.com/memononen/nanovg)
 * [MonoGame](http://www.monogame.net/)
 * [FNA](https://github.com/FNA-XNA/FNA)
+* [Silk.NET](https://github.com/dotnet/Silk.NET)
 * [stb](https://github.com/nothings/stb)
