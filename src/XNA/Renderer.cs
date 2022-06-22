@@ -37,7 +37,7 @@ namespace NvgSharp
 		private readonly DepthStencilState _stencilStateFill2 = new DepthStencilState
 		{
 			StencilEnable = true,
-			TwoSidedStencilMode = true,
+			TwoSidedStencilMode = false,
 			StencilWriteMask = 0xff,
 			ReferenceStencil = 0,
 			StencilMask = 0xff,
@@ -45,10 +45,6 @@ namespace NvgSharp
 			StencilFail = StencilOperation.Keep,
 			StencilDepthBufferFail = StencilOperation.Keep,
 			StencilPass = StencilOperation.Keep,
-			CounterClockwiseStencilFunction = CompareFunction.Always,
-			CounterClockwiseStencilFail = StencilOperation.Keep,
-			CounterClockwiseStencilDepthBufferFail = StencilOperation.Keep,
-			CounterClockwiseStencilPass = StencilOperation.Decrement
 		};
 
 		private readonly DepthStencilState _stencilStateFill3 = new DepthStencilState

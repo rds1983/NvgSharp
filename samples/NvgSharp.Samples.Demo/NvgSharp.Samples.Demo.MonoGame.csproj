@@ -6,14 +6,62 @@
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\src\XNA\NvgSharp.MonoGame.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Update="Assets\**\*.*">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>  
+    <ItemGroup>
+      <None Include="..\Assets\images\image1.jpg" Link="Assets\images\image1.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image10.jpg" Link="Assets\images\image10.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image11.jpg" Link="Assets\images\image11.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image12.jpg" Link="Assets\images\image12.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image2.jpg" Link="Assets\images\image2.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image3.jpg" Link="Assets\images\image3.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image4.jpg" Link="Assets\images\image4.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image5.jpg" Link="Assets\images\image5.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image6.jpg" Link="Assets\images\image6.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image7.jpg" Link="Assets\images\image7.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image8.jpg" Link="Assets\images\image8.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images\image9.jpg" Link="Assets\images\image9.jpg">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\Assets\entypo.ttf" Link="Assets\entypo.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\images.txt" Link="Assets\images.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\Roboto-Bold.ttf" Link="Assets\Roboto-Bold.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\Roboto-Light.ttf" Link="Assets\Roboto-Light.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Include="..\Assets\Roboto-Regular.ttf" Link="Assets\Roboto-Regular.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>
