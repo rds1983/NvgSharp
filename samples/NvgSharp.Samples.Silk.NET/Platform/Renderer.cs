@@ -201,8 +201,6 @@ namespace NvgSharp.Platform
 				GLUtility.CheckError();
 				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
 				GLUtility.CheckError();
-				Env.Gl.ColorMask(false, false, false, false);
-				GLUtility.CheckError();
 
 				SetUniform(ref call.UniformInfo2, call.Image);
 

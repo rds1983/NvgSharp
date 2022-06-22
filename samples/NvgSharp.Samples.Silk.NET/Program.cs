@@ -47,8 +47,8 @@ namespace NvgSharp
 			}
 
 			Env.Gl = GL.GetApi(window);
-			var renderer = new Renderer();
-			nvgContext = new NvgContext(renderer, true);
+			var renderer = new Renderer(true, true);
+			nvgContext = new NvgContext(renderer, renderer.AntiAlias);
 
 			demo = new Demo(nvgContext);
 			_perfGraph = new PerfGraph(PerfGraph.Style.GRAPH_RENDER_FPS, "Frame Time", demo.fontSystemNormal);
