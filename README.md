@@ -9,6 +9,8 @@ C# port of https://github.com/memononen/nanovg for MonoGame and FNA.
 
 [Using NvgSharp in Generic Game Engine](https://github.com/rds1983/NvgSharp/wiki/Using-NvgSharp-in-Generic-Game-Engine)
 
+Additional documentation is available at https://github.com/rds1983/NvgSharp/wiki
+
 # Screenshot
 ![](/images/screenshot.png)
 
