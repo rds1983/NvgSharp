@@ -53,7 +53,7 @@ namespace NvgSharp
 #if MONOGAME || FNA || STRIDE
 		public NvgContext(GraphicsDevice device, bool edgeAntiAlias = true)
 		{
-			_renderer = new Renderer(device);
+			_renderer = new Renderer(device, edgeAntiAlias);
 #else
 		public NvgContext(IRenderer renderer, bool edgeAntiAlias = false)
 		{

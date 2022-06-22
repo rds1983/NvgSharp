@@ -7,38 +7,57 @@ namespace NvgSharp
 {
 	internal static class Resources
 	{
-		private static byte[] _effectSource = null;
+		private static byte[] _effectSource = null, _effectWithAASource = null;
 
-#if MONOGAME		
+#if MONOGAME
 		private static bool? _isOpenGL;
 #endif
 
-		public static byte[] NvgEffectSource
+		public static byte[] GetNvgEffectSource(bool antiAliasing)
 		{
-			get
+			if (_effectSource != null && !antiAliasing)
 			{
-				if (_effectSource != null)
-				{
-					return _effectSource;
-				}
-
-				var assembly = typeof(Resources).Assembly;
-
-#if MONOGAME
-				var path = IsOpenGL?"NvgSharp.Resources.Effect.ogl.mgfxo":"NvgSharp.Resources.Effect.dx11.mgfxo";
-#elif FNA
-				var path = "NvgSharp.Resources.Effect.fxb";
-#endif
-
-				var ms = new MemoryStream();
-				using (var stream = assembly.GetManifestResourceStream(path))
-				{
-					stream.CopyTo(ms);
-					_effectSource = ms.ToArray();
-				}
-
 				return _effectSource;
 			}
+
+			if (_effectWithAASource != null && antiAliasing)
+			{
+				return _effectWithAASource;
+			}
+
+			var assembly = typeof(Resources).Assembly;
+
+			var name = "Effect";
+			if (antiAliasing)
+			{
+				name += "_AA";
+			}
+
+#if MONOGAME
+				var path = IsOpenGL?"NvgSharp.Resources." + name + ".ogl.mgfxo":"NvgSharp.Resources." + name + ".dx11.mgfxo";
+#elif FNA
+			var path = "NvgSharp.Resources." + name + ".fxb";
+#endif
+
+			byte[] result;
+
+			var ms = new MemoryStream();
+			using (var stream = assembly.GetManifestResourceStream(path))
+			{
+				stream.CopyTo(ms);
+				result = ms.ToArray();
+			}
+
+			if (antiAliasing)
+			{
+				_effectWithAASource = result;
+			}
+			else
+			{
+				_effectSource = result;
+			}
+
+			return result;
 		}
 
 #if MONOGAME		

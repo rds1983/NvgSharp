@@ -22,8 +22,8 @@ namespace NvgSharp.Samples.Demo
 		{
 			_graphics = new GraphicsDeviceManager(this)
 			{
-				PreferredBackBufferWidth = 1000,
-				PreferredBackBufferHeight = 600,
+				PreferredBackBufferWidth = 1200,
+				PreferredBackBufferHeight = 800,
 				PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8
 			};
 
@@ -40,7 +40,7 @@ namespace NvgSharp.Samples.Demo
 		/// </summary>
 		protected override void LoadContent()
 		{
-			_context = new NvgContext(GraphicsDevice);
+			_context = new NvgContext(GraphicsDevice, true);
 
 			_demo = new Demo(_context);
 

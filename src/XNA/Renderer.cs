@@ -37,6 +37,23 @@ namespace NvgSharp
 		private readonly DepthStencilState _stencilStateFill2 = new DepthStencilState
 		{
 			StencilEnable = true,
+			TwoSidedStencilMode = true,
+			StencilWriteMask = 0xff,
+			ReferenceStencil = 0,
+			StencilMask = 0xff,
+			StencilFunction = CompareFunction.Equal,
+			StencilFail = StencilOperation.Keep,
+			StencilDepthBufferFail = StencilOperation.Keep,
+			StencilPass = StencilOperation.Keep,
+			CounterClockwiseStencilFunction = CompareFunction.Always,
+			CounterClockwiseStencilFail = StencilOperation.Keep,
+			CounterClockwiseStencilDepthBufferFail = StencilOperation.Keep,
+			CounterClockwiseStencilPass = StencilOperation.Decrement
+		};
+
+		private readonly DepthStencilState _stencilStateFill3 = new DepthStencilState
+		{
+			StencilEnable = true,
 			TwoSidedStencilMode = false,
 			StencilWriteMask = 0xff,
 			ReferenceStencil = 0,
@@ -48,40 +65,37 @@ namespace NvgSharp
 		};
 
 		private readonly EffectTechnique[] _techniques = new EffectTechnique[4];
-		private readonly ArrayBuffer<Vertex> _vertexes = new ArrayBuffer<Vertex>(1024);
 		private readonly EffectParameter _extentParam;
 		private readonly EffectParameter _radiusParam;
 		private readonly EffectParameter _featherParam;
 		private readonly EffectParameter _innerColParam;
 		private readonly EffectParameter _outerColParam;
 		private readonly EffectParameter _textureParam;
-		private short[] _indexes;
-		private int _indexesCount;
+		private short[] _indexes = BuildTriangleFanIndexBuffer(2048 * 6);
 		private BlendState _oldBlendState;
 		private DepthStencilState _oldDepthStencilState;
 		private RasterizerState _oldRasterizerState;
-
 		private SamplerState _oldSamplerState;
-		private Vector2 _scissorExt, _scissorScale;
-		private Transform _scissorTransform;
-		private float _strokeMult;
+		private readonly bool _antiAliasing;
+		private float _width, _height, _devicePx;
 
 		private readonly EffectParameter _transformMatParam;
 		private readonly EffectParameter _scissorMatParam;
 		private readonly EffectParameter _scissorExtParam;
 		private readonly EffectParameter _scissorScaleParam;
 		private readonly EffectParameter _paintMatParam;
+		private readonly EffectParameter _strokeMultParam, _strokeThrParam;
 
 		public GraphicsDevice GraphicsDevice => _device;
 
-		public Renderer(GraphicsDevice device)
+		public Renderer(GraphicsDevice device, bool antiAliasing)
 		{
 			if (device == null)
 				throw new ArgumentNullException("device");
 
 			_device = device;
-
-			_effect = new Effect(device, Resources.NvgEffectSource);
+			_antiAliasing = antiAliasing;
+			_effect = new Effect(device, Resources.GetNvgEffectSource(antiAliasing));
 
 			_transformMatParam = _effect.Parameters["transformMat"];
 			_scissorMatParam = _effect.Parameters["scissorMat"];
@@ -95,99 +109,21 @@ namespace NvgSharp
 			_outerColParam = _effect.Parameters["outerCol"];
 			_textureParam = _effect.Parameters["g_texture"];
 
+			if (_antiAliasing)
+			{
+				_strokeThrParam = _effect.Parameters["strokeThr"];
+				_strokeMultParam = _effect.Parameters["strokeMult"];
+			}
+
 			foreach (RenderingType param in Enum.GetValues(typeof(RenderingType)))
 				_techniques[(int)param] = _effect.Techniques[param.ToString()];
 		}
 
 		public void Viewport(float width, float height, float devicePixelRatio)
 		{
-			// TO DO
-		}
-
-		public void RenderFill(ref Paint paint, ref Scissor scissor, float fringe, Bounds bounds,
-			ArraySegment<Path> paths)
-		{
-			var isConvex = paths.Count == 1 && paths.Array[paths.Offset].Convex;
-
-			RenderingType renderingType;
-			if (isConvex)
-			{
-				renderingType = paint.Image != null ? RenderingType.FillImage : RenderingType.FillGradient;
-			}
-			else
-			{
-				_device.BlendState = _blendStateNoDraw;
-				_device.DepthStencilState = _stencilStateFill1;
-				renderingType = RenderingType.Simple;
-			}
-
-			for (var i = 0; i < paths.Count; ++i)
-			{
-				var path = paths.Array[paths.Offset + i];
-
-				if (path.Fill != null)
-				{
-					var fill = path.Fill.Value;
-					for (var j = 0; j < fill.Count; ++j)
-						_vertexes.Add(fill.Array[fill.Offset + j]);
-
-					SetIndexBufferFill(fill.Count, (fill.Count - 2) * 3);
-					RenderTriangles(ref paint, ref scissor, fringe, fringe, -1.0f,
-						renderingType, _vertexes.ToArraySegment(), PrimitiveType.TriangleList, true);
-				}
-			}
-
-			if (!isConvex)
-			{
-				_device.BlendState = BlendState.AlphaBlend;
-				_device.DepthStencilState = _stencilStateFill2;
-
-				_vertexes.Add(new Vertex(bounds.X, bounds.Y, 0.5f, 1.0f));
-				_vertexes.Add(new Vertex(bounds.X2, bounds.Y, 0.5f, 1.0f));
-				_vertexes.Add(new Vertex(bounds.X, bounds.Y2, 0.5f, 1.0f));
-				_vertexes.Add(new Vertex(bounds.X2, bounds.Y2, 0.5f, 1.0f));
-
-				RenderTriangles(ref paint, ref scissor, fringe, fringe, -1.0f,
-					RenderingType.FillGradient, _vertexes.ToArraySegment(), PrimitiveType.TriangleStrip, false);
-
-				_device.DepthStencilState = DepthStencilState.None;
-			}
-		}
-
-		public void RenderStroke(ref Paint paint, ref Scissor scissor,
-			float fringe, float strokeWidth, ArraySegment<Path> paths)
-		{
-			for (var i = 0; i < paths.Count; ++i)
-			{
-				var path = paths.Array[paths.Offset + i];
-
-				if (path.Stroke != null)
-				{
-					var stroke = path.Stroke.Value;
-
-					for (var j = 0; j < stroke.Count; ++j)
-					{
-						_vertexes.Add(stroke.Array[stroke.Offset + j]);
-					}
-
-					RenderTriangles(ref paint, ref scissor,
-						strokeWidth, fringe, -1.0f,
-						paint.Image != null ? RenderingType.FillImage : RenderingType.FillGradient,
-						_vertexes.ToArraySegment(),
-						PrimitiveType.TriangleStrip,
-						false);
-				}
-			}
-		}
-
-		public void RenderTriangles(ref Paint paint, ref Scissor scissor, float fringe, ArraySegment<Vertex> verts)
-		{
-			RenderTriangles(ref paint, ref scissor,
-				1.0f, 1.0f, -1.0f,
-				RenderingType.Triangles,
-				verts,
-				PrimitiveType.TriangleList,
-				false);
+			_width = width;
+			_height = height;
+			_devicePx = devicePixelRatio;
 		}
 
 		public void Begin()
@@ -201,6 +137,211 @@ namespace NvgSharp
 			_device.DepthStencilState = DepthStencilState.None;
 			_device.RasterizerState = RasterizerState.CullNone;
 			_device.SamplerStates[0] = SamplerState.PointClamp;
+
+			var transform = Matrix.CreateOrthographicOffCenter(0, _width, _height, 0, 0, -1);
+			_transformMatParam.SetValue(transform);
+		}
+
+		private static void BuildUniform(ref Paint paint, ref Scissor scissor, float width, 
+			float fringe, float strokeThr, ref UniformInfo uniform)
+		{
+			uniform.innerCol = paint.InnerColor.ToColorInfo().MakePremultiplied();
+			uniform.outerCol = paint.OuterColor.ToColorInfo().MakePremultiplied();
+
+			if (scissor.Extent.X < -0.5f || scissor.Extent.Y < -0.5f)
+			{
+				uniform.scissorMat.MakeZero();
+				uniform.scissorExt.X = 1.0f;
+				uniform.scissorExt.Y = 1.0f;
+				uniform.scissorScale.X = 1.0f;
+				uniform.scissorScale.Y = 1.0f;
+			}
+			else
+			{
+				uniform.scissorMat = scissor.Transform.BuildInverse().ToMatrix();
+				uniform.scissorExt.X = scissor.Extent.X;
+				uniform.scissorExt.Y = scissor.Extent.Y;
+				uniform.scissorScale.X = (float)Math.Sqrt(scissor.Transform.T1 * scissor.Transform.T1 + scissor.Transform.T3 * scissor.Transform.T3) / fringe;
+				uniform.scissorScale.Y = (float)Math.Sqrt(scissor.Transform.T2 * scissor.Transform.T2 + scissor.Transform.T4 * scissor.Transform.T4) / fringe;
+			}
+
+			uniform.extent = paint.Extent;
+			uniform.strokeMult = (width * 0.5f + fringe * 0.5f) / fringe;
+			uniform.strokeThr = strokeThr;
+
+			if (paint.Image == null)
+			{
+				uniform.radius = paint.Radius;
+				uniform.feather = paint.Feather;
+			}
+
+			uniform.paintMat = paint.Transform.BuildInverse().ToMatrix();
+		}
+
+		private void SetUniform(ref UniformInfo uniform, Texture2D texture)
+		{
+			_scissorMatParam.SetValue(uniform.scissorMat);
+			_paintMatParam.SetValue(uniform.paintMat);
+			_innerColParam.SetValue(uniform.innerCol.ToVector4());
+			_outerColParam.SetValue(uniform.outerCol.ToVector4());
+			_scissorExtParam.SetValue(uniform.scissorExt);
+			_scissorScaleParam.SetValue(uniform.scissorScale);
+			_extentParam.SetValue(uniform.extent);
+			_radiusParam.SetValue(uniform.radius);
+			_featherParam.SetValue(uniform.feather);
+			_textureParam.SetValue(texture);
+
+			if (_antiAliasing)
+			{
+				_strokeMultParam.SetValue(uniform.strokeMult);
+				_strokeThrParam.SetValue(uniform.strokeThr);
+			}
+		}
+
+		private void DrawVertexes(RenderingType renderingType, ArraySegment<Vertex> verts, PrimitiveType primitiveType, bool indexed)
+		{
+			var technique = _techniques[(int)renderingType];
+			_effect.CurrentTechnique = technique;
+			foreach (var pass in _effect.CurrentTechnique.Passes)
+			{
+				pass.Apply();
+
+				if (indexed)
+				{
+					var primitiveCount = (verts.Count - 2);
+					_device.DrawUserIndexedPrimitives(primitiveType, verts.Array, verts.Offset, verts.Count,
+						_indexes, 0, primitiveCount);
+				}
+				else
+				{
+					var primitiveCount =
+						primitiveType == PrimitiveType.TriangleList ? verts.Count / 3 : verts.Count - 2;
+					_device.DrawUserPrimitives(primitiveType, verts.Array, verts.Offset, primitiveCount);
+				}
+			}
+		}
+
+		private ArrayBuffer<Vertex> _tempVerts = new ArrayBuffer<Vertex>(4);
+
+		public void RenderFill(ref Paint paint, ref Scissor scissor, float fringe, Bounds bounds, ArraySegment<Path> paths)
+		{
+			if (paths.Count == 1 && paths.Array[paths.Offset].Convex)
+			{
+				// Convex Fill
+				var uniformInfo = new UniformInfo();
+				BuildUniform(ref paint, ref scissor, fringe, fringe, -1.0f, ref uniformInfo);
+				SetUniform(ref uniformInfo, paint.Image);
+
+				var renderingType = paint.Image != null ? RenderingType.FillImage : RenderingType.FillGradient;
+				for (var i = 0; i < paths.Count; i++)
+				{
+					var path = paths.Array[paths.Offset + i];
+
+					if (path.Fill != null)
+					{
+						DrawVertexes(renderingType, path.Fill.Value, PrimitiveType.TriangleList, true);
+					}
+
+					if (path.Stroke != null)
+					{
+						DrawVertexes(renderingType, path.Stroke.Value, PrimitiveType.TriangleStrip, false);
+					}
+				}
+			}
+			else
+			{
+				// Setup uniforms for draw calls
+				var uniformInfo = new UniformInfo
+				{
+					strokeThr = -1.0f,
+				};
+
+				var uniformInfo2 = new UniformInfo();
+
+				// Fill shader
+				BuildUniform(ref paint, ref scissor, fringe, fringe, -1.0f, ref uniformInfo2);
+
+				_device.BlendState = _blendStateNoDraw;
+				_device.DepthStencilState = _stencilStateFill1;
+				var renderingType = RenderingType.Simple;
+
+				SetUniform(ref uniformInfo, null);
+
+				for (var i = 0; i < paths.Count; i++)
+				{
+					var path = paths.Array[paths.Offset + i];
+
+					if (path.Fill != null)
+					{
+						DrawVertexes(renderingType, path.Fill.Value, PrimitiveType.TriangleList, true);
+					}
+				}
+
+				// Draw anti-aliased pixels
+				_device.BlendState = BlendState.AlphaBlend;
+
+				SetUniform(ref uniformInfo2, paint.Image);
+
+				if (_antiAliasing)
+				{
+					_device.DepthStencilState = _stencilStateFill2;
+					renderingType = paint.Image != null ? RenderingType.FillImage : RenderingType.FillGradient;
+
+					// Draw fringes
+					for (var i = 0; i < paths.Count; i++)
+					{
+						var path = paths.Array[paths.Offset + i];
+
+						if (path.Stroke != null)
+						{
+							DrawVertexes(renderingType, path.Stroke.Value, PrimitiveType.TriangleStrip, false);
+						}
+					}
+				}
+
+				_device.DepthStencilState = _stencilStateFill3;
+
+				_tempVerts.Clear();
+				_tempVerts.Add(new Vertex(bounds.X2, bounds.Y2, 0.5f, 1.0f));
+				_tempVerts.Add(new Vertex(bounds.X2, bounds.Y, 0.5f, 1.0f));
+				_tempVerts.Add(new Vertex(bounds.X, bounds.Y2, 0.5f, 1.0f));
+				_tempVerts.Add(new Vertex(bounds.X, bounds.Y, 0.5f, 1.0f));
+
+				renderingType = RenderingType.FillGradient;
+				DrawVertexes(renderingType, _tempVerts.ToArraySegment(), PrimitiveType.TriangleStrip, false);
+
+				_device.DepthStencilState = DepthStencilState.None;
+			}
+		}
+
+		public void RenderStroke(ref Paint paint, ref Scissor scissor,
+			float fringe, float strokeWidth, ArraySegment<Path> paths)
+		{
+			var uniformInfo = new UniformInfo();
+
+			BuildUniform(ref paint, ref scissor, strokeWidth, fringe, -1.0f, ref uniformInfo);
+			SetUniform(ref uniformInfo, paint.Image);
+			var renderingType = paint.Image != null ? RenderingType.FillImage : RenderingType.FillGradient;
+
+			for (var i = 0; i < paths.Count; i++)
+			{
+				var path = paths.Array[paths.Offset + i];
+
+				if (path.Stroke != null)
+				{
+					DrawVertexes(renderingType, path.Stroke.Value, PrimitiveType.TriangleStrip, false);
+				}
+			}
+		}
+
+		public void RenderTriangles(ref Paint paint, ref Scissor scissor, float fringe, ArraySegment<Vertex> verts)
+		{
+			var uniformInfo = new UniformInfo();
+			BuildUniform(ref paint, ref scissor, 1.0f, fringe, -1.0f, ref uniformInfo);
+			SetUniform(ref uniformInfo, paint.Image);
+			var renderingType = RenderingType.Triangles;
+
+			DrawVertexes(renderingType, verts, PrimitiveType.TriangleList, false);
 		}
 
 		public void End()
@@ -211,118 +352,17 @@ namespace NvgSharp
 			_device.RasterizerState = _oldRasterizerState;
 		}
 
-		private Color premultiplyColor(Color src)
+		private static short[] BuildTriangleFanIndexBuffer(int indexesCount)
 		{
-			var f = src.A / 255.0f;
-
-			return new Color((int)(src.R * f),
-				(int)(src.G * f),
-				(int)(src.B * f),
-				src.A);
-		}
-
-		private void RenderTriangles(ref Paint paint,
-			ref Scissor scissor,
-			float width, float fringe, float strokeThr,
-			RenderingType renderingType,
-			ArraySegment<Vertex> verts,
-			PrimitiveType primitiveType,
-			bool indexed)
-		{
-			if (verts.Count <= 0 ||
-				indexed && _indexesCount <= 0)
-				return;
-
-			var innerColor = premultiplyColor(paint.InnerColor);
-			var outerColor = premultiplyColor(paint.OuterColor);
-
-			_strokeMult = (width * 0.5f + fringe * 0.5f) / fringe;
-
-			if (scissor.Extent.X < -0.5f || scissor.Extent.Y < -0.5f)
+			var result = new List<short>();
+			for (var j = 2; j < indexesCount; ++j)
 			{
-				_scissorTransform.Zero();
-
-				_scissorExt.X = 1.0f;
-				_scissorExt.Y = 1.0f;
-				_scissorScale.X = 1.0f;
-				_scissorScale.Y = 1.0f;
-			}
-			else
-			{
-				_scissorTransform = scissor.Transform.BuildInverse();
-				_scissorExt.X = scissor.Extent.X;
-				_scissorExt.Y = scissor.Extent.Y;
-				_scissorScale.X =
-					(float)Math.Sqrt(scissor.Transform.T1 * scissor.Transform.T1 +
-									  scissor.Transform.T3 * scissor.Transform.T3) / fringe;
-				_scissorScale.Y =
-					(float)Math.Sqrt(scissor.Transform.T2 * scissor.Transform.T2 +
-									  scissor.Transform.T4 * scissor.Transform.T4) / fringe;
+				result.Add(0);
+				result.Add((short)(j - 1));
+				result.Add((short)j);
 			}
 
-			var transform = paint.Transform.BuildInverse();
-
-			var transformMatrix = transform.ToMatrix();
-
-			Matrix projection;
-			Matrix.CreateOrthographicOffCenter(0, _device.PresentationParameters.Bounds.Width,
-				_device.PresentationParameters.Bounds.Height, 0, 0, -1, out projection);
-
-			_transformMatParam.SetValue(projection);
-			_scissorMatParam.SetValue(_scissorTransform.ToMatrix());
-			_scissorExtParam.SetValue(_scissorExt);
-			_scissorScaleParam.SetValue(_scissorScale);
-			_paintMatParam.SetValue(transformMatrix);
-			_extentParam.SetValue(new Vector4(paint.Extent.X, paint.Extent.Y, 0.0f, 0.0f));
-			_radiusParam.SetValue(new Vector4(paint.Radius, 0.0f, 0.0f, 0.0f));
-			_featherParam.SetValue(new Vector4(paint.Feather, 0.0f, 0.0f, 0.0f));
-			_innerColParam.SetValue(innerColor.ToVector4());
-			_outerColParam.SetValue(outerColor.ToVector4());
-			// _effect.Parameters["strokeMult"].SetValue(new Vector4(_strokeMult, 0.0f, 0.0f, 0.0f));
-
-			if (paint.Image != null)
-			{
-				_textureParam.SetValue(paint.Image);
-			}
-
-			var technique = _techniques[(int)renderingType];
-			_effect.CurrentTechnique = technique;
-			foreach (var pass in _effect.CurrentTechnique.Passes)
-			{
-				pass.Apply();
-
-				if (indexed)
-				{
-					_device.DrawUserIndexedPrimitives(primitiveType, verts.Array, verts.Offset, verts.Count,
-						_indexes, 0, _indexesCount / 3);
-				}
-				else
-				{
-					var primitiveCount =
-						primitiveType == PrimitiveType.TriangleList ? verts.Count / 3 : verts.Count - 2;
-					_device.DrawUserPrimitives(primitiveType, verts.Array, verts.Offset, primitiveCount);
-				}
-			}
-
-			_vertexes.Clear();
-		}
-
-		private void SetIndexBufferFill(int vertexesCount, int indexesCount)
-		{
-			if (_indexes == null || _indexes.Length < indexesCount)
-			{
-				var result = new List<short>();
-				for (var j = 2; j < indexesCount; ++j)
-				{
-					result.Add(0);
-					result.Add((short)(j - 1));
-					result.Add((short)j);
-				}
-
-				_indexes = result.ToArray();
-			}
-
-			_indexesCount = indexesCount;
+			return result.ToArray();
 		}
 
 		private enum RenderingType

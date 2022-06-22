@@ -15,23 +15,6 @@ namespace NvgSharp
 				throw new Exception("GL.GetError() returned " + error.ToString());
 		}
 
-		public static ColorInfo ToColorInfo(this Color c) => new()
-		{
-			R = c.R / 255.0f,
-			G = c.G / 255.0f,
-			B = c.B / 255.0f,
-			A = c.A / 255.0f
-		};
-
-		public static ColorInfo MakePremultiplied(this ColorInfo c)
-		{
-			c.R *= c.A;
-			c.G *= c.A;
-			c.B *= c.A;
-
-			return c;
-		}
-
 		public static Matrix4x4 ToMatrix4x4(this Transform t)
 		{
 			var result = Matrix4x4.Identity;
