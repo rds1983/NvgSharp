@@ -4,6 +4,7 @@ using Silk.NET.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace NvgSharp.Platform
 {
@@ -12,15 +13,13 @@ namespace NvgSharp.Platform
 		private const int MAX_VERTICES = 8192;
 
 		private readonly Shader _shader;
+		private float _width, _height, _devicePx;
+		private readonly bool _antiAlias, _stencilStrokes;
 		private BufferObject<Vertex> _vertexBuffer;
 		private readonly VertexArrayObject _vao;
-		private readonly ArrayBuffer<Vertex> _vertexArray = new ArrayBuffer<Vertex>(MAX_VERTICES);
-		private readonly ArrayBuffer<PathInfo> _paths = new ArrayBuffer<PathInfo>(1024);
-		private readonly ArrayBuffer<CallInfo> _calls = new ArrayBuffer<CallInfo>(1024);
-		private float _width, _height, _devicePx;
-		private readonly bool _antiAlias, _stencilStrokes;	
 
 		private readonly Texture2DManager _textureManager = new Texture2DManager();
+		private int _locationVertex, _locationTexCoord;
 
 		public bool AntiAlias => _antiAlias;
 
@@ -37,13 +36,13 @@ namespace NvgSharp.Platform
 				defines["EDGE_AA"] = "1";
 			}
 
-			_shader = new Shader("shader.vert", "shader.frag", defines);
-			_shader.Use();
+			_vao = new VertexArrayObject(sizeof(Vertex));
+			_vao.Bind();
 
 			_vertexBuffer = new BufferObject<Vertex>(MAX_VERTICES, BufferTargetARB.ArrayBuffer, true);
 
-			_vao = new VertexArrayObject(sizeof(Vertex));
-			_vao.Bind();
+			_shader = new Shader("shader.vert", "shader.frag", defines);
+			_shader.Use();
 		}
 
 		~Renderer() => Dispose(false);
@@ -57,13 +56,52 @@ namespace NvgSharp.Platform
 				return;
 			}
 
-			_vao.Dispose();
-			_vertexBuffer.Dispose();
 			_shader.Dispose();
+			_vao.Dispose();
 		}
 
 		public void Begin()
 		{
+			// Setup required GL state
+			Env.Gl.Enable(EnableCap.CullFace);
+			GLUtility.CheckError();
+			Env.Gl.CullFace(CullFaceMode.Back);
+			GLUtility.CheckError();
+			Env.Gl.FrontFace(FrontFaceDirection.Ccw);
+			GLUtility.CheckError();
+			Env.Gl.Enable(EnableCap.Blend);
+			GLUtility.CheckError();
+			Env.Gl.Disable(EnableCap.DepthTest);
+			GLUtility.CheckError();
+			Env.Gl.Disable(EnableCap.ScissorTest);
+			GLUtility.CheckError();
+			Env.Gl.ColorMask(true, true, true, true);
+			GLUtility.CheckError();
+			Env.Gl.StencilMask(0xffffffff);
+			GLUtility.CheckError();
+			Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+			GLUtility.CheckError();
+			Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xffffffff);
+			GLUtility.CheckError();
+			Env.Gl.ActiveTexture(TextureUnit.Texture0);
+			GLUtility.CheckError();
+			Env.Gl.BindTexture(TextureTarget.Texture2D, 0);
+			GLUtility.CheckError();
+
+			// Setup shader
+			_shader.Use();
+			_shader.SetUniform("tex", 0);
+			var transform = Matrix4x4.CreateOrthographicOffCenter(0, _width, _height, 0, 0, -1);
+			_shader.SetUniform("transformMat", transform);
+
+			_vao.Bind();
+			var location = _shader.GetAttribLocation("vertex");
+			_vao.VertexAttribPointer(location, 2, VertexAttribPointerType.Float, false, 0);
+
+			location = _shader.GetAttribLocation("tcoord");
+			_vao.VertexAttribPointer(location, 2, VertexAttribPointerType.Float, false, 8);
+
+			Env.Gl.BlendFuncSeparate(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
 		}
 
 		private void SetUniform(ref UniformInfo uniform, Texture texture)
@@ -99,263 +137,8 @@ namespace NvgSharp.Platform
 			}
 		}
 
-		private void ProcessFill(ref CallInfo call)
-		{
-			// Draw shapes
-			Env.Gl.Enable(EnableCap.StencilTest);
-			GLUtility.CheckError();
-			Env.Gl.StencilMask(0xff);
-			GLUtility.CheckError();
-			Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xff);
-			GLUtility.CheckError();
-			Env.Gl.ColorMask(false, false, false, false);
-			GLUtility.CheckError();
-
-			SetUniform(ref call.UniformInfo, null);
-
-			// set bindpoint for solid loc
-			Env.Gl.StencilOpSeparate(StencilFaceDirection.Front, StencilOp.Keep, StencilOp.Keep, StencilOp.IncrWrap);
-			GLUtility.CheckError();
-			Env.Gl.StencilOpSeparate(StencilFaceDirection.Back, StencilOp.Keep, StencilOp.Keep, StencilOp.DecrWrap);
-			GLUtility.CheckError();
-
-			Env.Gl.Disable(EnableCap.CullFace);
-			GLUtility.CheckError();
-
-			for (var i = 0; i < call.PathCount; i++)
-			{
-				var path = _paths[call.PathOffset + i];
-
-				Env.Gl.DrawArrays(PrimitiveType.TriangleFan, path.FillOffset, (uint)path.FillCount);
-				GLUtility.CheckError();
-			}
-
-			Env.Gl.Enable(EnableCap.CullFace);
-			GLUtility.CheckError();
-
-			// Draw anti-aliased pixels
-			Env.Gl.ColorMask(true, true, true, true);
-			GLUtility.CheckError();
-
-			SetUniform(ref call.UniformInfo2, call.Image);
-
-			if (_antiAlias)
-			{
-				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
-				GLUtility.CheckError();
-				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
-				GLUtility.CheckError();
-
-				// Draw fringes
-				for (var i = 0; i < call.PathCount; i++)
-				{
-					var path = _paths[call.PathOffset + i];
-
-					Env.Gl.DrawArrays(PrimitiveType.TriangleStrip, path.StrokeOffset, (uint)path.StrokeCount);
-					GLUtility.CheckError();
-				}
-			}
-
-			// Draw fill
-			Env.Gl.StencilFunc(StencilFunction.Notequal, 0, 0xff);
-			GLUtility.CheckError();
-			Env.Gl.StencilOp(StencilOp.Zero, StencilOp.Zero, StencilOp.Zero);
-			GLUtility.CheckError();
-
-			Env.Gl.DrawArrays(PrimitiveType.TriangleStrip, call.TriangleOffset, (uint)call.TriangleCount);
-			GLUtility.CheckError();
-
-			Env.Gl.Disable(EnableCap.StencilTest);
-			GLUtility.CheckError();
-		}
-
-		private void ProcessConvexFill(ref CallInfo call)
-		{
-			SetUniform(ref call.UniformInfo, call.Image);
-
-			for (var i = 0; i < call.PathCount; i++)
-			{
-				var path = _paths[call.PathOffset + i];
-
-				Env.Gl.DrawArrays(PrimitiveType.TriangleFan, path.FillOffset, (uint)path.FillCount);
-				GLUtility.CheckError();
-
-				if (path.StrokeCount > 0)
-				{
-					Env.Gl.DrawArrays(PrimitiveType.TriangleStrip, path.StrokeOffset, (uint)path.StrokeCount);
-					GLUtility.CheckError();
-				}
-			}
-		}
-
-		private void ProcessStroke(ref CallInfo call)
-		{
-			if (_stencilStrokes)
-			{
-				// Fill the stroke base without overlap
-				Env.Gl.Enable(EnableCap.StencilTest);
-				GLUtility.CheckError();
-				Env.Gl.StencilMask(0xff);
-				GLUtility.CheckError();
-				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
-				GLUtility.CheckError();
-				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
-				GLUtility.CheckError();
-
-				SetUniform(ref call.UniformInfo2, call.Image);
-
-				for (var i = 0; i < call.PathCount; i++)
-				{
-					var path = _paths[call.PathOffset + i];
-
-					Env.Gl.DrawArrays(PrimitiveType.TriangleStrip, path.StrokeOffset, (uint)path.StrokeCount);
-					GLUtility.CheckError();
-				}
-
-				// Draw anti-aliased pixels.
-				SetUniform(ref call.UniformInfo, call.Image);
-
-				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
-				GLUtility.CheckError();
-				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
-				GLUtility.CheckError();
-
-				for (var i = 0; i < call.PathCount; i++)
-				{
-					var path = _paths[call.PathOffset + i];
-
-					Env.Gl.DrawArrays(PrimitiveType.TriangleStrip, path.StrokeOffset, (uint)path.StrokeCount);
-					GLUtility.CheckError();
-				}
-
-				// Clear stencil buffer.
-				Env.Gl.ColorMask(false, false, false, false);
-				GLUtility.CheckError();
-
-				Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xff);
-				GLUtility.CheckError();
-				Env.Gl.StencilOp(StencilOp.Zero, StencilOp.Zero, StencilOp.Zero);
-				GLUtility.CheckError();
-
-				for (var i = 0; i < call.PathCount; i++)
-				{
-					var path = _paths[call.PathOffset + i];
-
-					Env.Gl.DrawArrays(PrimitiveType.TriangleStrip, path.StrokeOffset, (uint)path.StrokeCount);
-					GLUtility.CheckError();
-				}
-
-				Env.Gl.ColorMask(true, true, true, true);
-				GLUtility.CheckError();
-
-				Env.Gl.Disable(EnableCap.StencilTest);
-				GLUtility.CheckError();
-			}
-			else
-			{
-				SetUniform(ref call.UniformInfo, call.Image);
-
-				for (var i = 0; i < call.PathCount; i++)
-				{
-					var path = _paths[call.PathOffset + i];
-
-					Env.Gl.DrawArrays(PrimitiveType.TriangleStrip, path.StrokeOffset, (uint)path.StrokeCount);
-					GLUtility.CheckError();
-				}
-			}
-		}
-
-		private void ProcessTriangles(ref CallInfo call)
-		{
-			SetUniform(ref call.UniformInfo, call.Image);
-
-			Env.Gl.DrawArrays(PrimitiveType.Triangles, call.TriangleOffset, (uint)call.TriangleCount);
-			GLUtility.CheckError();
-		}
-
 		public void End()
 		{
-			if (_calls.Count == 0)
-			{
-				return;
-			}
-
-			// Setup required GL state
-			Env.Gl.Enable(EnableCap.CullFace);
-			GLUtility.CheckError();
-			Env.Gl.CullFace(CullFaceMode.Back);
-			GLUtility.CheckError();
-			Env.Gl.FrontFace(FrontFaceDirection.Ccw);
-			GLUtility.CheckError();
-			Env.Gl.Enable(EnableCap.Blend);
-			GLUtility.CheckError();
-			Env.Gl.Disable(EnableCap.DepthTest);
-			GLUtility.CheckError();
-			Env.Gl.Disable(EnableCap.ScissorTest);
-			GLUtility.CheckError();
-			Env.Gl.ColorMask(true, true, true, true);
-			GLUtility.CheckError();
-			Env.Gl.StencilMask(0xffffffff);
-			GLUtility.CheckError();
-			Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
-			GLUtility.CheckError();
-			Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xffffffff);
-			GLUtility.CheckError();
-			Env.Gl.ActiveTexture(TextureUnit.Texture0);
-			GLUtility.CheckError();
-			Env.Gl.BindTexture(TextureTarget.Texture2D, 0);
-			GLUtility.CheckError();
-
-			// Bind and update vertex buffer
-			if (_vertexBuffer == null || _vertexBuffer.Size < _vertexArray.Capacity)
-			{
-				_vertexBuffer = new BufferObject<Vertex>(_vertexArray.Capacity, BufferTargetARB.ArrayBuffer, true);
-			}
-
-			_vertexBuffer.Bind();
-			_vertexBuffer.SetData(_vertexArray.Array, 0, _vertexArray.Count);
-
-			// Setup vao
-			_vao.Bind();
-			var location = _shader.GetAttribLocation("vertex");
-			_vao.VertexAttribPointer(location, 2, VertexAttribPointerType.Float, false, 0);
-
-			location = _shader.GetAttribLocation("tcoord");
-			_vao.VertexAttribPointer(location, 2, VertexAttribPointerType.Float, false, 8);
-
-			// Setup shader
-			_shader.Use();
-			_shader.SetUniform("tex", 0);
-			var transform = Matrix4x4.CreateOrthographicOffCenter(0, _width, _height, 0, 0, -1);
-			_shader.SetUniform("transformMat", transform);
-
-			// Process calls
-			for (var i = 0; i < _calls.Count; i++)
-			{
-				var call = _calls[i];
-
-				Env.Gl.BlendFuncSeparate(call.BlendInfo.srcRgb, call.BlendInfo.destRgb, call.BlendInfo.srcAlpha, call.BlendInfo.destAlpha);
-
-				switch (call.Type)
-				{
-					case CallType.Fill:
-						ProcessFill(ref call);
-						break;
-					case CallType.ConvexFill:
-						ProcessConvexFill(ref call);
-						break;
-					case CallType.Stroke:
-						ProcessStroke(ref call);
-						break;
-					case CallType.Triangles:
-						ProcessTriangles(ref call);
-						break;
-				}
-			}
-
-			_vertexArray.Clear();
-			_paths.Clear();
-			_calls.Clear();
 		}
 
 		public void Viewport(float width, float height, float devicePixelRatio)
@@ -365,7 +148,7 @@ namespace NvgSharp.Platform
 			_devicePx = devicePixelRatio;
 		}
 
-		private static void BuildUniform(ref Paint paint, ref Scissor scissor, float width, 
+		private static void BuildUniform(ref Paint paint, ref Scissor scissor, float width,
 			float fringe, float strokeThr, ref UniformInfo uniform)
 		{
 			uniform.innerCol = paint.InnerColor.ToColorInfo().MakePremultiplied();
@@ -407,132 +190,237 @@ namespace NvgSharp.Platform
 			uniform.paintMat = paint.Transform.BuildInverse().ToMatrix4x4();
 		}
 
+		private void DrawVertexes(PrimitiveType primitiveType, ArraySegment<Vertex> vertexData)
+		{
+			// Copy vertex data to gpu mem
+			_vertexBuffer.SetData(vertexData.Array, vertexData.Offset, vertexData.Count);
+
+			// Draw
+			Env.Gl.DrawArrays(primitiveType, 0, (uint)vertexData.Count);
+			GLUtility.CheckError();
+		}
+
+		private ArrayBuffer<Vertex> _tempVerts = new ArrayBuffer<Vertex>(4);
+
 		public void RenderFill(ref Paint paint, ref Scissor scissor, float fringe, Bounds bounds, ArraySegment<Path> paths)
 		{
-			var call = new CallInfo
-			{
-				Type = CallType.Fill,
-				TriangleCount = 4,
-				PathOffset = _paths.Count,
-				PathCount = paths.Count,
-				Image = (Texture)paint.Image,
-				BlendInfo = BlendInfo.Default
-			};
-
 			if (paths.Count == 1 && paths[0].Convex)
 			{
-				call.Type = CallType.ConvexFill;
-				// Bounding box fill quad not needed for convex fill
-				call.TriangleCount = 0;
-			}
+				var uniformInfo = new UniformInfo();
+				BuildUniform(ref paint, ref scissor, fringe, fringe, -1.0f, ref uniformInfo);
+				SetUniform(ref uniformInfo, (Texture)paint.Image);
 
-			for (var i = 0; i < paths.Count; i++)
-			{
-				var path = paths[i];
-
-				var pathInfo = new PathInfo();
-				if (path.Fill != null && path.Fill.Value.Count > 0)
+				for (var i = 0; i < paths.Count; i++)
 				{
-					pathInfo.FillOffset = _vertexArray.Count;
-					pathInfo.FillCount = path.Fill.Value.Count;
-					_vertexArray.Add(path.Fill.Value);
+					var path = paths[i];
+
+					if (path.Fill != null)
+					{
+						DrawVertexes(PrimitiveType.TriangleFan, path.Fill.Value);
+					}
+
+					if (path.Stroke != null)
+					{
+						DrawVertexes(PrimitiveType.TriangleStrip, path.Stroke.Value);
+					}
 				}
-				if (path.Stroke != null && path.Stroke.Value.Count > 0)
-				{
-					pathInfo.StrokeOffset = _vertexArray.Count;
-					pathInfo.StrokeCount = path.Stroke.Value.Count;
-					_vertexArray.Add(path.Stroke.Value);
-				}
-
-				_paths.Add(pathInfo);
-			}
-
-			// Setup uniforms for draw calls
-			if (call.Type == CallType.Fill)
-			{
-				// Quad
-				call.TriangleOffset = _vertexArray.Count;
-				_vertexArray.Add(new Vertex(bounds.X2, bounds.Y2, 0.5f, 1.0f));
-				_vertexArray.Add(new Vertex(bounds.X2, bounds.Y, 0.5f, 1.0f));
-				_vertexArray.Add(new Vertex(bounds.X, bounds.Y2, 0.5f, 1.0f));
-				_vertexArray.Add(new Vertex(bounds.X, bounds.Y, 0.5f, 1.0f));
-
-				// Simple shader for stencil
-				call.UniformInfo.strokeThr = -1.0f;
-				call.UniformInfo.type = (int)RenderType.Simple;
-
-				// Fill shader
-				BuildUniform(ref paint, ref scissor, fringe, fringe, -1.0f, ref call.UniformInfo2);
 			}
 			else
 			{
-				// Fill shader
-				BuildUniform(ref paint, ref scissor, fringe, fringe, -1.0f, ref call.UniformInfo);
-			}
+				// Setup uniforms for draw calls
+				var uniformInfo = new UniformInfo();
+				var uniformInfo2 = new UniformInfo();
 
-			_calls.Add(call);
+				_tempVerts.Clear();
+				_tempVerts.Add(new Vertex(bounds.X2, bounds.Y2, 0.5f, 1.0f));
+				_tempVerts.Add(new Vertex(bounds.X2, bounds.Y, 0.5f, 1.0f));
+				_tempVerts.Add(new Vertex(bounds.X, bounds.Y2, 0.5f, 1.0f));
+				_tempVerts.Add(new Vertex(bounds.X, bounds.Y, 0.5f, 1.0f));
+
+				// Simple shader for stencil
+				uniformInfo.strokeThr = -1.0f;
+				uniformInfo.type = (int)RenderType.Simple;
+
+				// Fill shader
+				BuildUniform(ref paint, ref scissor, fringe, fringe, -1.0f, ref uniformInfo2);
+
+				// Draw shapes
+				Env.Gl.Enable(EnableCap.StencilTest);
+				GLUtility.CheckError();
+				Env.Gl.StencilMask(0xff);
+				GLUtility.CheckError();
+				Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xff);
+				GLUtility.CheckError();
+				Env.Gl.ColorMask(false, false, false, false);
+				GLUtility.CheckError();
+
+				SetUniform(ref uniformInfo, null);
+
+				// set bindpoint for solid loc
+				Env.Gl.StencilOpSeparate(StencilFaceDirection.Front, StencilOp.Keep, StencilOp.Keep, StencilOp.IncrWrap);
+				GLUtility.CheckError();
+				Env.Gl.StencilOpSeparate(StencilFaceDirection.Back, StencilOp.Keep, StencilOp.Keep, StencilOp.DecrWrap);
+				GLUtility.CheckError();
+
+				Env.Gl.Disable(EnableCap.CullFace);
+				GLUtility.CheckError();
+
+				for (var i = 0; i < paths.Count; i++)
+				{
+					var path = paths[i];
+
+					if (path.Fill != null)
+					{
+						DrawVertexes(PrimitiveType.TriangleFan, path.Fill.Value);
+					}
+				}
+
+				Env.Gl.Enable(EnableCap.CullFace);
+				GLUtility.CheckError();
+
+				// Draw anti-aliased pixels
+				Env.Gl.ColorMask(true, true, true, true);
+				GLUtility.CheckError();
+
+				SetUniform(ref uniformInfo2, (Texture)paint.Image);
+
+				if (_antiAlias)
+				{
+					Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
+					GLUtility.CheckError();
+					Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+					GLUtility.CheckError();
+
+					// Draw fringes
+					for (var i = 0; i < paths.Count; i++)
+					{
+						var path = paths[i];
+
+						if (path.Stroke != null)
+						{
+							DrawVertexes(PrimitiveType.TriangleStrip, path.Stroke.Value);
+						}
+					}
+				}
+
+				// Draw fill
+				Env.Gl.StencilFunc(StencilFunction.Notequal, 0, 0xff);
+				GLUtility.CheckError();
+				Env.Gl.StencilOp(StencilOp.Zero, StencilOp.Zero, StencilOp.Zero);
+				GLUtility.CheckError();
+
+				DrawVertexes(PrimitiveType.TriangleStrip, _tempVerts.ToArraySegment());
+				GLUtility.CheckError();
+
+				Env.Gl.Disable(EnableCap.StencilTest);
+				GLUtility.CheckError();
+			}
 		}
 
 		public void RenderStroke(ref Paint paint, ref Scissor scissor, float fringe, float strokeWidth, ArraySegment<Path> paths)
 		{
-			var call = new CallInfo
-			{
-				Type = CallType.Stroke,
-				PathOffset = _paths.Count,
-				PathCount = paths.Count,
-				Image = (Texture)paint.Image,
-				BlendInfo = BlendInfo.Default
-			};
-
-			for (var i = 0; i < paths.Count; i++)
-			{
-				var path = paths[i];
-
-				var pathInfo = new PathInfo();
-				if (path.Stroke != null && path.Stroke.Value.Count > 0)
-				{
-					pathInfo.StrokeOffset = _vertexArray.Count;
-					pathInfo.StrokeCount = path.Stroke.Value.Count;
-					_vertexArray.Add(path.Stroke.Value);
-				}
-
-				_paths.Add(pathInfo);
-			}
-
-			// Setup uniforms for draw calls
 			if (_stencilStrokes)
 			{
-				// Fill shader
-				BuildUniform(ref paint, ref scissor, strokeWidth, fringe, -1.0f, ref call.UniformInfo);
-				BuildUniform(ref paint, ref scissor, strokeWidth, fringe, 1.0f - 0.5f / 255.0f, ref call.UniformInfo2);
+				var uniformInfo = new UniformInfo();
+				var uniformInfo2 = new UniformInfo();
+
+				BuildUniform(ref paint, ref scissor, strokeWidth, fringe, -1.0f, ref uniformInfo);
+				BuildUniform(ref paint, ref scissor, strokeWidth, fringe, 1.0f - 0.5f / 255.0f, ref uniformInfo2);
+
+				// Fill the stroke base without overlap
+				Env.Gl.Enable(EnableCap.StencilTest);
+				GLUtility.CheckError();
+				Env.Gl.StencilMask(0xff);
+				GLUtility.CheckError();
+				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
+				GLUtility.CheckError();
+				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
+				GLUtility.CheckError();
+
+				SetUniform(ref uniformInfo2, (Texture)paint.Image);
+
+				for (var i = 0; i < paths.Count; i++)
+				{
+					var path = paths[i];
+
+					if (path.Stroke != null)
+					{
+						DrawVertexes(PrimitiveType.TriangleStrip, path.Stroke.Value);
+					}
+				}
+
+				// Draw anti-aliased pixels.
+				SetUniform(ref uniformInfo, (Texture)paint.Image);
+
+				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
+				GLUtility.CheckError();
+				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+				GLUtility.CheckError();
+
+				for (var i = 0; i < paths.Count; i++)
+				{
+					var path = paths[i];
+
+					if (path.Stroke != null)
+					{
+						DrawVertexes(PrimitiveType.TriangleStrip, path.Stroke.Value);
+					}
+				}
+
+				// Clear stencil buffer.
+				Env.Gl.ColorMask(false, false, false, false);
+				GLUtility.CheckError();
+
+				Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xff);
+				GLUtility.CheckError();
+				Env.Gl.StencilOp(StencilOp.Zero, StencilOp.Zero, StencilOp.Zero);
+				GLUtility.CheckError();
+
+				for (var i = 0; i < paths.Count; i++)
+				{
+					var path = paths[i];
+
+					if (path.Stroke != null)
+					{
+						DrawVertexes(PrimitiveType.TriangleStrip, path.Stroke.Value);
+					}
+				}
+
+				Env.Gl.ColorMask(true, true, true, true);
+				GLUtility.CheckError();
+
+				Env.Gl.Disable(EnableCap.StencilTest);
+				GLUtility.CheckError();
 			}
 			else
 			{
-				// Fill shader
-				BuildUniform(ref paint, ref scissor, strokeWidth, fringe, -1.0f, ref call.UniformInfo);
-			}
+				var uniformInfo = new UniformInfo();
 
-			_calls.Add(call);
+				BuildUniform(ref paint, ref scissor, strokeWidth, fringe, -1.0f, ref uniformInfo);
+				SetUniform(ref uniformInfo, (Texture)paint.Image);
+
+				for (var i = 0; i < paths.Count; i++)
+				{
+					var path = paths[i];
+
+					if (path.Stroke != null)
+					{
+						DrawVertexes(PrimitiveType.TriangleStrip, path.Stroke.Value);
+					}
+				}
+			}
 		}
 
 		public void RenderTriangles(ref Paint paint, ref Scissor scissor, float fringe, ArraySegment<Vertex> verts)
 		{
-			var call = new CallInfo
-			{
-				Type = CallType.Triangles,
-				Image = (Texture)paint.Image,
-				BlendInfo = BlendInfo.Default,
-				TriangleOffset = _vertexArray.Count,
-				TriangleCount = verts.Count
-			};
 
-			_vertexArray.Add(verts);
+			var uniformInfo = new UniformInfo();
+			BuildUniform(ref paint, ref scissor, 1.0f, fringe, -1.0f, ref uniformInfo);
+			uniformInfo.type = (int)RenderType.Image;
+			SetUniform(ref uniformInfo, (Texture)paint.Image);
 
-			// Fill shader
-			BuildUniform(ref paint, ref scissor, 1.0f, fringe, -1.0f, ref call.UniformInfo);
-			call.UniformInfo.type = (int)RenderType.Image;
+			DrawVertexes(PrimitiveType.Triangles, verts);
 
-			_calls.Add(call);
 		}
 	}
 }
