@@ -1,6 +1,6 @@
 ﻿namespace NvgSharp
 {
-	public class NvgPoint
+	internal class NvgPoint
 	{
 		public float X;
 		public float Y;

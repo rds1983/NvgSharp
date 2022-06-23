@@ -1,11 +1,13 @@
-﻿using System;
-using FontStashSharp;
-using FontStashSharp.Interfaces;
+﻿using System.Collections.Generic;
 
 #if MONOGAME || FNA
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 #elif STRIDE
 using Stride.Graphics;
+#else
+using FontStashSharp.Interfaces;
+using System.Numerics;
 #endif
 
 namespace NvgSharp
@@ -18,12 +20,6 @@ namespace NvgSharp
 		ITexture2DManager TextureManager { get; }
 #endif
 
-		void Begin();
-		void End();
-
-		void Viewport(float width, float height, float devicePixelRatio);
-		void RenderFill(ref Paint paint, ref Scissor scissor, float fringe, Bounds bounds, ArraySegment<Path> paths);
-		void RenderStroke(ref Paint paint, ref Scissor scissor, float fringe, float strokeWidth, ArraySegment<Path> paths);
-		void RenderTriangles(ref Paint paint, ref Scissor scissor, float fringe, ArraySegment<Vertex> verts);
+		void Draw(Vector2 viewportSize, float devicePixelRatio, IEnumerable<CallInfo> calls, Vertex[] vertexes);
 	}
 }

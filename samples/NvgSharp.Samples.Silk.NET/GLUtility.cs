@@ -63,5 +63,39 @@ namespace NvgSharp
 			m.M31 = m.M32 = m.M33 = m.M34 = 0;
 			m.M41 = m.M42 = m.M43 = m.M44 = 0;
 		}
+
+
+		public static void DrawStroke(this FillStrokeInfo fillStrokeInfo, PrimitiveType primitiveType)
+		{
+			if (fillStrokeInfo.StrokeCount <= 0)
+			{
+				return;
+			}
+
+			Env.Gl.DrawArrays(primitiveType, fillStrokeInfo.StrokeOffset, (uint)fillStrokeInfo.StrokeCount);
+			CheckError();
+		}
+
+		public static void DrawFill(this FillStrokeInfo fillStrokeInfo, PrimitiveType primitiveType)
+		{
+			if (fillStrokeInfo.FillCount <= 0)
+			{
+				return;
+			}
+
+			Env.Gl.DrawArrays(primitiveType, fillStrokeInfo.FillOffset, (uint)fillStrokeInfo.FillCount);
+			CheckError();
+		}
+
+		public static void DrawTriangles(this CallInfo callInfo, PrimitiveType primitiveType)
+		{
+			if (callInfo.TriangleCount <= 0)
+			{
+				return;
+			}
+
+			Env.Gl.DrawArrays(primitiveType, callInfo.TriangleOffset, (uint)callInfo.TriangleCount);
+			CheckError();
+		}
 	}
 }

@@ -645,7 +645,7 @@ namespace NvgSharp.Samples.Demo
 				ay = cy + (float)Math.Sin(a0) * (r0 + r1) * 0.5f;
 				bx = cx + (float)Math.Cos(a1) * (r0 + r1) * 0.5f;
 				by = cy + (float)Math.Sin(a1) * (r0 + r1) * 0.5f;
-				paint = vg.LinearGradient(ax, ay, bx, by, NvgUtility.HSLA(a0 / ((float)Math.PI * 2), 1.0f, 0.55f, 255), NvgUtility.HSLA(a1 / ((float)Math.PI * 2), 1.0f, 0.55f, 255));
+				paint = vg.LinearGradient(ax, ay, bx, by, Utility.HSLA(a0 / ((float)Math.PI * 2), 1.0f, 0.55f, 255), Utility.HSLA(a1 / ((float)Math.PI * 2), 1.0f, 0.55f, 255));
 				vg.FillPaint(paint);
 				vg.Fill();
 			}
@@ -688,7 +688,7 @@ namespace NvgSharp.Samples.Demo
 			vg.LineTo(ax, ay);
 			vg.LineTo(bx, by);
 			vg.ClosePath();
-			paint = vg.LinearGradient(r, 0, ax, ay, NvgUtility.HSLA(hue, 1.0f, 0.5f, 255), Utility.FromRGBA(255, 255, 255, 255));
+			paint = vg.LinearGradient(r, 0, ax, ay, Utility.HSLA(hue, 1.0f, 0.5f, 255), Utility.FromRGBA(255, 255, 255, 255));
 			vg.FillPaint(paint);
 			vg.Fill();
 			paint = vg.LinearGradient((r + ax) * 0.5f, (0 + ay) * 0.5f, bx, by, Utility.FromRGBA(0, 0, 0, 0), Utility.FromRGBA(0, 0, 0, 255));
@@ -845,7 +845,7 @@ namespace NvgSharp.Samples.Demo
 
 			// Draw first rect and set scissor to it's area.
 			vg.Translate(x, y);
-			vg.Rotate(NvgUtility.DegToRad(5));
+			vg.Rotate(Utility.DegToRad(5));
 			vg.BeginPath();
 			vg.Rect(-20, -20, 60, 40);
 			vg.FillColor(Utility.FromRGBA(255, 0, 0, 255));

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NvgSharp
 {
-	public class Path
+	internal class Path
 	{
 		public bool Closed;
 		public int BevelCount;
