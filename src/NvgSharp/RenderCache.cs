@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework;
 using Stride.Core.Mathematics;
 #else
 using System.Numerics;
-using Matrix = System.Numerics.Matrix4x4;
 #endif
 
 namespace NvgSharp
@@ -37,7 +36,7 @@ namespace NvgSharp
 			Calls.Clear();
 		}
 
-		private static void BuildUniform(ref Paint paint, ref Scissor scissor, float width, float fringe, 
+		private static void BuildUniform(ref Paint paint, ref Scissor scissor, float width, float fringe,
 			float strokeThr, ref UniformInfo uniform)
 		{
 			uniform.innerCol = new ColorInfo(paint.InnerColor);
@@ -82,35 +81,29 @@ namespace NvgSharp
 			uniform.paintMat = paint.Transform.BuildInverse().ToMatrix();
 		}
 
-		public void RenderFill(ref Paint paint, ref Scissor scissor, float fringe, Bounds bounds, ArraySegment<Path> paths)
+		public void RenderFill(ref Paint paint, ref Scissor scissor, float fringe, Bounds bounds, IReadOnlyList<Path> paths)
 		{
 			var call = new CallInfo
 			{
 				Type = CallType.Fill
 			};
 
-			if (paths.Count == 1 && paths.Array[paths.Offset].Convex)
+			if (paths.Count == 1 && paths[0].Convex)
 			{
 				call.Type = CallType.ConvexFill;
 			}
 
 			for (var i = 0; i < paths.Count; i++)
 			{
-				var path = paths.Array[i + paths.Offset];
+				var path = paths[i];
 
-				var drawCallInfo = new FillStrokeInfo();
-				if (path.Fill != null && path.Fill.Value.Count > 0)
+				var drawCallInfo = new FillStrokeInfo
 				{
-					drawCallInfo.FillOffset = VertexArray.Count;
-					drawCallInfo.FillCount = path.Fill.Value.Count;
-					VertexArray.Add(path.Fill.Value);
-				}
-				if (path.Stroke != null && path.Stroke.Value.Count > 0)
-				{
-					drawCallInfo.StrokeOffset = VertexArray.Count;
-					drawCallInfo.StrokeCount = path.Stroke.Value.Count;
-					VertexArray.Add(path.Stroke.Value);
-				}
+					FillOffset = path.FillOffset,
+					FillCount = path.FillCount,
+					StrokeOffset = path.StrokeOffset,
+					StrokeCount = path.StrokeCount,
+				};
 
 				call.FillStrokeInfos.Add(drawCallInfo);
 			}
@@ -142,7 +135,7 @@ namespace NvgSharp
 			Calls.Add(call);
 		}
 
-		public void RenderStroke(ref Paint paint, ref Scissor scissor, float fringe, float strokeWidth, ArraySegment<Path> paths)
+		public void RenderStroke(ref Paint paint, ref Scissor scissor, float fringe, float strokeWidth, IReadOnlyList<Path> paths)
 		{
 			var call = new CallInfo
 			{
@@ -151,15 +144,13 @@ namespace NvgSharp
 
 			for (var i = 0; i < paths.Count; i++)
 			{
-				var path = paths.Array[i + paths.Offset];
+				var path = paths[i];
 
-				var drawCallInfo = new FillStrokeInfo();
-				if (path.Stroke != null && path.Stroke.Value.Count > 0)
+				var drawCallInfo = new FillStrokeInfo
 				{
-					drawCallInfo.StrokeOffset = VertexArray.Count;
-					drawCallInfo.StrokeCount = path.Stroke.Value.Count;
-					VertexArray.Add(path.Stroke.Value);
-				}
+					StrokeOffset = path.StrokeOffset,
+					StrokeCount = path.StrokeCount,
+				};
 
 				call.FillStrokeInfos.Add(drawCallInfo);
 			}
@@ -180,16 +171,14 @@ namespace NvgSharp
 			Calls.Add(call);
 		}
 
-		public void RenderTriangles(ref Paint paint, ref Scissor scissor, float fringe, ArraySegment<Vertex> verts)
+		public void RenderTriangles(ref Paint paint, ref Scissor scissor, float fringe, int triangleOffset, int triangleCount)
 		{
 			var call = new CallInfo
 			{
 				Type = CallType.Triangles,
-				TriangleOffset = VertexArray.Count,
-				TriangleCount = verts.Count
+				TriangleOffset = triangleOffset,
+				TriangleCount = triangleCount
 			};
-
-			VertexArray.Add(verts);
 
 			// Fill shader
 			BuildUniform(ref paint, ref scissor, 1.0f, fringe, -1.0f, ref call.UniformInfo);

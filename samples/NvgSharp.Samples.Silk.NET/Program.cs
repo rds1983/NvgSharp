@@ -12,6 +12,7 @@ namespace NvgSharp
 	class Program
 	{
 		private static IWindow window;
+		private static IInputContext input;
 		private static NvgContext nvgContext;
 		private static PerfGraph _perfGraph;
 		private static Demo demo;
@@ -40,7 +41,7 @@ namespace NvgSharp
 
 		private static void OnLoad()
 		{
-			IInputContext input = window.CreateInput();
+			input = window.CreateInput();
 			for (int i = 0; i < input.Keyboards.Count; i++)
 			{
 				input.Keyboards[i].KeyDown += KeyDown;
@@ -68,10 +69,10 @@ namespace NvgSharp
 
 			previousTicks = currentTicks;
 
-			IInputContext input = window.CreateInput();
-
 			var totalElapsedTime = (float)TimeSpan.FromTicks(currentTicks - startTicks).TotalSeconds;
-			demo.renderDemo(nvgContext, input.Mice[0].Position.X, input.Mice[0].Position.Y, window.Size.X, window.Size.Y, totalElapsedTime, false);
+
+			var mousePos = input.Mice[0].Position;
+			demo.renderDemo(nvgContext, mousePos.X, mousePos.Y, window.Size.X, window.Size.Y, totalElapsedTime, false);
 			_perfGraph.Render(nvgContext, 5, 5);
 
 			nvgContext.EndFrame();

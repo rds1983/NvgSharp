@@ -27,9 +27,7 @@ namespace NvgSharp
 		public const int MaxTextRows = 10;
 
 		private readonly IRenderer _renderer;
-		private readonly PathCache _cache;
 		private readonly RenderCache _renderCache;
-		private readonly List<Command> _commands = new List<Command>();
 		private float _commandX;
 		private float _commandY;
 		private float _devicePxRatio;
@@ -40,7 +38,10 @@ namespace NvgSharp
 		private int _statesNumber;
 		private float _tessTol;
 		private Texture2D _lastTextTexture = null;
-
+		private int _lastVertexOffset;
+		private readonly List<Command> _commands = new List<Command>();
+		private readonly List<Path> _pathsCache = new List<Path>();
+		private Bounds _bounds = new Bounds();
 		public bool EdgeAntiAlias => _edgeAntiAlias;
 		public bool StencilStrokes => _renderCache.StencilStrokes;
 
@@ -61,7 +62,6 @@ namespace NvgSharp
 #endif
 			_edgeAntiAlias = edgeAntiAlias;
 
-			_cache = new PathCache();
 			_renderCache = new RenderCache(stencilStrokes);
 			Save();
 			Reset();
@@ -380,7 +380,7 @@ namespace NvgSharp
 		public void BeginPath()
 		{
 			_commands.Clear();
-			__clearPathCache();
+			_pathsCache.Clear();
 		}
 
 		public void MoveTo(float x, float y) => AppendCommand(CommandType.MoveTo, x, y);
@@ -626,8 +626,7 @@ namespace NvgSharp
 			MultiplyAlpha(ref fillPaint.InnerColor, state.Alpha);
 			MultiplyAlpha(ref fillPaint.OuterColor, state.Alpha);
 
-			_renderCache.RenderFill(ref fillPaint, ref state.Scissor, _fringeWidth, _cache.Bounds,
-				_cache.Paths.ToArraySegment());
+			_renderCache.RenderFill(ref fillPaint, ref state.Scissor, _fringeWidth, _bounds, _pathsCache);
 		}
 
 		public void Stroke()
@@ -653,9 +652,8 @@ namespace NvgSharp
 				__expandStroke(strokeWidth * 0.5f, _fringeWidth, state.LineCap, state.LineJoin, state.MiterLimit);
 			else
 				__expandStroke(strokeWidth * 0.5f, 0.0f, state.LineCap, state.LineJoin, state.MiterLimit);
-			_renderCache.RenderStroke(ref strokePaint, ref state.Scissor, _fringeWidth, strokeWidth, _cache.Paths.ToArraySegment());
+			_renderCache.RenderStroke(ref strokePaint, ref state.Scissor, _fringeWidth, strokeWidth, _pathsCache);
 		}
-
 
 		void IFontStashRenderer2.DrawQuad(Texture2D texture,
 			ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight,
@@ -681,7 +679,7 @@ namespace NvgSharp
 			state.Transform.TransformPoint(out px, out py, bottomLeft.Position.X, bottomLeft.Position.Y);
 			var newBottomLeft = new Vertex(px, py, bottomLeft.TextureCoordinate.X, bottomLeft.TextureCoordinate.Y);
 
-			var verts = _cache.Vertexes;
+			var verts = _renderCache.VertexArray;
 			verts.Add(newTopLeft);
 			verts.Add(newBottomRight);
 			verts.Add(newTopRight);
@@ -694,8 +692,7 @@ namespace NvgSharp
 
 		private void FlushText()
 		{
-			var verts = _cache.Vertexes;
-			if (_lastTextTexture == null || verts.Count == 0)
+			if (_lastTextTexture == null || _lastVertexOffset == _renderCache.VertexArray.Count)
 			{
 				return;
 			}
@@ -707,10 +704,10 @@ namespace NvgSharp
 			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
 			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
 
-			_renderCache.RenderTriangles(ref paint, ref state.Scissor, _fringeWidth, verts.ToArraySegment());
+			_renderCache.RenderTriangles(ref paint, ref state.Scissor, _fringeWidth, _lastVertexOffset, _renderCache.VertexArray.Count - _lastVertexOffset);
 
+			_lastVertexOffset = _renderCache.VertexArray.Count;
 			_lastTextTexture = null;
-			verts.Clear();
 		}
 
 		private void Text(SpriteFontBase font, TextSource text, float x, float y,
@@ -722,7 +719,7 @@ namespace NvgSharp
 				return;
 			}
 
-			_cache.Vertexes.Clear();
+			_lastVertexOffset = _renderCache.VertexArray.Count;
 
 			if (horizontalAlignment != TextHorizontalAlignment.Left)
 			{
@@ -823,15 +820,10 @@ namespace NvgSharp
 		private void AppendCommand(float p1, float p2, float p3, float p4, float p5, float p6) => 
 			AppendCommand(new Command(p1, p2, p3, p4, p5, p6));
 
-		private void __clearPathCache()
-		{
-			_cache.Paths.Clear();
-		}
-
 		private Path GetLastPath()
 		{
-			if (_cache.Paths.Count > 0)
-				return _cache.Paths[_cache.Paths.Count - 1];
+			if (_pathsCache.Count > 0)
+				return _pathsCache[_pathsCache.Count - 1];
 			return null;
 		}
 
@@ -842,7 +834,7 @@ namespace NvgSharp
 				Winding = Winding.CounterClockWise
 			};
 
-			_cache.Paths.Add(newPath);
+			_pathsCache.Add(newPath);
 
 			return newPath;
 		}
@@ -890,13 +882,6 @@ namespace NvgSharp
 			path.Winding = winding;
 		}
 
-		private ArraySegment<Vertex> __allocTempVerts(int nverts)
-		{
-			_cache.Vertexes.EnsureSize(nverts);
-
-			return new ArraySegment<Vertex>(_cache.Vertexes.Array);
-		}
-
 		private void __tesselateBezier(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4,
 			int level, PointFlags type)
 		{
@@ -930,7 +915,7 @@ namespace NvgSharp
 
 		private void __flattenPaths()
 		{
-			if (_cache.Paths.Count > 0)
+			if (_pathsCache.Count > 0)
 				return;
 
 			Path lastPath = null;
@@ -966,11 +951,11 @@ namespace NvgSharp
 				}
 			}
 
-			_cache.Bounds.X = _cache.Bounds.Y = 1e6f;
-			_cache.Bounds.X2 = _cache.Bounds.Y2 = -1e6f;
-			for (var j = 0; j < _cache.Paths.Count; j++)
+			_bounds.X = _bounds.Y = 1e6f;
+			_bounds.X2 = _bounds.Y2 = -1e6f;
+			for (var j = 0; j < _pathsCache.Count; j++)
 			{
-				var path = _cache.Paths[j];
+				var path = _pathsCache[j];
 
 				var p0Index = path.Count - 1;
 				var p1Index = 0;
@@ -997,10 +982,10 @@ namespace NvgSharp
 					p0.DeltaX = p1.X - p0.X;
 					p0.DeltaY = p1.Y - p0.Y;
 					p0.Length = NvgUtility.__normalize(ref p0.DeltaX, ref p0.DeltaY);
-					_cache.Bounds.X = NvgUtility.__minf(_cache.Bounds.X, p0.X);
-					_cache.Bounds.Y = NvgUtility.__minf(_cache.Bounds.Y, p0.Y);
-					_cache.Bounds.X2 = NvgUtility.__maxf(_cache.Bounds.X2, p0.X);
-					_cache.Bounds.Y2 = NvgUtility.__maxf(_cache.Bounds.Y2, p0.Y);
+					_bounds.X = NvgUtility.__minf(_bounds.X, p0.X);
+					_bounds.Y = NvgUtility.__minf(_bounds.Y, p0.Y);
+					_bounds.X2 = NvgUtility.__maxf(_bounds.X2, p0.X);
+					_bounds.Y2 = NvgUtility.__maxf(_bounds.Y2, p0.Y);
 					p0Index = p1Index++;
 				}
 			}
@@ -1013,9 +998,9 @@ namespace NvgSharp
 			var iw = 0.0f;
 			if (w > 0.0f)
 				iw = 1.0f / w;
-			for (i = 0; i < _cache.Paths.Count; i++)
+			for (i = 0; i < _pathsCache.Count; i++)
 			{
-				var path = _cache.Paths[i];
+				var path = _pathsCache[i];
 				var p0Index = path.Count - 1;
 				var p1Index = 0;
 				var nleft = 0;
@@ -1082,9 +1067,9 @@ namespace NvgSharp
 
 			__calculateJoins(w, lineJoin, miterLimit);
 			cverts = 0;
-			for (i = 0; i < _cache.Paths.Count; i++)
+			for (i = 0; i < _pathsCache.Count; i++)
 			{
-				var path = _cache.Paths[i];
+				var path = _pathsCache[i];
 				var loop = path.Closed;
 				if (lineJoin == NvgSharp.LineCap.Round)
 					cverts += (path.Points.Count + path.BevelCount * (ncap + 2) + 1) * 2;
@@ -1099,16 +1084,16 @@ namespace NvgSharp
 				}
 			}
 
-			var verts = __allocTempVerts(cverts);
-			for (i = 0; i < _cache.Paths.Count; i++)
+			var verts = _renderCache.VertexArray.Allocate(cverts);
+			for (i = 0; i < _pathsCache.Count; i++)
 			{
-				var path = _cache.Paths[i];
+				var path = _pathsCache[i];
 				var s = 0;
 				var e = 0;
 				var loop = false;
 				float dx = 0;
 				float dy = 0;
-				path.Fill = null;
+				path.FillCount = 0;
 				loop = path.Closed;
 				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
 				{
@@ -1190,10 +1175,11 @@ namespace NvgSharp
 							dst = __roundCapEnd(dst, p1, dx, dy, w, ncap, aa, u0, u1);
 					}
 
-					path.Stroke = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
+					path.StrokeOffset = verts.Offset;
+					path.StrokeCount = (int)(dst - dst2);
 
-					var newPos = verts.Offset + path.Stroke.Value.Count;
-					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
+					var newPos = verts.Offset + path.StrokeCount;
+					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Count - path.StrokeCount);
 				}
 			}
 		}
@@ -1207,19 +1193,19 @@ namespace NvgSharp
 			var fringe = w > 0.0f;
 			__calculateJoins(w, lineJoin, miterLimit);
 			cverts = 0;
-			for (i = 0; i < _cache.Paths.Count; i++)
+			for (i = 0; i < _pathsCache.Count; i++)
 			{
-				var path = _cache.Paths[i];
+				var path = _pathsCache[i];
 				cverts += path.Points.Count + path.BevelCount + 1;
 				if (fringe)
 					cverts += (path.Points.Count + path.BevelCount * 5 + 1) * 2;
 			}
 
-			var verts = __allocTempVerts(cverts);
-			var convex = _cache.Paths.Count == 1 && _cache.Paths[0].Convex;
-			for (i = 0; i < _cache.Paths.Count; i++)
+			var verts = _renderCache.VertexArray.Allocate(cverts);
+			var convex = _pathsCache.Count == 1 && _pathsCache[0].Convex;
+			for (i = 0; i < _pathsCache.Count; i++)
 			{
-				var path = _cache.Paths[i];
+				var path = _pathsCache[i];
 				float rw = 0;
 				float lw = 0;
 				float woff = 0;
@@ -1282,10 +1268,11 @@ namespace NvgSharp
 						}
 					}
 
-					path.Fill = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
+					path.FillOffset = verts.Offset;
+					path.FillCount = (int)(dst - dst2);
 
-					var newPos = verts.Offset + path.Fill.Value.Count;
-					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
+					var newPos = verts.Offset + path.FillCount;
+					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Count - path.FillCount);
 				}
 
 				if (fringe)
@@ -1334,15 +1321,16 @@ namespace NvgSharp
 							ru, 1);
 						dst++;
 
-						path.Stroke = new ArraySegment<Vertex>(verts.Array, verts.Offset, (int)(dst - dst2));
+						path.StrokeOffset = verts.Offset;
+						path.StrokeCount = (int)(dst - dst2);
 
-						var newPos = verts.Offset + path.Stroke.Value.Count;
-						verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Array.Length - newPos);
+						var newPos = verts.Offset + path.StrokeCount;
+						verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Count - path.StrokeCount);
 					}
 				}
 				else
 				{
-					path.Stroke = null;
+					path.StrokeCount = 0;
 				}
 			}
 		}

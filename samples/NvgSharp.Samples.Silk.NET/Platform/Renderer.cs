@@ -32,12 +32,8 @@ namespace NvgSharp.Platform
 			}
 
 			_shader = new Shader("shader.vert", "shader.frag", defines);
-			_shader.Use();
-
 			_vertexBuffer = new BufferObject<Vertex>(MAX_VERTICES, BufferTargetARB.ArrayBuffer, true);
-
 			_vao = new VertexArrayObject(sizeof(Vertex));
-			_vao.Bind();
 		}
 
 		~Renderer() => Dispose(false);

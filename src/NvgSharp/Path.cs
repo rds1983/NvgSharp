@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace NvgSharp
 {
@@ -7,8 +6,8 @@ namespace NvgSharp
 	{
 		public bool Closed;
 		public int BevelCount;
-		public ArraySegment<Vertex>? Fill;
-		public ArraySegment<Vertex>? Stroke;
+		public int FillOffset, FillCount;
+		public int StrokeOffset, StrokeCount;
 		public Winding Winding;
 		public bool Convex;
 		public readonly List<NvgPoint> Points = new List<NvgPoint>();
