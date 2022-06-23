@@ -28,21 +28,21 @@ namespace NvgSharp
 
 		private readonly IRenderer _renderer;
 		private readonly PathCache _cache;
+		private readonly RenderCache _renderCache;
 		private readonly List<Command> _commands = new List<Command>();
 		private float _commandX;
 		private float _commandY;
 		private float _devicePxRatio;
 		private float _distTol;
-		private int _drawCallCount;
 		private readonly bool _edgeAntiAlias;
-		private int _fillTriCount;
 		private float _fringeWidth;
 		private readonly NvgContextState[] _states = new NvgContextState[32];
 		private int _statesNumber;
-		private int _strokeTriCount;
 		private float _tessTol;
-		private int _textTriCount;
 		private Texture2D _lastTextTexture = null;
+
+		public bool EdgeAntiAlias => _edgeAntiAlias;
+		public bool StencilStrokes => _renderCache.StencilStrokes;
 
 #if MONOGAME || FNA || STRIDE
 		public GraphicsDevice GraphicsDevice => _renderer.GraphicsDevice;
@@ -51,16 +51,18 @@ namespace NvgSharp
 #endif
 
 #if MONOGAME || FNA || STRIDE
-		public NvgContext(GraphicsDevice device, bool edgeAntiAlias = true)
+		public NvgContext(GraphicsDevice device, bool edgeAntiAlias = true, bool stencilStrokes = true)
 		{
 			_renderer = new Renderer(device, edgeAntiAlias);
 #else
-		public NvgContext(IRenderer renderer, bool edgeAntiAlias = false)
+		public NvgContext(IRenderer renderer, bool edgeAntiAlias = true, bool stencilStrokes = true)
 		{
 			_renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
 #endif
 			_edgeAntiAlias = edgeAntiAlias;
+
 			_cache = new PathCache();
+			_renderCache = new RenderCache(stencilStrokes);
 			Save();
 			Reset();
 			SetDevicePixelRatio(1.0f);
@@ -73,18 +75,14 @@ namespace NvgSharp
 			Reset();
 			SetDevicePixelRatio(devicePixelRatio);
 
-			_renderer.Begin();
-			_renderer.Viewport(windowWidth, windowHeight, devicePixelRatio);
-			
-			_drawCallCount = 0;
-			_fillTriCount = 0;
-			_strokeTriCount = 0;
-			_textTriCount = 0;
+			_renderCache.ViewportSize = new Vector2(windowWidth, windowHeight);
+			_renderCache.DevicePixelRatio = devicePixelRatio;
+			_renderCache.Reset();
 		}
 
 		public void EndFrame()
 		{
-			_renderer.End();
+			_renderer.Draw(_renderCache.ViewportSize, _renderCache.DevicePixelRatio, _renderCache.Calls, _renderCache.VertexArray.Array);
 		}
 
 		public void Save()
@@ -619,9 +617,7 @@ namespace NvgSharp
 		public void Fill()
 		{
 			var state = GetState();
-			Path path;
 			var fillPaint = state.Fill;
-			var i = 0;
 			__flattenPaths();
 			if (_edgeAntiAlias && state.ShapeAntiAlias != 0)
 				__expandFill(_fringeWidth, NvgSharp.LineCap.Miter, 2.4f);
@@ -629,19 +625,9 @@ namespace NvgSharp
 				__expandFill(0.0f, NvgSharp.LineCap.Miter, 2.4f);
 			MultiplyAlpha(ref fillPaint.InnerColor, state.Alpha);
 			MultiplyAlpha(ref fillPaint.OuterColor, state.Alpha);
-			_renderer.RenderFill(ref fillPaint, ref state.Scissor, _fringeWidth, _cache.Bounds,
+
+			_renderCache.RenderFill(ref fillPaint, ref state.Scissor, _fringeWidth, _cache.Bounds,
 				_cache.Paths.ToArraySegment());
-
-			for (i = 0; i < _cache.Paths.Count; i++)
-			{
-				path = _cache.Paths[i];
-				if (path.Fill != null)
-					_fillTriCount += path.Fill.Value.Count - 2;
-
-				if (path.Stroke != null)
-					_fillTriCount += path.Stroke.Value.Count - 2;
-				_drawCallCount += 2;
-			}
 		}
 
 		public void Stroke()
@@ -650,8 +636,6 @@ namespace NvgSharp
 			var scale = __getAverageScale(ref state.Transform);
 			var strokeWidth = NvgUtility.__clampf(state.StrokeWidth * scale, 0.0f, 200.0f);
 			var strokePaint = state.Stroke;
-			Path path;
-			var i = 0;
 			if (strokeWidth < _fringeWidth)
 			{
 				var alpha = NvgUtility.__clampf(strokeWidth / _fringeWidth, 0.0f, 1.0f);
@@ -669,14 +653,7 @@ namespace NvgSharp
 				__expandStroke(strokeWidth * 0.5f, _fringeWidth, state.LineCap, state.LineJoin, state.MiterLimit);
 			else
 				__expandStroke(strokeWidth * 0.5f, 0.0f, state.LineCap, state.LineJoin, state.MiterLimit);
-			_renderer.RenderStroke(ref strokePaint, ref state.Scissor,
-				_fringeWidth, strokeWidth, _cache.Paths.ToArraySegment());
-			for (i = 0; i < _cache.Paths.Count; i++)
-			{
-				path = _cache.Paths[i];
-				_strokeTriCount += path.Stroke.Value.Count - 2;
-				_drawCallCount++;
-			}
+			_renderCache.RenderStroke(ref strokePaint, ref state.Scissor, _fringeWidth, strokeWidth, _cache.Paths.ToArraySegment());
 		}
 
 
@@ -730,9 +707,7 @@ namespace NvgSharp
 			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
 			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
 
-			_renderer.RenderTriangles(ref paint, ref state.Scissor, _fringeWidth, verts.ToArraySegment());
-			_drawCallCount++;
-			_textTriCount += verts.Count / 3;
+			_renderCache.RenderTriangles(ref paint, ref state.Scissor, _fringeWidth, verts.ToArraySegment());
 
 			_lastTextTexture = null;
 			verts.Clear();

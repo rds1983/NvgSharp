@@ -18,7 +18,6 @@ uniform float radius;
 uniform float feather;
 uniform float strokeMult;
 uniform float strokeThr;
-uniform int texType;
 uniform int type;
 
 // Varyings
@@ -68,8 +67,7 @@ void main(void) {
 		// Calculate color fron texture
 		vec2 pt = (paintMat * vec4(fpos,0,1)).xy / extent;
 		vec4 color = texture2D(tex, pt);
-		if (texType == 1) color = vec4(color.xyz*color.w,color.w);
-		if (texType == 2) color = vec4(color.x);
+		color = vec4(color.xyz*color.w,color.w);
 		
 		// Apply color tint and alpha.
 		color *= innerCol;
@@ -82,8 +80,6 @@ void main(void) {
 	} else if (type == 3) {
 		// Textured tris
 		vec4 color = texture2D(tex, ftcoord);
-		if (texType == 1) color = color;
-		if (texType == 2) color = vec4(color.x);
 		color *= scissor;
 		result = color * innerCol;
 	}

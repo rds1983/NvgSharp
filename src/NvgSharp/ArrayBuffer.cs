@@ -2,7 +2,7 @@
 
 namespace NvgSharp
 {
-	public class ArrayBuffer<T>
+	internal class ArrayBuffer<T>
 	{
 		private T[] _array;
 		private int _count = 0;

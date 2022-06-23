@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework;
 using Stride.Core.Mathematics;
 #else
 using System.Numerics;
-using Matrix = System.Numerics.Matrix3x2;
 #endif
 
 namespace NvgSharp
@@ -144,5 +143,51 @@ namespace NvgSharp
 		{
 			TransformPoint(out v.X, out v.Y, s.X, s.Y);
 		}
+
+#if MONOGAME || FNA || STRIDE
+		public Matrix ToMatrix()
+		{
+			var m3 = Matrix.Identity;
+
+			m3.M11 = T1;
+			m3.M21 = T2;
+			m3.M31 = 0.0f;
+			m3.M41 = 0.0f;
+			m3.M12 = T3;
+			m3.M22 = T4;
+			m3.M32 = 0.0f;
+			m3.M42 = 0.0f;
+			m3.M13 = T5;
+			m3.M23 = T6;
+			m3.M33 = 1.0f;
+			m3.M43 = 0.0f;
+
+			return m3;
+		}
+#else
+		public Matrix4x4 ToMatrix()
+		{
+			var result = Matrix4x4.Identity;
+
+			result.M11 = T1;
+			result.M12 = T2;
+			result.M13 = 0f;
+			result.M14 = 0f;
+			result.M21 = T3;
+			result.M22 = T4;
+			result.M23 = 0f;
+			result.M24 = 0f;
+			result.M31 = 0f;
+			result.M32 = 0f;
+			result.M33 = 1f;
+			result.M34 = 0f;
+			result.M41 = T5;
+			result.M42 = T6;
+			result.M43 = 0f;
+			result.M44 = 1f;
+
+			return result;
+		}
+#endif
 	}
 }
