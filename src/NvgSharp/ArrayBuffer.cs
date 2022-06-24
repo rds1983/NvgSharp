@@ -72,17 +72,5 @@ namespace NvgSharp
 			System.Array.Copy(data.Array, data.Offset, _array, _count, data.Count);
 			_count += data.Count;
 		}
-
-		public ArraySegment<T> Allocate(int size)
-		{
-			EnsureSize(_count + size);
-
-			var offset = _count;
-			_count += size;
-
-			return new ArraySegment<T>(_array, offset, size);
-		}
-
-		public ArraySegment<T> ToArraySegment() => new ArraySegment<T>(Array, 0, Count);
 	}
 }

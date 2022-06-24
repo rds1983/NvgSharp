@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace NvgSharp.Platform
 {
-	internal class Renderer : IRenderer
+	internal class Renderer : INvgRenderer
 	{
 		private const int MAX_VERTICES = 8192;
 
@@ -56,8 +56,8 @@ namespace NvgSharp.Platform
 		{
 			_shader.SetUniform("scissorMat", uniform.scissorMat);
 			_shader.SetUniform("paintMat", uniform.paintMat);
-			_shader.SetUniform("innerCol", uniform.innerCol.ToVector4());
-			_shader.SetUniform("outerCol", uniform.outerCol.ToVector4());
+			_shader.SetUniform("innerCol", uniform.innerCol);
+			_shader.SetUniform("outerCol", uniform.outerCol);
 			_shader.SetUniform("scissorExt", uniform.scissorExt);
 			_shader.SetUniform("scissorScale", uniform.scissorScale);
 			_shader.SetUniform("extent", uniform.extent);

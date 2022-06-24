@@ -17,8 +17,21 @@ using Texture2D = System.Object;
 
 namespace NvgSharp
 {
-	public unsafe class NvgContext : IFontStashRenderer2
+	public class NvgContext : IFontStashRenderer2
 	{
+		private struct RectF
+		{
+			public float X, Y, Width, Height;
+
+			public RectF(float x, float y, float width, float height)
+			{
+				X = x;
+				Y = y;
+				Width = width;
+				Height = height;
+			}
+		}
+
 		/// <summary>
 		/// Length proportional to radius of a cubic bezier handle for 90deg arcs
 		/// </summary>
@@ -26,7 +39,7 @@ namespace NvgSharp
 
 		public const int MaxTextRows = 10;
 
-		private readonly IRenderer _renderer;
+		private readonly INvgRenderer _renderer;
 		private readonly RenderCache _renderCache;
 		private float _commandX;
 		private float _commandY;
@@ -54,9 +67,9 @@ namespace NvgSharp
 #if MONOGAME || FNA || STRIDE
 		public NvgContext(GraphicsDevice device, bool edgeAntiAlias = true, bool stencilStrokes = true)
 		{
-			_renderer = new Renderer(device, edgeAntiAlias);
+			_renderer = new XNARenderer(device, edgeAntiAlias);
 #else
-		public NvgContext(IRenderer renderer, bool edgeAntiAlias = true, bool stencilStrokes = true)
+		public NvgContext(INvgRenderer renderer, bool edgeAntiAlias = true, bool stencilStrokes = true)
 		{
 			_renderer = renderer ?? throw new ArgumentNullException(nameof(renderer));
 #endif
@@ -345,28 +358,21 @@ namespace NvgSharp
 		public void IntersectScissor(float x, float y, float w, float h)
 		{
 			var state = GetState();
-			var pxform = new Transform();
-			var invxorm = new Transform();
-			var rect = stackalloc float[4];
-			float ex = 0;
-			float ey = 0;
-			float tex = 0;
-			float tey = 0;
 			if (state.Scissor.Extent.X < 0)
 			{
 				Scissor(x, y, w, h);
 				return;
 			}
 
-			pxform = state.Scissor.Transform;
-			ex = state.Scissor.Extent.X;
-			ey = state.Scissor.Extent.Y;
-			invxorm = state.Transform.BuildInverse();
+			var pxform = state.Scissor.Transform;
+			var ex = state.Scissor.Extent.X;
+			var ey = state.Scissor.Extent.Y;
+			var invxorm = state.Transform.BuildInverse();
 			pxform.Multiply(ref invxorm);
-			tex = ex * NvgUtility.__absf(pxform.T1) + ey * NvgUtility.__absf(pxform.T3);
-			tey = ex * NvgUtility.__absf(pxform.T2) + ey * NvgUtility.__absf(pxform.T4);
-			__isectRects(rect, pxform.T5 - tex, pxform.T6 - tey, tex * 2, tey * 2, x, y, w, h);
-			Scissor(rect[0], rect[1], rect[2], rect[3]);
+			var tex = ex * NvgUtility.__absf(pxform.T1) + ey * NvgUtility.__absf(pxform.T3);
+			var tey = ex * NvgUtility.__absf(pxform.T2) + ey * NvgUtility.__absf(pxform.T4);
+			var rect = __isectRects(pxform.T5 - tex, pxform.T6 - tey, tex * 2, tey * 2, x, y, w, h);
+			Scissor(rect.X, rect.Y, rect.Width, rect.Height);
 		}
 
 		public void ResetScissor()
@@ -456,25 +462,12 @@ namespace NvgSharp
 
 		public void Arc(float cx, float cy, float r, float a0, float a1, Winding dir)
 		{
-			var a = (float)0;
-			var da = (float)0;
-			var hda = (float)0;
-			var kappa = (float)0;
-			var dx = (float)0;
-			var dy = (float)0;
-			var x = (float)0;
-			var y = (float)0;
-			var tanx = (float)0;
-			var tany = (float)0;
 			var px = (float)0;
 			var py = (float)0;
 			var ptanx = (float)0;
 			var ptany = (float)0;
-			var vals = stackalloc float[3 + 5 * 7 + 100];
-			var i = 0;
-			var ndivs = 0;
 			var move = _commands.Count > 0 ? CommandType.LineTo : CommandType.MoveTo;
-			da = a1 - a0;
+			var da = a1 - a0;
 			if (dir == Winding.ClockWise)
 			{
 				if (NvgUtility.__absf(da) >= 3.14159274 * 2)
@@ -492,21 +485,21 @@ namespace NvgSharp
 						da -= (float)(3.14159274 * 2);
 			}
 
-			ndivs = NvgUtility.__maxi(1,
+			var ndivs = NvgUtility.__maxi(1,
 				NvgUtility.__mini((int)(NvgUtility.__absf(da) / (3.14159274 * 0.5f) + 0.5f), 5));
-			hda = da / ndivs / 2.0f;
-			kappa = NvgUtility.__absf(4.0f / 3.0f * (1.0f - NvgUtility.cosf(hda)) / NvgUtility.sinf(hda));
+			var hda = da / ndivs / 2.0f;
+			var kappa = NvgUtility.__absf(4.0f / 3.0f * (1.0f - NvgUtility.cosf(hda)) / NvgUtility.sinf(hda));
 			if (dir == Winding.CounterClockWise)
 				kappa = -kappa;
-			for (i = 0; i <= ndivs; i++)
+			for (var i = 0; i <= ndivs; i++)
 			{
-				a = a0 + da * (i / (float)ndivs);
-				dx = NvgUtility.cosf(a);
-				dy = NvgUtility.sinf(a);
-				x = cx + dx * r;
-				y = cy + dy * r;
-				tanx = -dy * r * kappa;
-				tany = dx * r * kappa;
+				var a = a0 + da * (i / (float)ndivs);
+				var dx = NvgUtility.cosf(a);
+				var dy = NvgUtility.sinf(a);
+				var x = cx + dx * r;
+				var y = cy + dy * r;
+				var tanx = -dy * r * kappa;
+				var tany = dx * r * kappa;
 				if (i == 0)
 				{
 					AppendCommand(move, x, y);
@@ -692,7 +685,7 @@ namespace NvgSharp
 
 		private void FlushText()
 		{
-			if (_lastTextTexture == null || _lastVertexOffset == _renderCache.VertexArray.Count)
+			if (_lastTextTexture == null || _lastVertexOffset == _renderCache.VertexCount)
 			{
 				return;
 			}
@@ -704,9 +697,9 @@ namespace NvgSharp
 			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
 			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
 
-			_renderCache.RenderTriangles(ref paint, ref state.Scissor, _fringeWidth, _lastVertexOffset, _renderCache.VertexArray.Count - _lastVertexOffset);
+			_renderCache.RenderTriangles(ref paint, ref state.Scissor, _fringeWidth, _lastVertexOffset, _renderCache.VertexCount - _lastVertexOffset);
 
-			_lastVertexOffset = _renderCache.VertexArray.Count;
+			_lastVertexOffset = _renderCache.VertexCount;
 			_lastTextTexture = null;
 		}
 
@@ -719,7 +712,7 @@ namespace NvgSharp
 				return;
 			}
 
-			_lastVertexOffset = _renderCache.VertexArray.Count;
+			_lastVertexOffset = _renderCache.VertexCount;
 
 			if (horizontalAlignment != TextHorizontalAlignment.Left)
 			{
@@ -1051,9 +1044,6 @@ namespace NvgSharp
 
 		private void __expandStroke(float w, float fringe, LineCap lineCap, LineCap lineJoin, float miterLimit)
 		{
-			var cverts = 0;
-			var i = 0;
-			var j = 0;
 			var aa = fringe;
 			var u0 = 0.0f;
 			var u1 = 1.0f;
@@ -1066,267 +1056,201 @@ namespace NvgSharp
 			}
 
 			__calculateJoins(w, lineJoin, miterLimit);
-			cverts = 0;
-			for (i = 0; i < _pathsCache.Count; i++)
-			{
-				var path = _pathsCache[i];
-				var loop = path.Closed;
-				if (lineJoin == NvgSharp.LineCap.Round)
-					cverts += (path.Points.Count + path.BevelCount * (ncap + 2) + 1) * 2;
-				else
-					cverts += (path.Points.Count + path.BevelCount * 5 + 1) * 2;
-				if (!loop)
-				{
-					if (lineCap == NvgSharp.LineCap.Round)
-						cverts += (ncap * 2 + 2) * 2;
-					else
-						cverts += (3 + 3) * 2;
-				}
-			}
 
-			var verts = _renderCache.VertexArray.Allocate(cverts);
-			for (i = 0; i < _pathsCache.Count; i++)
+			for (var i = 0; i < _pathsCache.Count; i++)
 			{
+				var vertexOffset = _renderCache.VertexCount;
 				var path = _pathsCache[i];
-				var s = 0;
-				var e = 0;
-				var loop = false;
 				float dx = 0;
 				float dy = 0;
 				path.FillCount = 0;
-				loop = path.Closed;
-				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
+				var loop = path.Closed;
+				
+				int p0Index, p1Index;
+				int s;
+				int e;
+				if (loop)
 				{
-					var dst = dst2;
-					int p0Index, p1Index;
-					if (loop)
-					{
-						p0Index = path.Count - 1;
-						p1Index = 0;
-						s = 0;
-						e = path.Points.Count;
-					}
-					else
-					{
-						p0Index = 0;
-						p1Index = 1;
-						s = 1;
-						e = path.Points.Count - 1;
-					}
-
-					var p0 = path[p0Index];
-					var p1 = path[p1Index];
-					if (!loop)
-					{
-						dx = p1.X - p0.X;
-						dy = p1.Y - p0.Y;
-						NvgUtility.__normalize(ref dx, ref dy);
-						if (lineCap == NvgSharp.LineCap.Butt)
-							dst = __buttCapStart(dst, p0, dx, dy, w, -aa * 0.5f, aa, u0, u1);
-						else if (lineCap == NvgSharp.LineCap.Butt || lineCap == NvgSharp.LineCap.Square)
-							dst = __buttCapStart(dst, p0, dx, dy, w, w - aa, aa, u0, u1);
-						else if (lineCap == NvgSharp.LineCap.Round)
-							dst = __roundCapStart(dst, p0, dx, dy, w, ncap, aa, u0, u1);
-					}
-
-					for (j = s; j < e; ++j)
-					{
-						p0 = path[p0Index];
-						p1 = path[p1Index];
-						if ((p1.flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
-						{
-							if (lineJoin == NvgSharp.LineCap.Round)
-								dst = __roundJoin(dst, p0, p1, w, w, u0, u1, ncap, aa);
-							else
-								dst = __bevelJoin(dst, p0, p1, w, w, u0, u1, aa);
-						}
-						else
-						{
-							__vset(dst, p1.X + p1.dmx * w, p1.Y + p1.dmy * w, u0, 1);
-							dst++;
-							__vset(dst, p1.X - p1.dmx * w, p1.Y - p1.dmy * w, u1, 1);
-							dst++;
-						}
-
-						p0Index = p1Index++;
-					}
-
-					if (loop)
-					{
-						__vset(dst, verts.Array[verts.Offset].Position.X, verts.Array[verts.Offset].Position.Y, u0, 1);
-						dst++;
-						__vset(dst, verts.Array[verts.Offset + 1].Position.X, verts.Array[verts.Offset + 1].Position.Y,
-							u1, 1);
-						dst++;
-					}
-					else
-					{
-						p0 = path[p0Index];
-						p1 = path[p1Index];
-
-						dx = p1.X - p0.X;
-						dy = p1.Y - p0.Y;
-						NvgUtility.__normalize(ref dx, ref dy);
-						if (lineCap == NvgSharp.LineCap.Butt)
-							dst = __buttCapEnd(dst, p1, dx, dy, w, -aa * 0.5f, aa, u0, u1);
-						else if (lineCap == NvgSharp.LineCap.Butt || lineCap == NvgSharp.LineCap.Square)
-							dst = __buttCapEnd(dst, p1, dx, dy, w, w - aa, aa, u0, u1);
-						else if (lineCap == NvgSharp.LineCap.Round)
-							dst = __roundCapEnd(dst, p1, dx, dy, w, ncap, aa, u0, u1);
-					}
-
-					path.StrokeOffset = verts.Offset;
-					path.StrokeCount = (int)(dst - dst2);
-
-					var newPos = verts.Offset + path.StrokeCount;
-					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Count - path.StrokeCount);
+					p0Index = path.Count - 1;
+					p1Index = 0;
+					s = 0;
+					e = path.Points.Count;
 				}
+				else
+				{
+					p0Index = 0;
+					p1Index = 1;
+					s = 1;
+					e = path.Points.Count - 1;
+				}
+
+				var p0 = path[p0Index];
+				var p1 = path[p1Index];
+				if (!loop)
+				{
+					dx = p1.X - p0.X;
+					dy = p1.Y - p0.Y;
+					NvgUtility.__normalize(ref dx, ref dy);
+					if (lineCap == NvgSharp.LineCap.Butt)
+						__buttCapStart(p0, dx, dy, w, -aa * 0.5f, aa, u0, u1);
+					else if (lineCap == NvgSharp.LineCap.Butt || lineCap == NvgSharp.LineCap.Square)
+						__buttCapStart(p0, dx, dy, w, w - aa, aa, u0, u1);
+					else if (lineCap == NvgSharp.LineCap.Round)
+						__roundCapStart(p0, dx, dy, w, ncap, aa, u0, u1);
+				}
+
+				for (var j = s; j < e; ++j)
+				{
+					p0 = path[p0Index];
+					p1 = path[p1Index];
+					if ((p1.flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
+					{
+						if (lineJoin == NvgSharp.LineCap.Round)
+							__roundJoin(p0, p1, w, w, u0, u1, ncap, aa);
+						else
+							__bevelJoin(p0, p1, w, w, u0, u1, aa);
+					}
+					else
+					{
+						_renderCache.AddVertex(p1.X + p1.dmx * w, p1.Y + p1.dmy * w, u0, 1);
+						_renderCache.AddVertex(p1.X - p1.dmx * w, p1.Y - p1.dmy * w, u1, 1);
+					}
+
+					p0Index = p1Index++;
+				}
+
+				if (loop)
+				{
+					var v = _renderCache.VertexArray[vertexOffset];
+					_renderCache.AddVertex(v.Position.X, v.Position.Y, u0, 1);
+					v = _renderCache.VertexArray[vertexOffset + 1];
+					_renderCache.AddVertex(v.Position.X, v.Position.Y, u1, 1);
+				}
+				else
+				{
+					p0 = path[p0Index];
+					p1 = path[p1Index];
+
+					dx = p1.X - p0.X;
+					dy = p1.Y - p0.Y;
+					NvgUtility.__normalize(ref dx, ref dy);
+					if (lineCap == NvgSharp.LineCap.Butt)
+						__buttCapEnd(p1, dx, dy, w, -aa * 0.5f, aa, u0, u1);
+					else if (lineCap == NvgSharp.LineCap.Butt || lineCap == NvgSharp.LineCap.Square)
+						__buttCapEnd(p1, dx, dy, w, w - aa, aa, u0, u1);
+					else if (lineCap == NvgSharp.LineCap.Round)
+						__roundCapEnd(p1, dx, dy, w, ncap, aa, u0, u1);
+				}
+
+				path.StrokeOffset = vertexOffset;
+				path.StrokeCount = _renderCache.VertexCount - vertexOffset;
 			}
 		}
 
 		private void __expandFill(float w, LineCap lineJoin, float miterLimit)
 		{
-			var cverts = 0;
-			var i = 0;
-			var j = 0;
 			var aa = _fringeWidth;
 			var fringe = w > 0.0f;
 			__calculateJoins(w, lineJoin, miterLimit);
-			cverts = 0;
-			for (i = 0; i < _pathsCache.Count; i++)
-			{
-				var path = _pathsCache[i];
-				cverts += path.Points.Count + path.BevelCount + 1;
-				if (fringe)
-					cverts += (path.Points.Count + path.BevelCount * 5 + 1) * 2;
-			}
 
-			var verts = _renderCache.VertexArray.Allocate(cverts);
 			var convex = _pathsCache.Count == 1 && _pathsCache[0].Convex;
-			for (i = 0; i < _pathsCache.Count; i++)
+			for (var i = 0; i < _pathsCache.Count; i++)
 			{
+				var vertexOffset = _renderCache.VertexCount;
 				var path = _pathsCache[i];
-				float rw = 0;
-				float lw = 0;
-				float woff = 0;
-				float ru = 0;
-				float lu = 0;
-				woff = 0.5f * aa;
-				fixed (Vertex* dst2 = &verts.Array[verts.Offset])
+				var woff = 0.5f * aa;
+				if (fringe)
 				{
-					var dst = dst2;
-					if (fringe)
+					var p0Index = path.Count - 1;
+					var p1Index = 0;
+					for (var j = 0; j < path.Points.Count; ++j)
 					{
-						var p0Index = path.Count - 1;
-						var p1Index = 0;
-						for (j = 0; j < path.Points.Count; ++j)
-						{
-							var p0 = path[p0Index];
-							var p1 = path[p1Index];
+						var p0 = path[p0Index];
+						var p1 = path[p1Index];
 
-							if ((p1.flags & (byte)PointFlags.Bevel) != 0)
+						if ((p1.flags & (byte)PointFlags.Bevel) != 0)
+						{
+							var dlx0 = p0.DeltaY;
+							var dly0 = -p0.DeltaX;
+							var dlx1 = p1.DeltaY;
+							var dly1 = -p1.DeltaX;
+							if ((p1.flags & (byte)PointFlags.Left) != 0)
 							{
-								var dlx0 = p0.DeltaY;
-								var dly0 = -p0.DeltaX;
-								var dlx1 = p1.DeltaY;
-								var dly1 = -p1.DeltaX;
-								if ((p1.flags & (byte)PointFlags.Left) != 0)
-								{
-									var lx = p1.X + p1.dmx * woff;
-									var ly = p1.Y + p1.dmy * woff;
-									__vset(dst, lx, ly, 0.5f, 1);
-									dst++;
-								}
-								else
-								{
-									var lx0 = p1.X + dlx0 * woff;
-									var ly0 = p1.Y + dly0 * woff;
-									var lx1 = p1.X + dlx1 * woff;
-									var ly1 = p1.Y + dly1 * woff;
-									__vset(dst, lx0, ly0, 0.5f, 1);
-									dst++;
-									__vset(dst, lx1, ly1, 0.5f, 1);
-									dst++;
-								}
+								var lx = p1.X + p1.dmx * woff;
+								var ly = p1.Y + p1.dmy * woff;
+								_renderCache.AddVertex(lx, ly, 0.5f, 1);
 							}
 							else
 							{
-								__vset(dst, p1.X + p1.dmx * woff, p1.Y + p1.dmy * woff, 0.5f, 1);
-								dst++;
+								var lx0 = p1.X + dlx0 * woff;
+								var ly0 = p1.Y + dly0 * woff;
+								var lx1 = p1.X + dlx1 * woff;
+								var ly1 = p1.Y + dly1 * woff;
+								_renderCache.AddVertex(lx0, ly0, 0.5f, 1);
+								_renderCache.AddVertex(lx1, ly1, 0.5f, 1);
 							}
-
-							p0Index = p1Index++;
 						}
-					}
-					else
-					{
-						for (j = 0; j < path.Count; ++j)
+						else
 						{
-							var p = path[j];
-							__vset(dst, p.X, p.Y, 0.5f, 1);
-							dst++;
+							_renderCache.AddVertex(p1.X + p1.dmx * woff, p1.Y + p1.dmy * woff, 0.5f, 1);
 						}
+
+						p0Index = p1Index++;
 					}
-
-					path.FillOffset = verts.Offset;
-					path.FillCount = (int)(dst - dst2);
-
-					var newPos = verts.Offset + path.FillCount;
-					verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Count - path.FillCount);
+				}
+				else
+				{
+					for (var j = 0; j < path.Count; ++j)
+					{
+						var p = path[j];
+						_renderCache.AddVertex(p.X, p.Y, 0.5f, 1);
+					}
 				}
 
+				path.FillOffset = vertexOffset;
+				path.FillCount = _renderCache.VertexCount - vertexOffset;
+
+				vertexOffset = _renderCache.VertexCount;
 				if (fringe)
 				{
-					lw = w + woff;
-					rw = w - woff;
-					lu = 0;
-					ru = 1;
-					fixed (Vertex* dst2 = &verts.Array[verts.Offset])
+					var lw = w + woff;
+					var rw = w - woff;
+					var lu = 0.0f;
+					var ru = 1.0f;
+
+					if (convex)
 					{
-						var dst = dst2;
-						if (convex)
-						{
-							lw = woff;
-							lu = 0.5f;
-						}
-
-						var p0Index = path.Count - 1;
-						var p1Index = 0;
-						for (j = 0; j < path.Points.Count; ++j)
-						{
-							var p0 = path[p0Index];
-							var p1 = path[p1Index];
-
-							if ((p1.flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
-							{
-								dst = __bevelJoin(dst, p0, p1, lw, rw, lu, ru, _fringeWidth);
-							}
-							else
-							{
-								__vset(dst, p1.X + p1.dmx * lw, p1.Y + p1.dmy * lw, lu, 1);
-								dst++;
-								__vset(dst, p1.X - p1.dmx * rw, p1.Y - p1.dmy * rw, ru, 1);
-								dst++;
-							}
-
-							p0Index = p1Index++;
-						}
-
-						__vset(dst, verts.Array[verts.Offset].Position.X,
-							verts.Array[verts.Offset].Position.Y,
-							lu, 1);
-						dst++;
-						__vset(dst, verts.Array[verts.Offset + 1].Position.X,
-							verts.Array[verts.Offset + 1].Position.Y,
-							ru, 1);
-						dst++;
-
-						path.StrokeOffset = verts.Offset;
-						path.StrokeCount = (int)(dst - dst2);
-
-						var newPos = verts.Offset + path.StrokeCount;
-						verts = new ArraySegment<Vertex>(verts.Array, newPos, verts.Count - path.StrokeCount);
+						lw = woff;
+						lu = 0.5f;
 					}
+
+					var p0Index = path.Count - 1;
+					var p1Index = 0;
+					for (var j = 0; j < path.Points.Count; ++j)
+					{
+						var p0 = path[p0Index];
+						var p1 = path[p1Index];
+
+						if ((p1.flags & (byte)(PointFlags.Bevel | PointFlags.InnerBevel)) != 0)
+						{
+							__bevelJoin(p0, p1, lw, rw, lu, ru, _fringeWidth);
+						}
+						else
+						{
+							_renderCache.AddVertex(p1.X + p1.dmx * lw, p1.Y + p1.dmy * lw, lu, 1);
+							_renderCache.AddVertex(p1.X - p1.dmx * rw, p1.Y - p1.dmy * rw, ru, 1);
+						}
+
+						p0Index = p1Index++;
+					}
+
+					var v = _renderCache.VertexArray[vertexOffset];
+					_renderCache.AddVertex(v.Position.X, v.Position.Y, lu, 1);
+					v = _renderCache.VertexArray[vertexOffset + 1];
+					_renderCache.AddVertex(v.Position.X, v.Position.Y, ru, 1);
+
+					path.StrokeOffset = vertexOffset;
+					path.StrokeCount = _renderCache.VertexCount - vertexOffset;
 				}
 				else
 				{
@@ -1373,30 +1297,14 @@ namespace NvgSharp
 			}
 		}
 
-		private static void __vset(Vertex* vtx, float x, float y, float u, float v)
-		{
-			__vset(ref *vtx, x, y, u, v);
-		}
-
-		private static void __vset(ref Vertex vtx, float x, float y, float u, float v)
-		{
-			vtx.Position.X = x;
-			vtx.Position.Y = y;
-			vtx.TextureCoordinate.X = u;
-			vtx.TextureCoordinate.Y = v;
-		}
-
-		private static void __isectRects(float* dst, float ax, float ay, float aw, float ah, float bx, float by,
-			float bw, float bh)
+		private static RectF __isectRects(float ax, float ay, float aw, float ah, float bx, float by, float bw, float bh)
 		{
 			var minx = NvgUtility.__maxf(ax, bx);
 			var miny = NvgUtility.__maxf(ay, by);
 			var maxx = NvgUtility.__minf(ax + aw, bx + bw);
 			var maxy = NvgUtility.__minf(ay + ah, by + bh);
-			dst[0] = minx;
-			dst[1] = miny;
-			dst[2] = NvgUtility.__maxf(0.0f, maxx - minx);
-			dst[3] = NvgUtility.__maxf(0.0f, maxy - miny);
+
+			return new RectF(minx, miny, NvgUtility.__maxf(0.0f, maxx - minx), NvgUtility.__maxf(0.0f, maxy - miny));
 		}
 
 		private static float __getAverageScale(ref Transform t)
@@ -1412,247 +1320,169 @@ namespace NvgSharp
 			return NvgUtility.__maxi(2, (int)NvgUtility.ceilf(arc / da));
 		}
 
-		private static void __chooseBevel(int bevel, NvgPoint p0, NvgPoint p1, float w, float* x0, float* y0,
-			float* x1, float* y1)
+		private static Bounds __chooseBevel(int bevel, NvgPoint p0, NvgPoint p1, float w)
 		{
+			var result = new Bounds();
 			if (bevel != 0)
 			{
-				*x0 = p1.X + p0.DeltaY * w;
-				*y0 = p1.Y - p0.DeltaX * w;
-				*x1 = p1.X + p1.DeltaY * w;
-				*y1 = p1.Y - p1.DeltaX * w;
+				result.X = p1.X + p0.DeltaY * w;
+				result.Y = p1.Y - p0.DeltaX * w;
+				result.X2 = p1.X + p1.DeltaY * w;
+				result.Y2 = p1.Y - p1.DeltaX * w;
 			}
 			else
 			{
-				*x0 = p1.X + p1.dmx * w;
-				*y0 = p1.Y + p1.dmy * w;
-				*x1 = p1.X + p1.dmx * w;
-				*y1 = p1.Y + p1.dmy * w;
+				result.X = p1.X + p1.dmx * w;
+				result.Y = p1.Y + p1.dmy * w;
+				result.X2 = p1.X + p1.dmx * w;
+				result.Y2 = p1.Y + p1.dmy * w;
 			}
+
+			return result;
 		}
 
-		private static Vertex* __roundJoin(Vertex* dst, NvgPoint p0, NvgPoint p1, float lw, float rw, float lu,
-			float ru, int ncap, float fringe)
+		private void __roundJoin(NvgPoint p0, NvgPoint p1, float lw, float rw, float lu, float ru, int ncap, float fringe)
 		{
-			var i = 0;
-			var n = 0;
 			var dlx0 = p0.DeltaY;
 			var dly0 = -p0.DeltaX;
 			var dlx1 = p1.DeltaY;
 			var dly1 = -p1.DeltaX;
 			if ((p1.flags & (byte)PointFlags.Left) != 0)
 			{
-				float lx0 = 0;
-				float ly0 = 0;
-				float lx1 = 0;
-				float ly1 = 0;
-				float a0 = 0;
-				float a1 = 0;
-				__chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
-				a0 = NvgUtility.atan2f(-dly0, -dlx0);
-				a1 = NvgUtility.atan2f(-dly1, -dlx1);
+				var bounds =  __chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, lw);
+				var a0 = NvgUtility.atan2f(-dly0, -dlx0);
+				var a1 = NvgUtility.atan2f(-dly1, -dlx1);
 				if (a1 > a0)
 					a1 -= (float)(3.14159274 * 2);
-				__vset(dst, lx0, ly0, lu, 1);
-				dst++;
-				__vset(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
-				dst++;
-				n = NvgUtility.__clampi((int)NvgUtility.ceilf((float)((a0 - a1) / 3.14159274 * ncap)), 2, ncap);
-				for (i = 0; i < n; i++)
+				_renderCache.AddVertex(bounds.X, bounds.Y, lu, 1);
+				_renderCache.AddVertex(p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
+				var n = NvgUtility.__clampi((int)NvgUtility.ceilf((float)((a0 - a1) / 3.14159274 * ncap)), 2, ncap);
+				for (var i = 0; i < n; i++)
 				{
 					var u = i / (float)(n - 1);
 					var a = a0 + u * (a1 - a0);
 					var rx = p1.X + NvgUtility.cosf(a) * rw;
 					var ry = p1.Y + NvgUtility.sinf(a) * rw;
-					__vset(dst, p1.X, p1.Y, 0.5f, 1);
-					dst++;
-					__vset(dst, rx, ry, ru, 1);
-					dst++;
+					_renderCache.AddVertex(p1.X, p1.Y, 0.5f, 1);
+					_renderCache.AddVertex(rx, ry, ru, 1);
 				}
 
-				__vset(dst, lx1, ly1, lu, 1);
-				dst++;
-				__vset(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
-				dst++;
+				_renderCache.AddVertex(bounds.X2, bounds.Y2, lu, 1);
+				_renderCache.AddVertex(p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
 			}
 			else
 			{
-				float rx0 = 0;
-				float ry0 = 0;
-				float rx1 = 0;
-				float ry1 = 0;
-				float a0 = 0;
-				float a1 = 0;
-				__chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
-				a0 = NvgUtility.atan2f(dly0, dlx0);
-				a1 = NvgUtility.atan2f(dly1, dlx1);
+				var bounds = __chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, -rw);
+				var a0 = NvgUtility.atan2f(dly0, dlx0);
+				var a1 = NvgUtility.atan2f(dly1, dlx1);
 				if (a1 < a0)
 					a1 += (float)(3.14159274 * 2);
-				__vset(dst, p1.X + dlx0 * rw, p1.Y + dly0 * rw, lu, 1);
-				dst++;
-				__vset(dst, rx0, ry0, ru, 1);
-				dst++;
-				n = NvgUtility.__clampi((int)NvgUtility.ceilf((float)((a1 - a0) / 3.14159274 * ncap)), 2, ncap);
-				for (i = 0; i < n; i++)
+				_renderCache.AddVertex(p1.X + dlx0 * rw, p1.Y + dly0 * rw, lu, 1);
+				_renderCache.AddVertex(bounds.X, bounds.Y, ru, 1);
+				var n = NvgUtility.__clampi((int)NvgUtility.ceilf((float)((a1 - a0) / 3.14159274 * ncap)), 2, ncap);
+				for (var i = 0; i < n; i++)
 				{
 					var u = i / (float)(n - 1);
 					var a = a0 + u * (a1 - a0);
 					var lx = p1.X + NvgUtility.cosf(a) * lw;
 					var ly = p1.Y + NvgUtility.sinf(a) * lw;
-					__vset(dst, lx, ly, lu, 1);
-					dst++;
-					__vset(dst, p1.X, p1.Y, 0.5f, 1);
-					dst++;
+					_renderCache.AddVertex(lx, ly, lu, 1);
+					_renderCache.AddVertex(p1.X, p1.Y, 0.5f, 1);
 				}
 
-				__vset(dst, p1.X + dlx1 * rw, p1.Y + dly1 * rw, lu, 1);
-				dst++;
-				__vset(dst, rx1, ry1, ru, 1);
-				dst++;
+				_renderCache.AddVertex(p1.X + dlx1 * rw, p1.Y + dly1 * rw, lu, 1);
+				_renderCache.AddVertex(bounds.X2, bounds.Y2, ru, 1);
 			}
-
-			return dst;
 		}
 
-		private static Vertex* __bevelJoin(Vertex* dst, NvgPoint p0, NvgPoint p1, float lw, float rw, float lu,
-			float ru, float fringe)
+		private void __bevelJoin(NvgPoint p0, NvgPoint p1, float lw, float rw, float lu, float ru, float fringe)
 		{
-			float rx0 = 0;
-			float ry0 = 0;
-			float rx1 = 0;
-			float ry1 = 0;
-			float lx0 = 0;
-			float ly0 = 0;
-			float lx1 = 0;
-			float ly1 = 0;
 			var dlx0 = p0.DeltaY;
 			var dly0 = -p0.DeltaX;
 			var dlx1 = p1.DeltaY;
 			var dly1 = -p1.DeltaX;
 			if ((p1.flags & (byte)PointFlags.Left) != 0)
 			{
-				__chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, lw, &lx0, &ly0, &lx1, &ly1);
-				__vset(dst, lx0, ly0, lu, 1);
-				dst++;
-				__vset(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
-				dst++;
+				var bounds = __chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, lw);
+				_renderCache.AddVertex(bounds.X, bounds.Y, lu, 1);
+				_renderCache.AddVertex(p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
 				if ((p1.flags & (byte)PointFlags.Bevel) != 0)
 				{
-					__vset(dst, lx0, ly0, lu, 1);
-					dst++;
-					__vset(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
-					dst++;
-					__vset(dst, lx1, ly1, lu, 1);
-					dst++;
-					__vset(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
-					dst++;
+					_renderCache.AddVertex(bounds.X, bounds.Y, lu, 1);
+					_renderCache.AddVertex(p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
+					_renderCache.AddVertex(bounds.X2, bounds.Y2, lu, 1);
+					_renderCache.AddVertex(p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
 				}
 				else
 				{
-					rx0 = p1.X - p1.dmx * rw;
-					ry0 = p1.Y - p1.dmy * rw;
-					__vset(dst, p1.X, p1.Y, 0.5f, 1);
-					dst++;
-					__vset(dst, p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
-					dst++;
-					__vset(dst, rx0, ry0, ru, 1);
-					dst++;
-					__vset(dst, rx0, ry0, ru, 1);
-					dst++;
-					__vset(dst, p1.X, p1.Y, 0.5f, 1);
-					dst++;
-					__vset(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
-					dst++;
+					var rx0 = p1.X - p1.dmx * rw;
+					var ry0 = p1.Y - p1.dmy * rw;
+					_renderCache.AddVertex(p1.X, p1.Y, 0.5f, 1);
+					_renderCache.AddVertex(p1.X - dlx0 * rw, p1.Y - dly0 * rw, ru, 1);
+					_renderCache.AddVertex(rx0, ry0, ru, 1);
+					_renderCache.AddVertex(rx0, ry0, ru, 1);
+					_renderCache.AddVertex(p1.X, p1.Y, 0.5f, 1);
+					_renderCache.AddVertex(p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
 				}
 
-				__vset(dst, lx1, ly1, lu, 1);
-				dst++;
-				__vset(dst, p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
-				dst++;
+				_renderCache.AddVertex(bounds.X2, bounds.Y2, lu, 1);
+				_renderCache.AddVertex(p1.X - dlx1 * rw, p1.Y - dly1 * rw, ru, 1);
 			}
 			else
 			{
-				__chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, -rw, &rx0, &ry0, &rx1, &ry1);
-				__vset(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
-				dst++;
-				__vset(dst, rx0, ry0, ru, 1);
-				dst++;
+				var bounds = __chooseBevel(p1.flags & (byte)PointFlags.InnerBevel, p0, p1, -rw);
+				_renderCache.AddVertex(p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
+				_renderCache.AddVertex(bounds.X, bounds.Y, ru, 1);
 				if ((p1.flags & (byte)PointFlags.Bevel) != 0)
 				{
-					__vset(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
-					dst++;
-					__vset(dst, rx0, ry0, ru, 1);
-					dst++;
-					__vset(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
-					dst++;
-					__vset(dst, rx1, ry1, ru, 1);
-					dst++;
+					_renderCache.AddVertex(p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
+					_renderCache.AddVertex(bounds.X, bounds.Y, ru, 1);
+					_renderCache.AddVertex(p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
+					_renderCache.AddVertex(bounds.X2, bounds.Y2, ru, 1);
 				}
 				else
 				{
-					lx0 = p1.X + p1.dmx * lw;
-					ly0 = p1.Y + p1.dmy * lw;
-					__vset(dst, p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
-					dst++;
-					__vset(dst, p1.X, p1.Y, 0.5f, 1);
-					dst++;
-					__vset(dst, lx0, ly0, lu, 1);
-					dst++;
-					__vset(dst, lx0, ly0, lu, 1);
-					dst++;
-					__vset(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
-					dst++;
-					__vset(dst, p1.X, p1.Y, 0.5f, 1);
-					dst++;
+					var lx0 = p1.X + p1.dmx * lw;
+					var ly0 = p1.Y + p1.dmy * lw;
+					_renderCache.AddVertex(p1.X + dlx0 * lw, p1.Y + dly0 * lw, lu, 1);
+					_renderCache.AddVertex(p1.X, p1.Y, 0.5f, 1);
+					_renderCache.AddVertex(lx0, ly0, lu, 1);
+					_renderCache.AddVertex(lx0, ly0, lu, 1);
+					_renderCache.AddVertex(p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
+					_renderCache.AddVertex(p1.X, p1.Y, 0.5f, 1);
 				}
 
-				__vset(dst, p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
-				dst++;
-				__vset(dst, rx1, ry1, ru, 1);
-				dst++;
+				_renderCache.AddVertex(p1.X + dlx1 * lw, p1.Y + dly1 * lw, lu, 1);
+				_renderCache.AddVertex(bounds.X2, bounds.Y2, ru, 1);
 			}
-
-			return dst;
 		}
 
-		private static Vertex* __buttCapStart(Vertex* dst, NvgPoint p, float dx, float dy, float w, float d, float aa,
-			float u0, float u1)
+		private void __buttCapStart(NvgPoint p, float dx, float dy, float w, float d, float aa, float u0, float u1)
 		{
 			var px = p.X - dx * d;
 			var py = p.Y - dy * d;
 			var dlx = dy;
 			var dly = -dx;
-			__vset(dst, px + dlx * w - dx * aa, py + dly * w - dy * aa, u0, 0);
-			dst++;
-			__vset(dst, px - dlx * w - dx * aa, py - dly * w - dy * aa, u1, 0);
-			dst++;
-			__vset(dst, px + dlx * w, py + dly * w, u0, 1);
-			dst++;
-			__vset(dst, px - dlx * w, py - dly * w, u1, 1);
-			dst++;
-			return dst;
+
+			_renderCache.AddVertex(px + dlx * w - dx * aa, py + dly * w - dy * aa, u0, 0);
+			_renderCache.AddVertex(px - dlx * w - dx * aa, py - dly * w - dy * aa, u1, 0);
+			_renderCache.AddVertex(px + dlx * w, py + dly * w, u0, 1);
+			_renderCache.AddVertex(px - dlx * w, py - dly * w, u1, 1);
 		}
 
-		private static Vertex* __buttCapEnd(Vertex* dst, NvgPoint p, float dx, float dy, float w, float d, float aa,
-			float u0, float u1)
+		private void __buttCapEnd(NvgPoint p, float dx, float dy, float w, float d, float aa, float u0, float u1)
 		{
 			var px = p.X + dx * d;
 			var py = p.Y + dy * d;
 			var dlx = dy;
 			var dly = -dx;
-			__vset(dst, px + dlx * w, py + dly * w, u0, 1);
-			dst++;
-			__vset(dst, px - dlx * w, py - dly * w, u1, 1);
-			dst++;
-			__vset(dst, px + dlx * w + dx * aa, py + dly * w + dy * aa, u0, 0);
-			dst++;
-			__vset(dst, px - dlx * w + dx * aa, py - dly * w + dy * aa, u1, 0);
-			dst++;
-			return dst;
+			_renderCache.AddVertex(px + dlx * w, py + dly * w, u0, 1);
+			_renderCache.AddVertex(px - dlx * w, py - dly * w, u1, 1);
+			_renderCache.AddVertex(px + dlx * w + dx * aa, py + dly * w + dy * aa, u0, 0);
+			_renderCache.AddVertex(px - dlx * w + dx * aa, py - dly * w + dy * aa, u1, 0);
 		}
 
-		private static Vertex* __roundCapStart(Vertex* dst, NvgPoint p, float dx, float dy, float w, int ncap,
-			float aa, float u0, float u1)
+		private void __roundCapStart(NvgPoint p, float dx, float dy, float w, int ncap, float aa, float u0, float u1)
 		{
 			var px = p.X;
 			var py = p.Y;
@@ -1663,43 +1493,31 @@ namespace NvgSharp
 				var a = (float)(i / (float)(ncap - 1) * 3.14159274);
 				var ax = NvgUtility.cosf(a) * w;
 				var ay = NvgUtility.sinf(a) * w;
-				__vset(dst, px - dlx * ax - dx * ay, py - dly * ax - dy * ay, u0, 1);
-				dst++;
-				__vset(dst, px, py, 0.5f, 1);
-				dst++;
+				_renderCache.AddVertex(px - dlx * ax - dx * ay, py - dly * ax - dy * ay, u0, 1);
+				_renderCache.AddVertex(px, py, 0.5f, 1);
 			}
 
-			__vset(dst, px + dlx * w, py + dly * w, u0, 1);
-			dst++;
-			__vset(dst, px - dlx * w, py - dly * w, u1, 1);
-			dst++;
-			return dst;
+			_renderCache.AddVertex(px + dlx * w, py + dly * w, u0, 1);
+			_renderCache.AddVertex(px - dlx * w, py - dly * w, u1, 1);
 		}
 
-		private static Vertex* __roundCapEnd(Vertex* dst, NvgPoint p, float dx, float dy, float w, int ncap, float aa,
-			float u0, float u1)
+		private void __roundCapEnd(NvgPoint p, float dx, float dy, float w, int ncap, float aa, float u0, float u1)
 		{
 			var i = 0;
 			var px = p.X;
 			var py = p.Y;
 			var dlx = dy;
 			var dly = -dx;
-			__vset(dst, px + dlx * w, py + dly * w, u0, 1);
-			dst++;
-			__vset(dst, px - dlx * w, py - dly * w, u1, 1);
-			dst++;
+			_renderCache.AddVertex(px + dlx * w, py + dly * w, u0, 1);
+			_renderCache.AddVertex(px - dlx * w, py - dly * w, u1, 1);
 			for (i = 0; i < ncap; i++)
 			{
 				var a = (float)(i / (float)(ncap - 1) * 3.14159274);
 				var ax = NvgUtility.cosf(a) * w;
 				var ay = NvgUtility.sinf(a) * w;
-				__vset(dst, px, py, 0.5f, 1);
-				dst++;
-				__vset(dst, px - dlx * ax + dx * ay, py - dly * ax + dy * ay, u0, 1);
-				dst++;
+				_renderCache.AddVertex(px, py, 0.5f, 1);
+				_renderCache.AddVertex(px - dlx * ax + dx * ay, py - dly * ax + dy * ay, u0, 1);
 			}
-
-			return dst;
 		}
 
 		private static int __ptEquals(float x1, float y1, float x2, float y2, float tol)

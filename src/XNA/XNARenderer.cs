@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace NvgSharp
 {
-	internal class Renderer : IRenderer
+	internal class XNARenderer : INvgRenderer
 	{
 		private readonly BlendState _blendStateNoDraw = new BlendState
 		{
@@ -83,7 +83,7 @@ namespace NvgSharp
 
 		public GraphicsDevice GraphicsDevice => _device;
 
-		public Renderer(GraphicsDevice device, bool edgeAntiAlias)
+		public XNARenderer(GraphicsDevice device, bool edgeAntiAlias)
 		{
 			if (device == null)
 				throw new ArgumentNullException("device");
@@ -166,8 +166,8 @@ namespace NvgSharp
 		{
 			_scissorMatParam.SetValue(uniform.scissorMat);
 			_paintMatParam.SetValue(uniform.paintMat);
-			_innerColParam.SetValue(uniform.innerCol.ToVector4());
-			_outerColParam.SetValue(uniform.outerCol.ToVector4());
+			_innerColParam.SetValue(uniform.innerCol);
+			_outerColParam.SetValue(uniform.outerCol);
 			_scissorExtParam.SetValue(uniform.scissorExt);
 			_scissorScaleParam.SetValue(uniform.scissorScale);
 			_extentParam.SetValue(uniform.extent);

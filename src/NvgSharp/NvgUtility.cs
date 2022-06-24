@@ -6,12 +6,13 @@ using Microsoft.Xna.Framework;
 using Stride.Core.Mathematics;
 #else
 using System.Drawing;
+using System.Numerics;
 using Matrix = System.Numerics.Matrix4x4;
 #endif
 
 namespace NvgSharp
 {
-	internal static unsafe class NvgUtility
+	internal static class NvgUtility
 	{
 		public static float sqrtf(float a)
 		{
@@ -128,5 +129,18 @@ namespace NvgSharp
 #endif
 		}
 
+		public static Vector4 ToVector4(this Color c, bool premultiply)
+		{
+			var result = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
+
+			if (premultiply)
+			{
+				result.X *= result.W;
+				result.Y *= result.W;
+				result.Z *= result.W;
+			}
+
+			return result;
+		}
 	}
 }

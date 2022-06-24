@@ -23,6 +23,8 @@ namespace NvgSharp
 		public Vector2 ViewportSize;
 		public float DevicePixelRatio;
 
+		public int VertexCount => VertexArray.Count;
+
 		public bool StencilStrokes => _stencilStrokes;
 
 		public RenderCache(bool stencilStrokes)
@@ -36,13 +38,16 @@ namespace NvgSharp
 			Calls.Clear();
 		}
 
+		public void AddVertex(float x, float y, float u, float v)
+		{
+			VertexArray.Add(new Vertex(x, y, u, v));
+		}
+
 		private static void BuildUniform(ref Paint paint, ref Scissor scissor, float width, float fringe,
 			float strokeThr, ref UniformInfo uniform)
 		{
-			uniform.innerCol = new ColorInfo(paint.InnerColor);
-			uniform.innerCol.MakePremultiplied();
-			uniform.outerCol = new ColorInfo(paint.OuterColor);
-			uniform.outerCol.MakePremultiplied();
+			uniform.innerCol = paint.InnerColor.ToVector4(true);
+			uniform.outerCol = paint.OuterColor.ToVector4(true);
 
 			if (scissor.Extent.X < -0.5f || scissor.Extent.Y < -0.5f)
 			{
