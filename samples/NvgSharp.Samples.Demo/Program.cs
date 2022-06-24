@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NvgSharp.Samples.Demo
+namespace NvgSharp.Samples.XNA
 {
     /// <summary>
     /// The main class.
