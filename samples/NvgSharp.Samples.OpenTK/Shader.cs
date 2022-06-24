@@ -1,111 +1,111 @@
+using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Text;
-using Silk.NET.OpenGL;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples.OpenTK
 {
 	public class Shader : IDisposable
 	{
-		private uint _handle;
+		private int _handle;
 
 		public Shader(string vertexPath, string fragmentPath, Dictionary<string, string> defines)
 		{
-			uint vertex = LoadShader(ShaderType.VertexShader, vertexPath, defines);
-			uint fragment = LoadShader(ShaderType.FragmentShader, fragmentPath, defines);
-			_handle = Env.Gl.CreateProgram();
+			int vertex = LoadShader(ShaderType.VertexShader, vertexPath, defines);
+			int fragment = LoadShader(ShaderType.FragmentShader, fragmentPath, defines);
+			_handle = GL.CreateProgram();
 			GLUtility.CheckError();
 
-			Env.Gl.AttachShader(_handle, vertex);
+			GL.AttachShader(_handle, vertex);
 			GLUtility.CheckError();
 
-			Env.Gl.AttachShader(_handle, fragment);
+			GL.AttachShader(_handle, fragment);
 			GLUtility.CheckError();
 
-			Env.Gl.LinkProgram(_handle);
-			Env.Gl.GetProgram(_handle, GLEnum.LinkStatus, out var status);
+			GL.LinkProgram(_handle);
+			GL.GetProgram(_handle, GetProgramParameterName.LinkStatus, out var status);
 			if (status == 0)
 			{
-				throw new Exception($"Program failed to link with error: {Env.Gl.GetProgramInfoLog(_handle)}");
+				throw new Exception($"Program failed to link with error: {GL.GetProgramInfoLog(_handle)}");
 			}
 
-			Env.Gl.DetachShader(_handle, vertex);
-			Env.Gl.DetachShader(_handle, fragment);
+			GL.DetachShader(_handle, vertex);
+			GL.DetachShader(_handle, fragment);
 
-			Env.Gl.DeleteShader(vertex);
-			Env.Gl.DeleteShader(fragment);
+			GL.DeleteShader(vertex);
+			GL.DeleteShader(fragment);
 		}
 
 		public void Use()
 		{
-			Env.Gl.UseProgram(_handle);
+			GL.UseProgram(_handle);
 			GLUtility.CheckError();
 		}
 
 		public void SetUniform(string name, int value)
 		{
-			int location = Env.Gl.GetUniformLocation(_handle, name);
+			int location = GL.GetUniformLocation(_handle, name);
 			if (location == -1)
 			{
 				throw new Exception($"{name} uniform not found on shader.");
 			}
-			Env.Gl.Uniform1(location, value);
+			GL.Uniform1(location, value);
 			GLUtility.CheckError();
 		}
 
 		public void SetUniform(string name, float value)
 		{
-			int location = Env.Gl.GetUniformLocation(_handle, name);
+			int location = GL.GetUniformLocation(_handle, name);
 			if (location == -1)
 			{
 				throw new Exception($"{name} uniform not found on shader.");
 			}
-			Env.Gl.Uniform1(location, value);
+			GL.Uniform1(location, value);
 			GLUtility.CheckError();
 		}
 
 		public void SetUniform(string name, Vector2 value)
 		{
-			int location = Env.Gl.GetUniformLocation(_handle, name);
+			int location = GL.GetUniformLocation(_handle, name);
 			if (location == -1)
 			{
 				throw new Exception($"{name} uniform not found on shader.");
 			}
-			Env.Gl.Uniform2(location, ref value);
+			GL.Uniform2(location, value.X, value.Y);
 			GLUtility.CheckError();
 		}
 
 		public void SetUniform(string name, Vector4 value)
 		{
-			int location = Env.Gl.GetUniformLocation(_handle, name);
+			int location = GL.GetUniformLocation(_handle, name);
 			if (location == -1)
 			{
 				throw new Exception($"{name} uniform not found on shader.");
 			}
-			Env.Gl.Uniform4(location, ref value);
+			GL.Uniform4(location, value.X, value.Y, value.Z, value.W);
 			GLUtility.CheckError();
 		}
 
 		public unsafe void SetUniform(string name, Matrix4x4 value)
 		{
-			int location = Env.Gl.GetUniformLocation(_handle, name);
+			int location = GL.GetUniformLocation(_handle, name);
 			if (location == -1)
 			{
 				throw new Exception($"{name} uniform not found on shader.");
 			}
 
-			Env.Gl.UniformMatrix4(location, 1, false, (float*)&value);
+			GL.UniformMatrix4(location, 1, false, (float*)&value);
 			GLUtility.CheckError();
 		}
 
 		public void Dispose()
 		{
-			Env.Gl.DeleteProgram(_handle);
+			GL.DeleteProgram(_handle);
 		}
 
-		private uint LoadShader(ShaderType type, string path, Dictionary<string, string> defines)
+		private int LoadShader(ShaderType type, string path, Dictionary<string, string> defines)
 		{
 			var sb = new StringBuilder();
 
@@ -120,14 +120,14 @@ namespace NvgSharp.Samples.SilkNET
 			string src = File.ReadAllText(path);
 			sb.Append(src);
 
-			uint handle = Env.Gl.CreateShader(type);
+			int handle = GL.CreateShader(type);
 			GLUtility.CheckError();
 
-			Env.Gl.ShaderSource(handle, sb.ToString());
+			GL.ShaderSource(handle, sb.ToString());
 			GLUtility.CheckError();
 
-			Env.Gl.CompileShader(handle);
-			string infoLog = Env.Gl.GetShaderInfoLog(handle);
+			GL.CompileShader(handle);
+			string infoLog = GL.GetShaderInfoLog(handle);
 			if (!string.IsNullOrWhiteSpace(infoLog))
 			{
 				throw new Exception($"Error compiling shader of type {type}, failed with error {infoLog}");
@@ -138,7 +138,7 @@ namespace NvgSharp.Samples.SilkNET
 
 		public int GetAttribLocation(string attribName)
 		{
-			var result = Env.Gl.GetAttribLocation(_handle, attribName);
+			var result = GL.GetAttribLocation(_handle, attribName);
 			GLUtility.CheckError();
 			return result;
 		}

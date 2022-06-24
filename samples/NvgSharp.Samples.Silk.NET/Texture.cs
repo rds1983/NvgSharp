@@ -3,7 +3,7 @@ using StbImageSharp;
 using System;
 using System.Drawing;
 
-namespace NvgSharp
+namespace NvgSharp.Samples.SilkNET
 {
 	public unsafe class Texture : IDisposable
 	{

@@ -1,41 +1,41 @@
-using Silk.NET.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Runtime.InteropServices;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples.OpenTK
 {
 	public class BufferObject<T> : IDisposable where T : unmanaged
 	{
-		private readonly uint _handle;
-		private readonly BufferTargetARB _bufferType;
+		private readonly int _handle;
+		private readonly BufferTarget _bufferType;
 		private readonly int _size;
 
 		public int Size => _size;
 
-		public unsafe BufferObject(int size, BufferTargetARB bufferType, bool isDynamic)
+		public unsafe BufferObject(int size, BufferTarget bufferType, bool isDynamic)
 		{
 			_bufferType = bufferType;
 			_size = size;
 
-			_handle = Env.Gl.GenBuffer();
+			_handle = GL.GenBuffer();
 			GLUtility.CheckError();
 			
 			Bind();
 
 			var elementSizeInBytes = Marshal.SizeOf<T>();
-			Env.Gl.BufferData(bufferType, (nuint)(size * elementSizeInBytes), null, isDynamic ? BufferUsageARB.StreamDraw : BufferUsageARB.StaticDraw);
+			GL.BufferData(bufferType, size * elementSizeInBytes, IntPtr.Zero, isDynamic ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
 			GLUtility.CheckError();
 		}
 
 		public void Bind()
 		{
-			Env.Gl.BindBuffer(_bufferType, _handle);
+			GL.BindBuffer(_bufferType, _handle);
 			GLUtility.CheckError();
 		}
 
 		public void Dispose()
 		{
-			Env.Gl.DeleteBuffer(_handle);
+			GL.DeleteBuffer(_handle);
 			GLUtility.CheckError();
 		}
 
@@ -47,7 +47,7 @@ namespace NvgSharp.Samples.SilkNET
 			{
 				var elementSizeInBytes = sizeof(T);
 
-				Env.Gl.BufferSubData(_bufferType, 0, (nuint)(elementCount * elementSizeInBytes), dataPtr);
+				GL.BufferSubData(_bufferType, IntPtr.Zero, elementCount * elementSizeInBytes, new IntPtr(dataPtr));
 				GLUtility.CheckError();
 			}
 		}

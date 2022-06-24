@@ -6,7 +6,7 @@ using Stride.Core.Mathematics;
 using System.Drawing;
 #endif
 
-namespace NvgSharp
+namespace NvgSharp.Samples
 {
 	internal static class Utility
 	{

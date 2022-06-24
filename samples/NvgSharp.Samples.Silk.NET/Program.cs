@@ -2,12 +2,10 @@
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using Silk.NET.Maths;
-using NvgSharp.Samples.Demo;
-using NvgSharp.Platform;
 using System;
 using System.Diagnostics;
 
-namespace NvgSharp
+namespace NvgSharp.Samples.SilkNET
 {
 	class Program
 	{

@@ -1,9 +1,9 @@
 ﻿using FontStashSharp.Interfaces;
-using Silk.NET.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples.OpenTK
 {
 	internal class Renderer : INvgRenderer
 	{
@@ -32,7 +32,7 @@ namespace NvgSharp.Samples.SilkNET
 			}
 
 			_shader = new Shader("shader.vert", "shader.frag", defines);
-			_vertexBuffer = new BufferObject<Vertex>(MAX_VERTICES, BufferTargetARB.ArrayBuffer, true);
+			_vertexBuffer = new BufferObject<Vertex>(MAX_VERTICES, BufferTarget.ArrayBuffer, true);
 			_vao = new VertexArrayObject(sizeof(Vertex));
 		}
 
@@ -72,7 +72,7 @@ namespace NvgSharp.Samples.SilkNET
 			}
 			else
 			{
-				Env.Gl.BindTexture(TextureTarget.Texture2D, 0);
+				GL.BindTexture(TextureTarget.Texture2D, 0);
 				GLUtility.CheckError();
 			}
 
@@ -86,24 +86,24 @@ namespace NvgSharp.Samples.SilkNET
 		private void ProcessFill(CallInfo call)
 		{
 			// Draw shapes
-			Env.Gl.Enable(EnableCap.StencilTest);
+			GL.Enable(EnableCap.StencilTest);
 			GLUtility.CheckError();
-			Env.Gl.StencilMask(0xff);
+			GL.StencilMask(0xff);
 			GLUtility.CheckError();
-			Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xff);
+			GL.StencilFunc(StencilFunction.Always, 0, 0xff);
 			GLUtility.CheckError();
-			Env.Gl.ColorMask(false, false, false, false);
+			GL.ColorMask(false, false, false, false);
 			GLUtility.CheckError();
 
 			SetUniform(ref call.UniformInfo);
 
 			// set bindpoint for solid loc
-			Env.Gl.StencilOpSeparate(StencilFaceDirection.Front, StencilOp.Keep, StencilOp.Keep, StencilOp.IncrWrap);
+			GL.StencilOpSeparate(StencilFace.Front, StencilOp.Keep, StencilOp.Keep, StencilOp.IncrWrap);
 			GLUtility.CheckError();
-			Env.Gl.StencilOpSeparate(StencilFaceDirection.Back, StencilOp.Keep, StencilOp.Keep, StencilOp.DecrWrap);
+			GL.StencilOpSeparate(StencilFace.Back, StencilOp.Keep, StencilOp.Keep, StencilOp.DecrWrap);
 			GLUtility.CheckError();
 
-			Env.Gl.Disable(EnableCap.CullFace);
+			GL.Disable(EnableCap.CullFace);
 			GLUtility.CheckError();
 
 			for (var i = 0; i < call.FillStrokeInfos.Count; i++)
@@ -111,20 +111,20 @@ namespace NvgSharp.Samples.SilkNET
 				call.FillStrokeInfos[i].DrawFill(PrimitiveType.TriangleFan);
 			}
 
-			Env.Gl.Enable(EnableCap.CullFace);
+			GL.Enable(EnableCap.CullFace);
 			GLUtility.CheckError();
 
 			// Draw anti-aliased pixels
-			Env.Gl.ColorMask(true, true, true, true);
+			GL.ColorMask(true, true, true, true);
 			GLUtility.CheckError();
 
 			SetUniform(ref call.UniformInfo2);
 
 			if (_edgeAntiAlias)
 			{
-				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
+				GL.StencilFunc(StencilFunction.Equal, 0, 0xff);
 				GLUtility.CheckError();
-				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+				GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
 				GLUtility.CheckError();
 
 				// Draw fringes
@@ -135,14 +135,14 @@ namespace NvgSharp.Samples.SilkNET
 			}
 
 			// Draw fill
-			Env.Gl.StencilFunc(StencilFunction.Notequal, 0, 0xff);
+			GL.StencilFunc(StencilFunction.Notequal, 0, 0xff);
 			GLUtility.CheckError();
-			Env.Gl.StencilOp(StencilOp.Zero, StencilOp.Zero, StencilOp.Zero);
+			GL.StencilOp(StencilOp.Zero, StencilOp.Zero, StencilOp.Zero);
 			GLUtility.CheckError();
 
 			call.DrawTriangles(PrimitiveType.TriangleStrip);
 
-			Env.Gl.Disable(EnableCap.StencilTest);
+			GL.Disable(EnableCap.StencilTest);
 			GLUtility.CheckError();
 		}
 
@@ -164,13 +164,13 @@ namespace NvgSharp.Samples.SilkNET
 			if (_stencilStrokes)
 			{
 				// Fill the stroke base without overlap
-				Env.Gl.Enable(EnableCap.StencilTest);
+				GL.Enable(EnableCap.StencilTest);
 				GLUtility.CheckError();
-				Env.Gl.StencilMask(0xff);
+				GL.StencilMask(0xff);
 				GLUtility.CheckError();
-				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
+				GL.StencilFunc(StencilFunction.Equal, 0, 0xff);
 				GLUtility.CheckError();
-				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
+				GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
 				GLUtility.CheckError();
 
 				SetUniform(ref call.UniformInfo2);
@@ -183,9 +183,9 @@ namespace NvgSharp.Samples.SilkNET
 				// Draw anti-aliased pixels.
 				SetUniform(ref call.UniformInfo);
 
-				Env.Gl.StencilFunc(StencilFunction.Equal, 0, 0xff);
+				GL.StencilFunc(StencilFunction.Equal, 0, 0xff);
 				GLUtility.CheckError();
-				Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+				GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
 				GLUtility.CheckError();
 
 				for (var i = 0; i < call.FillStrokeInfos.Count; i++)
@@ -194,12 +194,12 @@ namespace NvgSharp.Samples.SilkNET
 				}
 
 				// Clear stencil buffer.
-				Env.Gl.ColorMask(false, false, false, false);
+				GL.ColorMask(false, false, false, false);
 				GLUtility.CheckError();
 
-				Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xff);
+				GL.StencilFunc(StencilFunction.Always, 0, 0xff);
 				GLUtility.CheckError();
-				Env.Gl.StencilOp(StencilOp.Zero, StencilOp.Zero, StencilOp.Zero);
+				GL.StencilOp(StencilOp.Zero, StencilOp.Zero, StencilOp.Zero);
 				GLUtility.CheckError();
 
 				for (var i = 0; i < call.FillStrokeInfos.Count; i++)
@@ -207,10 +207,10 @@ namespace NvgSharp.Samples.SilkNET
 					call.FillStrokeInfos[i].DrawStroke(PrimitiveType.TriangleStrip);
 				}
 
-				Env.Gl.ColorMask(true, true, true, true);
+				GL.ColorMask(true, true, true, true);
 				GLUtility.CheckError();
 
-				Env.Gl.Disable(EnableCap.StencilTest);
+				GL.Disable(EnableCap.StencilTest);
 				GLUtility.CheckError();
 			}
 			else
@@ -234,35 +234,35 @@ namespace NvgSharp.Samples.SilkNET
 		public void Draw(Vector2 viewportSize, float devicePixelRatio, IEnumerable<CallInfo> calls, Vertex[] vertexes)
 		{
 			// Setup required GL state
-			Env.Gl.Enable(EnableCap.CullFace);
+			GL.Enable(EnableCap.CullFace);
 			GLUtility.CheckError();
-			Env.Gl.CullFace(CullFaceMode.Back);
+			GL.CullFace(CullFaceMode.Back);
 			GLUtility.CheckError();
-			Env.Gl.FrontFace(FrontFaceDirection.Ccw);
+			GL.FrontFace(FrontFaceDirection.Ccw);
 			GLUtility.CheckError();
-			Env.Gl.Enable(EnableCap.Blend);
+			GL.Enable(EnableCap.Blend);
 			GLUtility.CheckError();
-			Env.Gl.Disable(EnableCap.DepthTest);
+			GL.Disable(EnableCap.DepthTest);
 			GLUtility.CheckError();
-			Env.Gl.Disable(EnableCap.ScissorTest);
+			GL.Disable(EnableCap.ScissorTest);
 			GLUtility.CheckError();
-			Env.Gl.ColorMask(true, true, true, true);
+			GL.ColorMask(true, true, true, true);
 			GLUtility.CheckError();
-			Env.Gl.StencilMask(0xffffffff);
+			GL.StencilMask(0xffffffff);
 			GLUtility.CheckError();
-			Env.Gl.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+			GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
 			GLUtility.CheckError();
-			Env.Gl.StencilFunc(StencilFunction.Always, 0, 0xffffffff);
+			GL.StencilFunc(StencilFunction.Always, 0, 0xffffffff);
 			GLUtility.CheckError();
-			Env.Gl.ActiveTexture(TextureUnit.Texture0);
+			GL.ActiveTexture(TextureUnit.Texture0);
 			GLUtility.CheckError();
-			Env.Gl.BindTexture(TextureTarget.Texture2D, 0);
+			GL.BindTexture(TextureTarget.Texture2D, 0);
 			GLUtility.CheckError();
 
 			// Bind and update vertex buffer
 			if (_vertexBuffer.Size < vertexes.Length)
 			{
-				_vertexBuffer = new BufferObject<Vertex>(vertexes.Length, BufferTargetARB.ArrayBuffer, true);
+				_vertexBuffer = new BufferObject<Vertex>(vertexes.Length, BufferTarget.ArrayBuffer, true);
 			}
 
 			_vertexBuffer.Bind();
@@ -282,7 +282,7 @@ namespace NvgSharp.Samples.SilkNET
 			var transform = Matrix4x4.CreateOrthographicOffCenter(0, viewportSize.X, viewportSize.Y, 0, 0, -1);
 			_shader.SetUniform("transformMat", transform);
 
-			Env.Gl.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+			GL.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
 			GLUtility.CheckError();
 
 			// Process calls

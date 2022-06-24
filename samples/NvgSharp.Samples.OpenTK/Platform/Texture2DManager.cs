@@ -1,7 +1,7 @@
 ﻿using FontStashSharp.Interfaces;
 using System.Drawing;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples.OpenTK
 {
 	internal class Texture2DManager : ITexture2DManager
 	{

@@ -1,7 +1,7 @@
-﻿using Silk.NET.OpenGL;
+﻿using OpenTK.Graphics.OpenGL4;
 using System;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples.OpenTK
 {
 	public class VertexArrayObject: IDisposable
 	{
@@ -17,27 +17,27 @@ namespace NvgSharp.Samples.SilkNET
 
 			_stride = stride;
 
-			Env.Gl.GenVertexArrays(1, out _handle);
+			GL.GenVertexArrays(1, out _handle);
 			GLUtility.CheckError();
 		}
 
 		public void Dispose()
 		{
-			Env.Gl.DeleteVertexArray(_handle);
+			GL.DeleteVertexArray(_handle);
 			GLUtility.CheckError();
 		}
 
 		public void Bind()
 		{
-			Env.Gl.BindVertexArray(_handle);
+			GL.BindVertexArray(_handle);
 			GLUtility.CheckError();
 		}
 
 		public unsafe void VertexAttribPointer(int location, int size, VertexAttribPointerType type, bool normalized, int offset)
 		{
-			Env.Gl.EnableVertexAttribArray((uint)location);
+			GL.EnableVertexAttribArray(location);
 			GLUtility.CheckError();
-			Env.Gl.VertexAttribPointer((uint)location, size, type, normalized, (uint)_stride, (void*)offset);
+			GL.VertexAttribPointer(location, size, type, normalized, _stride, new IntPtr(offset));
 			GLUtility.CheckError();
 		}
 	}

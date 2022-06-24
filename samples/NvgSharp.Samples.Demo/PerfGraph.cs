@@ -9,7 +9,7 @@ using System.Drawing;
 using Texture2D = System.Object;
 #endif
 
-namespace NvgSharp.Samples.Demo
+namespace NvgSharp.Samples
 {
 	public class PerfGraph
 	{
