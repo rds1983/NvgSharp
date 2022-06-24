@@ -14,102 +14,59 @@ namespace NvgSharp
 {
 	internal static class NvgUtility
 	{
-		public static float sqrtf(float a)
+		/// <summary>
+		/// Length proportional to radius of a cubic bezier handle for 90deg arcs
+		/// </summary>
+		public const float NVG_KAPPA90 = 0.5522847493f;
+
+		/// <summary>
+		/// PI
+		/// </summary>
+		public const float PI = (float)Math.PI;
+
+		public static float SqrtF(float a) => (float)Math.Sqrt(a);
+
+		public static float SinF(float a) => (float)Math.Sin(a);
+
+		public static float TanF(float a) => (float)Math.Tan(a);
+
+		public static float Atan2F(float a, float b) => (float)Math.Atan2(a, b);
+
+		public static float CosF(float a) => (float)Math.Cos(a);
+
+		public static float AcosF(float a) => (float)Math.Acos(a);
+
+		public static float CeilingF(float a) => (float)Math.Ceiling(a);
+
+		public static int ClampI(int a, int mn, int mx)
 		{
-			return (float)(Math.Sqrt((float)(a)));
+			if (a < mn) return a;
+			if (a > mx) return mx;
+
+			return a;
 		}
 
-		public static float sinf(float a)
+		public static float ClampF(float a, float mn, float mx)
 		{
-			return (float)(Math.Sin((float)(a)));
+			if (a < mn) return a;
+			if (a > mx) return mx;
+
+			return a;
 		}
 
-		public static float tanf(float a)
-		{
-			return (float)(Math.Tan((float)(a)));
-		}
+		public static float Cross(float dx0, float dy0, float dx1, float dy1) => dx1 * dy0 - dx0 * dy1;
 
-		public static float atan2f(float a, float b)
+		public static float Normalize(ref float x, ref float y)
 		{
-			return (float)(Math.Atan2(a, b));
-		}
-
-		public static float cosf(float a)
-		{
-			return (float)(Math.Cos((float)(a)));
-		}
-
-		public static float acosf(float a)
-		{
-			return (float)(Math.Acos((float)(a)));
-		}
-
-		public static float ceilf(float a)
-		{
-			return (float)(Math.Ceiling((float)(a)));
-		}
-
-		public static float __modf(float a, float b)
-		{
-			return (float)(a % b);
-		}
-
-		public static int __mini(int a, int b)
-		{
-			return (int)((a) < (b) ? a : b);
-		}
-
-		public static int __maxi(int a, int b)
-		{
-			return (int)((a) > (b) ? a : b);
-		}
-
-		public static int __clampi(int a, int mn, int mx)
-		{
-			return (int)((a) < (mn) ? mn : ((a) > (mx) ? mx : a));
-		}
-
-		public static float __minf(float a, float b)
-		{
-			return (float)((a) < (b) ? a : b);
-		}
-
-		public static float __maxf(float a, float b)
-		{
-			return (float)((a) > (b) ? a : b);
-		}
-
-		public static float __absf(float a)
-		{
-			return (float)((a) >= (0.0f) ? a : -a);
-		}
-
-		public static float __signf(float a)
-		{
-			return (float)((a) >= (0.0f) ? 1.0f : -1.0f);
-		}
-
-		public static float __clampf(float a, float mn, float mx)
-		{
-			return (float)((a) < (mn) ? mn : ((a) > (mx) ? mx : a));
-		}
-
-		public static float __cross(float dx0, float dy0, float dx1, float dy1)
-		{
-			return (float)(dx1 * dy0 - dx0 * dy1);
-		}
-
-		public static float __normalize(ref float x, ref float y)
-		{
-			float d = (float)sqrtf((float)((x * x) + (y * y)));
-			if ((d) > (1e-6f))
+			var d = SqrtF((x * x) + (y * y));
+			if (d > 1e-6f)
 			{
 				float id = (float)(1.0f / d);
-				x *= (float)(id);
-				y *= (float)(id);
+				x *= id;
+				y *= id;
 			}
 
-			return (float)(d);
+			return d;
 		}
 
 		public static void MakeZero(this Matrix m)

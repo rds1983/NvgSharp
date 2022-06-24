@@ -62,8 +62,8 @@ namespace NvgSharp
 
 		public void SetRotate(float a)
 		{
-			var cs = NvgUtility.cosf(a);
-			var sn = NvgUtility.sinf(a);
+			var cs = NvgUtility.CosF(a);
+			var sn = NvgUtility.SinF(a);
 			T1 = cs;
 			T2 = sn;
 			T3 = -sn;
@@ -76,7 +76,7 @@ namespace NvgSharp
 		{
 			T1 = 1.0f;
 			T2 = 0.0f;
-			T3 = NvgUtility.tanf(a);
+			T3 = NvgUtility.TanF(a);
 			T4 = 1.0f;
 			T5 = 0.0f;
 			T6 = 0.0f;
@@ -85,7 +85,7 @@ namespace NvgSharp
 		public void SetSkewY(float a)
 		{
 			T1 = 1.0f;
-			T2 = NvgUtility.tanf(a);
+			T2 = NvgUtility.TanF(a);
 			T3 = 0.0f;
 			T4 = 1.0f;
 			T5 = 0.0f;

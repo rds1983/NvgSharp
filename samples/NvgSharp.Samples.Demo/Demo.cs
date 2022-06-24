@@ -79,7 +79,7 @@ namespace NvgSharp.Samples.Demo
 			Paint shadowPaint;
 			Paint headerPaint;
 
-			vg.Save();
+			vg.SaveState();
 
 			// Window
 			vg.BeginPath();
@@ -115,7 +115,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FillColor(Utility.FromRGBA(220, 220, 220, 160));
 			vg.Text(fontBold18, title, x + w / 2, y + 16, TextHorizontalAlignment.Center, TextVerticalAlignment.Center);
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		public void drawSearchBox(NvgContext vg, string text, float x, float y, float w, float h)
@@ -275,7 +275,7 @@ namespace NvgSharp.Samples.Demo
 			float cy = y + (int)(h * 0.5f);
 			float kr = (int)(h * 0.25f);
 
-			vg.Save();
+			vg.SaveState();
 			//	ClearState(vg);
 
 			// Slot
@@ -308,7 +308,7 @@ namespace NvgSharp.Samples.Demo
 			vg.StrokeColor(Utility.FromRGBA(0, 0, 0, 92));
 			vg.Stroke();
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		public static void drawEyes(NvgContext vg, float x, float y, float w, float h, float mx, float my, float t)
@@ -463,7 +463,7 @@ namespace NvgSharp.Samples.Demo
 			float ax, ay, bx, by;
 			Paint paint;
 
-			vg.Save();
+			vg.SaveState();
 
 			vg.BeginPath();
 			vg.Arc(cx, cy, r0, a0, a1, Winding.ClockWise);
@@ -477,7 +477,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FillPaint(paint);
 			vg.Fill();
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		public static void drawThumbnails(NvgContext vg, float x, float y, float w, float h, Texture2D[] images, float t)
@@ -494,7 +494,7 @@ namespace NvgSharp.Samples.Demo
 			float u2 = (1 - (float)Math.Cos(t * 0.2f)) * 0.5f;
 			float scrollh, dv;
 
-			vg.Save();
+			vg.SaveState();
 			//	ClearState(vg);
 
 			// Drop shadow
@@ -515,7 +515,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FillColor(Utility.FromRGBA(200, 200, 200, 255));
 			vg.Fill();
 
-			vg.Save();
+			vg.SaveState();
 			vg.Scissor(x, y, w, h);
 			vg.Translate(0, -(stackh - h) * u);
 
@@ -579,7 +579,7 @@ namespace NvgSharp.Samples.Demo
 				vg.StrokeColor(Utility.FromRGBA(255, 255, 255, 192));
 				vg.Stroke();
 			}
-			vg.Restore();
+			vg.RestoreState();
 
 			// Hide fades
 			fadePaint = vg.LinearGradient(x, y, x, y + 6, Utility.FromRGBA(200, 200, 200, 255), Utility.FromRGBA(200, 200, 200, 0));
@@ -610,7 +610,7 @@ namespace NvgSharp.Samples.Demo
 			//	vg.FillColor(GLUtility.FromRGBA(0,0,0,128));
 			vg.Fill();
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		public static void drawColorwheel(NvgContext vg, float x, float y, float w, float h, float t)
@@ -620,7 +620,7 @@ namespace NvgSharp.Samples.Demo
 			float hue = (float)Math.Sin(t * 0.12f);
 			Paint paint;
 
-			vg.Save();
+			vg.SaveState();
 
 			/*	vg.BeginPath();
 				vg.Rect(x,y,w,h);
@@ -658,7 +658,7 @@ namespace NvgSharp.Samples.Demo
 			vg.Stroke();
 
 			// Selector
-			vg.Save();
+			vg.SaveState();
 			vg.Translate(cx, cy);
 			vg.Rotate(hue * (float)Math.PI * 2);
 
@@ -714,9 +714,9 @@ namespace NvgSharp.Samples.Demo
 			vg.FillPaint(paint);
 			vg.Fill();
 
-			vg.Restore();
+			vg.RestoreState();
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		public static void drawLines(NvgContext vg, float x, float y, float w, float h, float t)
@@ -728,7 +728,7 @@ namespace NvgSharp.Samples.Demo
 			LineCap[] joins = new LineCap[] { LineCap.Miter, LineCap.Round, LineCap.Bevel };
 			LineCap[] caps = new LineCap[] { LineCap.Butt, LineCap.Round, LineCap.Square };
 
-			vg.Save();
+			vg.SaveState();
 			pts[0] = -s * 0.25f + (float)Math.Cos(t * 0.3f) * s * 0.5f;
 			pts[1] = (float)Math.Sin(t * 0.3f) * s * 0.5f;
 			pts[2] = -s * 0.25f;
@@ -771,7 +771,7 @@ namespace NvgSharp.Samples.Demo
 				}
 			}
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		private static FontSystem LoadFont(string path)
@@ -789,7 +789,7 @@ namespace NvgSharp.Samples.Demo
 		{
 			int i;
 
-			vg.Save();
+			vg.SaveState();
 
 			vg.StrokeColor(Utility.FromRGBA(0, 0, 0, 255));
 
@@ -804,7 +804,7 @@ namespace NvgSharp.Samples.Demo
 				y += 10;
 			}
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		public static void drawCaps(NvgContext vg, float x, float y, float width)
@@ -813,7 +813,7 @@ namespace NvgSharp.Samples.Demo
 			LineCap[] caps = new[] { LineCap.Butt, LineCap.Round, LineCap.Square };
 			float lineWidth = 8.0f;
 
-			vg.Save();
+			vg.SaveState();
 
 			vg.BeginPath();
 			vg.Rect(x - lineWidth / 2, y, width + lineWidth, 40);
@@ -836,12 +836,12 @@ namespace NvgSharp.Samples.Demo
 				vg.Stroke();
 			}
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		public static void drawScissor(NvgContext vg, float x, float y, float t)
 		{
-			vg.Save();
+			vg.SaveState();
 
 			// Draw first rect and set scissor to it's area.
 			vg.Translate(x, y);
@@ -857,13 +857,13 @@ namespace NvgSharp.Samples.Demo
 			vg.Rotate(t);
 
 			// Draw the intended second rectangle without any scissoring.
-			vg.Save();
+			vg.SaveState();
 			vg.ResetScissor();
 			vg.BeginPath();
 			vg.Rect(-20, -10, 60, 30);
 			vg.FillColor(Utility.FromRGBA(255, 128, 0, 64));
 			vg.Fill();
-			vg.Restore();
+			vg.RestoreState();
 
 			// Draw second rectangle with combined scissoring.
 			vg.IntersectScissor(-20, -10, 60, 30);
@@ -872,7 +872,7 @@ namespace NvgSharp.Samples.Demo
 			vg.FillColor(Utility.FromRGBA(255, 128, 0, 255));
 			vg.Fill();
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 
 		public void renderDemo(NvgContext vg, float mx, float my, float width, float height,
@@ -895,7 +895,7 @@ namespace NvgSharp.Samples.Demo
 
 			drawScissor(vg, 50, height - 80, t);
 
-			vg.Save();
+			vg.SaveState();
 			if (blowup)
 			{
 				vg.Rotate((float)Math.Sin(t * 0.3f) * 5.0f / 180.0f * (float)Math.PI);
@@ -936,7 +936,7 @@ namespace NvgSharp.Samples.Demo
 			// Thumbnails box
 			drawThumbnails(vg, 365, popy - 30, 160, 300, images, t);
 
-			vg.Restore();
+			vg.RestoreState();
 		}
 	}
 }
