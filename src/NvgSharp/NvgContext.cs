@@ -672,13 +672,12 @@ namespace NvgSharp
 			state.Transform.TransformPoint(out px, out py, bottomLeft.Position.X, bottomLeft.Position.Y);
 			var newBottomLeft = new Vertex(px, py, bottomLeft.TextureCoordinate.X, bottomLeft.TextureCoordinate.Y);
 
-			var verts = _renderCache.VertexArray;
-			verts.Add(newTopLeft);
-			verts.Add(newBottomRight);
-			verts.Add(newTopRight);
-			verts.Add(newTopLeft);
-			verts.Add(newBottomLeft);
-			verts.Add(newBottomRight);
+			_renderCache.AddVertex(newTopLeft);
+			_renderCache.AddVertex(newBottomRight);
+			_renderCache.AddVertex(newTopRight);
+			_renderCache.AddVertex(newTopLeft);
+			_renderCache.AddVertex(newBottomLeft);
+			_renderCache.AddVertex(newBottomRight);
 
 			_lastTextTexture = texture;
 		}

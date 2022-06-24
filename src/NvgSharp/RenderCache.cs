@@ -43,6 +43,11 @@ namespace NvgSharp
 			VertexArray.Add(new Vertex(x, y, u, v));
 		}
 
+		public void AddVertex(Vertex v)
+		{
+			VertexArray.Add(v);
+		}
+
 		private static void BuildUniform(ref Paint paint, ref Scissor scissor, float width, float fringe,
 			float strokeThr, ref UniformInfo uniform)
 		{

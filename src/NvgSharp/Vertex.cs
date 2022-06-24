@@ -22,8 +22,8 @@ namespace NvgSharp
 
 		public Vertex(float x, float y, float u, float v)
 		{
-			Position.X = (int)x;
-			Position.Y = (int)y;
+			Position.X = x;
+			Position.Y = y;
 			TextureCoordinate.X = u;
 			TextureCoordinate.Y = v;
 		}
