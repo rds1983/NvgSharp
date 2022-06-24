@@ -6,7 +6,6 @@
     <Description>NvgSharp for FNA</Description>
     <DefineConstants>$(DefineConstants);FNA</DefineConstants>
     <OutputPath>bin\FNA\$(Configuration)</OutputPath>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   
   <ItemGroup>

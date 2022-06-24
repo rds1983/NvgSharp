@@ -4,7 +4,6 @@
     <Description>NvgSharp for MonoGame</Description>
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">

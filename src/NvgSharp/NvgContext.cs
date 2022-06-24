@@ -1502,14 +1502,13 @@ namespace NvgSharp
 
 		private void __roundCapEnd(NvgPoint p, float dx, float dy, float w, int ncap, float aa, float u0, float u1)
 		{
-			var i = 0;
 			var px = p.X;
 			var py = p.Y;
 			var dlx = dy;
 			var dly = -dx;
 			_renderCache.AddVertex(px + dlx * w, py + dly * w, u0, 1);
 			_renderCache.AddVertex(px - dlx * w, py - dly * w, u1, 1);
-			for (i = 0; i < ncap; i++)
+			for (var i = 0; i < ncap; i++)
 			{
 				var a = (float)(i / (float)(ncap - 1) * 3.14159274);
 				var ax = NvgUtility.cosf(a) * w;
@@ -1528,18 +1527,12 @@ namespace NvgSharp
 
 		private static float __distPtSeg(float x, float y, float px, float py, float qx, float qy)
 		{
-			float pqx = 0;
-			float pqy = 0;
-			float dx = 0;
-			float dy = 0;
-			float d = 0;
-			float t = 0;
-			pqx = qx - px;
-			pqy = qy - py;
-			dx = x - px;
-			dy = y - py;
-			d = pqx * pqx + pqy * pqy;
-			t = pqx * dx + pqy * dy;
+			var pqx = qx - px;
+			var pqy = qy - py;
+			var dx = x - px;
+			var dy = y - py;
+			var d = pqx * pqx + pqy * pqy;
+			var t = pqx * dx + pqy * dy;
 			if (d > 0)
 				t /= d;
 			if (t < 0)
