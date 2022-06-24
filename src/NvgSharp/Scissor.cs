@@ -11,7 +11,7 @@ using System.Numerics;
 namespace NvgSharp
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct Scissor
+	internal struct Scissor
 	{
 		public Transform Transform;
 		public Vector2 Extent;
