@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FontStashSharp.MonoGame" Version="$(FontStashSharpVersion)" />
     <PackageReference Include="MonoGame.Framework.Portable" Version="3.7.1.189" PrivateAssets="All" />
   </ItemGroup>
 </Project>

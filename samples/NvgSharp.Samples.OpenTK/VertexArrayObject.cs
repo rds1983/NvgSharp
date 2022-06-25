@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL4;
 using System;
 
-namespace NvgSharp.Samples.OpenTK
+namespace NvgSharp.Samples
 {
 	public class VertexArrayObject: IDisposable
 	{

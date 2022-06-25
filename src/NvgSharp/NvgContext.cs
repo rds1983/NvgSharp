@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
-using FontStashSharp;
-using FontStashSharp.Interfaces;
 
 #if MONOGAME || FNA
 using Microsoft.Xna.Framework;
@@ -17,7 +14,7 @@ using Texture2D = System.Object;
 
 namespace NvgSharp
 {
-	public class NvgContext : IFontStashRenderer2
+	public class NvgContext
 	{
 		private struct RectF
 		{
@@ -32,29 +29,28 @@ namespace NvgSharp
 			}
 		}
 
-		private readonly INvgRenderer _renderer;
-		private readonly RenderCache _renderCache;
 		private float _commandX;
 		private float _commandY;
 		private float _devicePxRatio;
 		private float _distTol;
 		private readonly bool _edgeAntiAlias;
-		private float _fringeWidth;
-		private NvgContextState _currentState = new NvgContextState();
 		private readonly Stack<NvgContextState> _savedStates = new Stack<NvgContextState>();
 		private float _tessTol;
-		private Texture2D _lastTextTexture = null;
-		private int _lastVertexOffset;
 		private readonly List<Command> _commands = new List<Command>();
 		private readonly List<Path> _pathsCache = new List<Path>();
 		private Bounds _bounds = new Bounds();
+		internal float _fringeWidth;
+		internal NvgContextState _currentState = new NvgContextState();
+		internal readonly RenderCache _renderCache;
+		internal readonly INvgRenderer _renderer;
+
+		internal object _textRenderer;
+
 		public bool EdgeAntiAlias => _edgeAntiAlias;
 		public bool StencilStrokes => _renderCache.StencilStrokes;
 
 #if MONOGAME || FNA || STRIDE
 		public GraphicsDevice GraphicsDevice => _renderer.GraphicsDevice;
-#else
-		public ITexture2DManager TextureManager => _renderer.TextureManager;
 #endif
 
 #if MONOGAME || FNA || STRIDE
@@ -582,7 +578,7 @@ namespace NvgSharp
                     }
                 }*/
 
-		private static void MultiplyAlpha(ref Color c, float alpha)
+		internal static void MultiplyAlpha(ref Color c, float alpha)
 		{
 			var na = (byte)(int)(c.A * alpha);
 
@@ -629,125 +625,6 @@ namespace NvgSharp
 				__expandStroke(strokeWidth * 0.5f, 0.0f, state.LineCap, state.LineJoin, state.MiterLimit);
 			_renderCache.RenderStroke(ref strokePaint, ref state.Scissor, _fringeWidth, strokeWidth, _pathsCache);
 		}
-
-		void IFontStashRenderer2.DrawQuad(Texture2D texture,
-			ref VertexPositionColorTexture topLeft, ref VertexPositionColorTexture topRight,
-			ref VertexPositionColorTexture bottomLeft, ref VertexPositionColorTexture bottomRight)
-		{
-			if (_lastTextTexture != null && _lastTextTexture != texture)
-			{
-				FlushText();
-			}
-
-			var state = _currentState;
-
-			float px, py;
-			state.Transform.TransformPoint(out px, out py, topLeft.Position.X, topLeft.Position.Y);
-			var newTopLeft = new Vertex(px, py, topLeft.TextureCoordinate.X, topLeft.TextureCoordinate.Y);
-
-			state.Transform.TransformPoint(out px, out py, topRight.Position.X, topRight.Position.Y);
-			var newTopRight = new Vertex(px, py, topRight.TextureCoordinate.X, topRight.TextureCoordinate.Y);
-
-			state.Transform.TransformPoint(out px, out py, bottomRight.Position.X, bottomRight.Position.Y);
-			var newBottomRight = new Vertex(px, py, bottomRight.TextureCoordinate.X, bottomRight.TextureCoordinate.Y);
-
-			state.Transform.TransformPoint(out px, out py, bottomLeft.Position.X, bottomLeft.Position.Y);
-			var newBottomLeft = new Vertex(px, py, bottomLeft.TextureCoordinate.X, bottomLeft.TextureCoordinate.Y);
-
-			_renderCache.AddVertex(newTopLeft);
-			_renderCache.AddVertex(newBottomRight);
-			_renderCache.AddVertex(newTopRight);
-			_renderCache.AddVertex(newTopLeft);
-			_renderCache.AddVertex(newBottomLeft);
-			_renderCache.AddVertex(newBottomRight);
-
-			_lastTextTexture = texture;
-		}
-
-		private void FlushText()
-		{
-			if (_lastTextTexture == null || _lastVertexOffset == _renderCache.VertexCount)
-			{
-				return;
-			}
-
-			var state = _currentState;
-			var paint = state.Fill;
-			paint.Image = _lastTextTexture;
-
-			MultiplyAlpha(ref paint.InnerColor, state.Alpha);
-			MultiplyAlpha(ref paint.OuterColor, state.Alpha);
-
-			_renderCache.RenderTriangles(ref paint, ref state.Scissor, _fringeWidth, _lastVertexOffset, _renderCache.VertexCount - _lastVertexOffset);
-
-			_lastVertexOffset = _renderCache.VertexCount;
-			_lastTextTexture = null;
-		}
-
-		private void Text(SpriteFontBase font, TextSource text, float x, float y,
-			TextHorizontalAlignment horizontalAlignment, TextVerticalAlignment verticalAlignment,
-			float layerDepth, float characterSpacing, float lineSpacing)
-		{
-			if (text.IsNull)
-			{
-				return;
-			}
-
-			_lastVertexOffset = _renderCache.VertexCount;
-
-			if (horizontalAlignment != TextHorizontalAlignment.Left)
-			{
-				Vector2 sz;
-				if (text.StringText != null)
-				{
-					sz = font.MeasureString(text.StringText);
-				}
-				else
-				{
-					sz = font.MeasureString(text.StringBuilderText);
-				}
-
-				if (horizontalAlignment == TextHorizontalAlignment.Center)
-				{
-					x -= sz.X / 2.0f;
-				}
-				else if (horizontalAlignment == TextHorizontalAlignment.Right)
-				{
-					x -= sz.X;
-				}
-			}
-
-			if (verticalAlignment == TextVerticalAlignment.Center)
-			{
-				y -= font.LineHeight / 2.0f;
-			} else if (verticalAlignment == TextVerticalAlignment.Bottom)
-			{
-				y -= font.LineHeight;
-			}
-
-			if (text.StringText != null)
-			{
-				font.DrawText(this, text.StringText, new Vector2(x, y), Color.White,
-					layerDepth: layerDepth, characterSpacing: characterSpacing, lineSpacing: lineSpacing);
-			}
-			else
-			{
-				font.DrawText(this, text.StringBuilderText, new Vector2(x, y), Color.White,
-					layerDepth: layerDepth, characterSpacing: characterSpacing, lineSpacing: lineSpacing);
-			}
-
-			FlushText();
-		}
-
-		public void Text(SpriteFontBase font, string text, float x, float y,
-			TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
-			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f) => 
-			Text(font, new TextSource(text), x, y, horizontalAlignment, verticalAlignment, layerDepth, characterSpacing, lineSpacing);
-
-		public void Text(SpriteFontBase font, StringBuilder text, float x, float y,
-			TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
-			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
-			Text(font, new TextSource(text), x, y, horizontalAlignment, verticalAlignment, layerDepth, characterSpacing, lineSpacing);
 
 		private void SetDevicePixelRatio(float ratio)
 		{

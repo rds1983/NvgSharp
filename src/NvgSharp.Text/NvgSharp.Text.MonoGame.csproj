@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>NvgSharp.Text for MonoGame</Description>
+    <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
+    <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>     
+
+  <ItemGroup>
+    <PackageReference Include="FontStashSharp.MonoGame" Version="$(FontStashSharpVersion)" />
+    <PackageReference Include="MonoGame.Framework.Portable" Version="3.7.1.189" PrivateAssets="All" />
+  </ItemGroup>     
+
+  <ItemGroup>
+    <ProjectReference Include="..\XNA\NvgSharp.MonoGame.csproj" />
+  </ItemGroup>
+</Project>

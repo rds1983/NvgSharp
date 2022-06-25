@@ -67,6 +67,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\NvgSharp.Text\NvgSharp.Text.MonoGame.csproj" />
       <ProjectReference Include="..\..\src\XNA\NvgSharp.MonoGame.csproj" />
     </ItemGroup>
 </Project>

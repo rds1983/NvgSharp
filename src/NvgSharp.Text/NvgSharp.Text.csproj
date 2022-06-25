@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Platform-Agnostic Version of NvgSharp</Description>
+    <Description>Platform-Agnostic Version of NvgSharp.Text</Description>
     <DefineConstants>$(DefineConstants);PLATFORM_AGNOSTIC</DefineConstants>
   </PropertyGroup>
   
@@ -10,6 +10,10 @@
   </PropertyGroup>   
   
   <ItemGroup>
-    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+    <PackageReference Include="FontStashSharp" Version="$(FontStashSharpVersion)" />
+  </ItemGroup>   
+  
+  <ItemGroup>
+    <ProjectReference Include="..\NvgSharp\NvgSharp.csproj" />
   </ItemGroup>
 </Project>

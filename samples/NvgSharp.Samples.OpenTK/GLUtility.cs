@@ -2,7 +2,7 @@
 using System;
 
 
-namespace NvgSharp.Samples.OpenTK
+namespace NvgSharp.Samples
 {
 	internal static class GLUtility
 	{

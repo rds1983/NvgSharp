@@ -2,7 +2,7 @@ using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Runtime.InteropServices;
 
-namespace NvgSharp.Samples.OpenTK
+namespace NvgSharp.Samples
 {
 	public class BufferObject<T> : IDisposable where T : unmanaged
 	{

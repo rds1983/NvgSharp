@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvgSharp.MonoGame", "..\src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvgSharp.Samples.Demo.MonoGame", "..\samples\NvgSharp.Samples.Demo\NvgSharp.Samples.Demo.MonoGame.csproj", "{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvgSharp.Text.MonoGame", "..\src\NvgSharp.Text\NvgSharp.Text.MonoGame.csproj", "{29F04FB2-43D8-4BC8-A92F-07E62F4934E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D2336D8-D4A4-4CF0-A86C-4B904B3EF428}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29F04FB2-43D8-4BC8-A92F-07E62F4934E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29F04FB2-43D8-4BC8-A92F-07E62F4934E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29F04FB2-43D8-4BC8-A92F-07E62F4934E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29F04FB2-43D8-4BC8-A92F-07E62F4934E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

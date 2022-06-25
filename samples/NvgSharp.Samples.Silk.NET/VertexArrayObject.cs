@@ -1,7 +1,7 @@
 ﻿using Silk.NET.OpenGL;
 using System;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples
 {
 	public class VertexArrayObject: IDisposable
 	{

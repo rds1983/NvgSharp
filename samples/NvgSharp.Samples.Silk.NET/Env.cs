@@ -1,6 +1,6 @@
 ﻿using Silk.NET.OpenGL;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples
 {
 	internal static class Env
 	{

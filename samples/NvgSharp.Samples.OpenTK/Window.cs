@@ -4,7 +4,7 @@ using OpenTK.Windowing.Desktop;
 using System;
 using System.Diagnostics;
 
-namespace NvgSharp.Samples.OpenTK
+namespace NvgSharp.Samples
 {
 	internal class Window : GameWindow
 	{

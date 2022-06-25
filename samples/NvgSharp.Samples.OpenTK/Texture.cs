@@ -2,7 +2,7 @@ using OpenTK.Graphics.OpenGL4;
 using System;
 using System.Drawing;
 
-namespace NvgSharp.Samples.OpenTK
+namespace NvgSharp.Samples
 {
 	public unsafe class Texture : IDisposable
 	{

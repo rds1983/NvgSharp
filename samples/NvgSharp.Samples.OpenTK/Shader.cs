@@ -5,7 +5,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 
-namespace NvgSharp.Samples.OpenTK
+namespace NvgSharp.Samples
 {
 	public class Shader : IDisposable
 	{

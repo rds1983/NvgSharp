@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 using Silk.NET.OpenGL;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples
 {
 	public class Shader : IDisposable
 	{

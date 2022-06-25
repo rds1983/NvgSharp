@@ -5,7 +5,7 @@ using Silk.NET.Maths;
 using System;
 using System.Diagnostics;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples
 {
 	class Program
 	{

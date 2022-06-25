@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>NvgSharp.Text.FNA</PackageId>
+    <AssemblyName>NvgSharp.Text.FNA</AssemblyName>
+    <Description>NvgSharp.Text for FNA</Description>
+    <DefineConstants>$(DefineConstants);FNA</DefineConstants>
+    <OutputPath>bin\FNA\$(Configuration)</OutputPath>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\FontStashSharp\src\XNA\FontStashSharp.FNA.csproj" />
+    <ProjectReference Include="..\XNA\NvgSharp.FNA.csproj" />
+  </ItemGroup>
+</Project>

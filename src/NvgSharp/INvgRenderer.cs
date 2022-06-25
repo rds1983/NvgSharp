@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 #elif STRIDE
 using Stride.Graphics;
 #else
-using FontStashSharp.Interfaces;
+using System.Drawing;
 using System.Numerics;
 using Matrix = System.Numerics.Matrix4x4;
 using Texture2D = System.Object;
@@ -69,7 +69,27 @@ namespace NvgSharp
 #if MONOGAME || FNA || STRIDE
 		GraphicsDevice GraphicsDevice { get; }
 #else
-		ITexture2DManager TextureManager { get; }
+		/// <summary>
+		/// Creates a texture of the specified size
+		/// </summary>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		/// <returns></returns>
+		object CreateTexture(int width, int height);
+
+		/// <summary>
+		/// Returns size of the specified texture
+		/// </summary>
+		/// <param name="texture"></param>
+		/// <returns></returns>
+		Point GetTextureSize(object texture);
+
+		/// <summary>
+		/// Sets RGBA data at the specified bounds
+		/// </summary>
+		/// <param name="bounds"></param>
+		/// <param name="data"></param>
+		void SetTextureData(object texture, Rectangle bounds, byte[] data);
 #endif
 
 		void Draw(Vector2 viewportSize, float devicePixelRatio, IEnumerable<CallInfo> calls, Vertex[] vertexes);

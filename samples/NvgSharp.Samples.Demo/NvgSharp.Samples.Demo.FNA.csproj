@@ -5,9 +5,6 @@
     <OutputPath>bin\FNA\$(Configuration)</OutputPath>
     <DefineConstants>$(DefineConstants);FNA</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\XNA\NvgSharp.FNA.csproj" />
-  </ItemGroup>
     <ItemGroup>
       <None Include="..\Assets\images\image1.jpg" Link="Assets\images\image1.jpg">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -63,5 +60,10 @@
       <None Include="..\Assets\Roboto-Regular.ttf" Link="Assets\Roboto-Regular.ttf">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\NvgSharp.Text\NvgSharp.Text.FNA.csproj" />
+      <ProjectReference Include="..\..\src\XNA\NvgSharp.FNA.csproj" />
     </ItemGroup>
 </Project>

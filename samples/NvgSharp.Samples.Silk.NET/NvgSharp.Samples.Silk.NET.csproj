@@ -76,6 +76,7 @@
     </ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\src\NvgSharp.Text\NvgSharp.Text.csproj" />
 		<ProjectReference Include="..\..\src\NvgSharp\NvgSharp.csproj" />
 		<None Update="Shader.frag">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

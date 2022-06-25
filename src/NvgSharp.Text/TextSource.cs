@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace FontStashSharp
+namespace NvgSharp
 {
 	internal struct TextSource
 	{

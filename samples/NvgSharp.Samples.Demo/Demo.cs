@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Stride.Core.Mathematics;
 #else
 using System.Drawing;
-using Texture2D = System.Object;
+using Texture2D = NvgSharp.Samples.Texture;
 #endif
 
 namespace NvgSharp.Samples
@@ -57,8 +57,9 @@ namespace NvgSharp.Samples
 					imageResult = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 				}
 
-				images[i] = vg.TextureManager.CreateTexture(imageResult.Width, imageResult.Height);
-				vg.TextureManager.SetTextureData(images[i], new Rectangle(0, 0, imageResult.Width, imageResult.Height), imageResult.Data);
+				var texture = new Texture(imageResult.Width, imageResult.Height);
+				texture.SetData(new Rectangle(0, 0, imageResult.Width, imageResult.Height), imageResult.Data);
+				images[i] = texture;
 #endif
 			}
 
@@ -529,14 +530,8 @@ namespace NvgSharp.Samples
 				tx += (i % 2) * (thumb + 10);
 				ty += (i / 2) * (thumb + 10);
 
-#if MONOGAME || FNA || STRIDE
 				imgw = images[i].Width;
 				imgh = images[i].Height;
-#else
-				var sz = vg.TextureManager.GetTextureSize(images[i]);
-				imgw = sz.X;
-				imgh = sz.Y;
-#endif
 
 				if (imgw < imgh)
 				{

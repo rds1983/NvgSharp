@@ -1,9 +1,10 @@
 ﻿using FontStashSharp.Interfaces;
 using OpenTK.Graphics.OpenGL4;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 
-namespace NvgSharp.Samples.OpenTK
+namespace NvgSharp.Samples
 {
 	internal class Renderer : INvgRenderer
 	{
@@ -14,11 +15,7 @@ namespace NvgSharp.Samples.OpenTK
 		private readonly VertexArrayObject _vao;
 		private readonly bool _edgeAntiAlias, _stencilStrokes;
 
-		private readonly Texture2DManager _textureManager = new Texture2DManager();
-
 		public bool EdgeAntiAlias => _edgeAntiAlias;
-
-		public ITexture2DManager TextureManager => _textureManager;
 
 		public unsafe Renderer(bool edgeAntiAlias = true, bool stencilStrokes = true)
 		{
@@ -50,6 +47,20 @@ namespace NvgSharp.Samples.OpenTK
 			_vao.Dispose();
 			_vertexBuffer.Dispose();
 			_shader.Dispose();
+		}
+
+		public object CreateTexture(int width, int height) => new Texture(width, height);
+
+		public Point GetTextureSize(object texture)
+		{
+			var t = (Texture)texture;
+			return new Point(t.Width, t.Height);
+		}
+
+		public void SetTextureData(object texture, Rectangle bounds, byte[] data)
+		{
+			var t = (Texture)texture;
+			t.SetData(bounds, data);
 		}
 
 		private void SetUniform(ref UniformInfo uniform)

@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Numerics;
 
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples
 {
 	internal static class GLUtility
 	{

@@ -2,7 +2,7 @@ using Silk.NET.OpenGL;
 using System;
 using System.Runtime.InteropServices;
 
-namespace NvgSharp.Samples.SilkNET
+namespace NvgSharp.Samples
 {
 	public class BufferObject<T> : IDisposable where T : unmanaged
 	{

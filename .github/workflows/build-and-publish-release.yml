@@ -22,6 +22,10 @@ jobs:
       run: dotnet test build\NvgSharp.MonoGame.sln
     - name: Install NuGet
       uses: NuGet/setup-nuget@v1
+    - name: Publish NvgSharp.Text.MonoGame to NuGet
+      run: nuget.exe push src\NvgSharp.Text\bin\MonoGame\Release\NvgSharp.Text.MonoGame.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json
+    - name: Publish NvgSharp.Text to NuGet
+      run: nuget.exe push src\NvgSharp.Text\bin\Release\NvgSharp.Text.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json
     - name: Publish NvgSharp.MonoGame to NuGet
       run: nuget.exe push src\XNA\bin\MonoGame\Release\NvgSharp.MonoGame.*.nupkg ${{secrets.NUGET_APIKEY}} -Source https://api.nuget.org/v3/index.json
     - name: Publish NvgSharp to NuGet
