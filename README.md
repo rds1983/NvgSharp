@@ -11,6 +11,13 @@ C# port of https://github.com/memononen/nanovg
 
 Additional documentation is available at https://github.com/rds1983/NvgSharp/wiki
 
+## Sponsor
+https://www.patreon.com/rds1983
+
+https://boosty.to/rds1983
+
+bitcoin: 3GeKFcv8X1cn8WqH1mr8i7jgPBkQjQuyN1
+
 # Screenshot
 ![](/images/screenshot.png)
 
