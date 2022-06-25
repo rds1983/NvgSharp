@@ -11,6 +11,13 @@ C# port of https://github.com/memononen/nanovg
 
 Additional documentation is available at https://github.com/rds1983/NvgSharp/wiki
 
+## Support
+[Discord](https://discord.gg/ZeHxhCY)
+
+## Building From Source Code
+1. Clone this repo.
+2. Open a solution from the "build" folder.
+
 ## Sponsor
 https://www.patreon.com/rds1983
 
