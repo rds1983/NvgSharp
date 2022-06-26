@@ -100,9 +100,7 @@ namespace NvgSharp
 				_lastTextTexture = null;
 			}
 
-			public void Text(SpriteFontBase font, TextSource text, float x, float y,
-				TextHorizontalAlignment horizontalAlignment, TextVerticalAlignment verticalAlignment,
-				float layerDepth, float characterSpacing, float lineSpacing)
+			public void Text(SpriteFontBase font, TextSource text, float x, float y, float layerDepth, float characterSpacing, float lineSpacing)
 			{
 				if (text.IsNull)
 				{
@@ -110,37 +108,6 @@ namespace NvgSharp
 				}
 
 				_lastVertexOffset = _context._renderCache.VertexCount;
-
-				if (horizontalAlignment != TextHorizontalAlignment.Left)
-				{
-					Vector2 sz;
-					if (text.StringText != null)
-					{
-						sz = font.MeasureString(text.StringText);
-					}
-					else
-					{
-						sz = font.MeasureString(text.StringBuilderText);
-					}
-
-					if (horizontalAlignment == TextHorizontalAlignment.Center)
-					{
-						x -= sz.X / 2.0f;
-					}
-					else if (horizontalAlignment == TextHorizontalAlignment.Right)
-					{
-						x -= sz.X;
-					}
-				}
-
-				if (verticalAlignment == TextVerticalAlignment.Center)
-				{
-					y -= font.LineHeight / 2.0f;
-				}
-				else if (verticalAlignment == TextVerticalAlignment.Bottom)
-				{
-					y -= font.LineHeight;
-				}
 
 				if (text.StringText != null)
 				{
@@ -157,7 +124,6 @@ namespace NvgSharp
 			}
 		}
 		private static void Text(this NvgContext context, SpriteFontBase font, TextSource text, float x, float y,
-			TextHorizontalAlignment horizontalAlignment, TextVerticalAlignment verticalAlignment,
 			float layerDepth, float characterSpacing, float lineSpacing)
 		{
 			TextRenderer textRenderer;
@@ -169,18 +135,15 @@ namespace NvgSharp
 				textRenderer = (TextRenderer)context._textRenderer;
 			}
 
-			textRenderer.Text(font, text, x, y, horizontalAlignment, verticalAlignment, layerDepth, characterSpacing, lineSpacing);
+			textRenderer.Text(font, text, x, y, layerDepth, characterSpacing, lineSpacing);
 		}
 
-
 		public static void Text(this NvgContext context, SpriteFontBase font, string text, float x, float y,
-			TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
 			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
-			Text(context, font, new TextSource(text), x, y, horizontalAlignment, verticalAlignment, layerDepth, characterSpacing, lineSpacing);
+			Text(context, font, new TextSource(text), x, y, layerDepth, characterSpacing, lineSpacing);
 
 		public static void Text(this NvgContext context, SpriteFontBase font, StringBuilder text, float x, float y,
-			TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
 			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f) =>
-			Text(context, font, new TextSource(text), x, y, horizontalAlignment, verticalAlignment, layerDepth, characterSpacing, lineSpacing);
+			Text(context, font, new TextSource(text), x, y, layerDepth, characterSpacing, lineSpacing);
 	}
 }

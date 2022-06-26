@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <Compile Include="..\NvgSharp.Samples.Demo\Demo.cs" Link="Demo.cs" />
+      <Compile Include="..\NvgSharp.Samples.Demo\NvgExtensions.cs" Link="NvgExtensions.cs" />
       <Compile Include="..\NvgSharp.Samples.Demo\PerfGraph.cs" Link="PerfGraph.cs" />
       <Compile Include="..\NvgSharp.Samples.Demo\Utility.cs" Link="Utility.cs" />
     </ItemGroup>
