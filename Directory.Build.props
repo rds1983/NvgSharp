@@ -5,7 +5,7 @@
     <PackageLicenseExpression>Zlib</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/rds1983/NvgSharp</PackageProjectUrl>
     <RootNamespace>NvgSharp</RootNamespace>
-    <Version>0.6.1</Version>
+    <Version>0.6.2</Version>
     <FontStashSharpVersion>1.1.5</FontStashSharpVersion>
   </PropertyGroup>
 </Project>
