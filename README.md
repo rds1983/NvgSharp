@@ -9,7 +9,7 @@ C# port of https://github.com/memononen/nanovg
 
 [Using NvgSharp in Generic Game Engine](https://github.com/rds1983/NvgSharp/wiki/Using-NvgSharp-in-Generic-Game-Engine)
 
-Additional documentation is available at https://github.com/rds1983/NvgSharp/wiki
+[Text Rendering](https://github.com/rds1983/NvgSharp/wiki/Text-Rendering)
 
 ## Support
 [Discord](https://discord.gg/ZeHxhCY)
