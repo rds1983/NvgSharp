@@ -32,5 +32,6 @@ bitcoin: 3GeKFcv8X1cn8WqH1mr8i7jgPBkQjQuyN1
 * [nanovg](https://github.com/memononen/nanovg)
 * [MonoGame](http://www.monogame.net/)
 * [FNA](https://github.com/FNA-XNA/FNA)
+* [OpenTK](https://github.com/opentk/opentk)
 * [Silk.NET](https://github.com/dotnet/Silk.NET)
 * [stb](https://github.com/nothings/stb)
