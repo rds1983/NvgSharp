@@ -2,7 +2,7 @@
 [![NuGet](https://img.shields.io/nuget/v/NvgSharp.MonoGame.svg)](https://www.nuget.org/packages/NvgSharp.MonoGame/) [![Build status](https://ci.appveyor.com/api/projects/status/r4cd8vcao5i84xo7?svg=true)](https://ci.appveyor.com/project/RomanShapiro/nvgsharp)
 [![Chat](https://img.shields.io/discord/628186029488340992.svg)](https://discord.gg/ZeHxhCY)
 
-C# port of https://github.com/memononen/nanovg
+NvgSharp is 2D vector graphics library in pure C#.
 
 # Usage
 [Using NvgSharp in MonoGame or FNA](https://github.com/rds1983/NvgSharp/wiki/Using-NvgSharp-in-MonoGame-or-FNA)
