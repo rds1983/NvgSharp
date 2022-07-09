@@ -19,7 +19,6 @@ namespace NvgSharp
 
 		public readonly ArrayBuffer<Vertex> VertexArray = new ArrayBuffer<Vertex>(MAX_VERTICES);
 		public readonly List<CallInfo> Calls = new List<CallInfo>();
-		public Vector2 ViewportSize;
 		public float DevicePixelRatio;
 
 		public int VertexCount => VertexArray.Count;

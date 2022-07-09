@@ -1,5 +1,4 @@
-﻿using FontStashSharp.Interfaces;
-using Silk.NET.OpenGL;
+﻿using Silk.NET.OpenGL;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
@@ -14,6 +13,7 @@ namespace NvgSharp.Samples
 		private BufferObject<Vertex> _vertexBuffer;
 		private readonly VertexArrayObject _vao;
 		private readonly bool _edgeAntiAlias, _stencilStrokes;
+		private readonly int[] _viewPortValues = new int[4];
 
 		public bool EdgeAntiAlias => _edgeAntiAlias;
 
@@ -242,7 +242,7 @@ namespace NvgSharp.Samples
 			call.DrawTriangles(PrimitiveType.Triangles);
 		}
 
-		public void Draw(Vector2 viewportSize, float devicePixelRatio, IEnumerable<CallInfo> calls, Vertex[] vertexes)
+		public void Draw(float devicePixelRatio, IEnumerable<CallInfo> calls, Vertex[] vertexes)
 		{
 			// Setup required GL state
 			Env.Gl.Enable(EnableCap.CullFace);
@@ -290,7 +290,17 @@ namespace NvgSharp.Samples
 			// Setup shader
 			_shader.Use();
 			_shader.SetUniform("tex", 0);
-			var transform = Matrix4x4.CreateOrthographicOffCenter(0, viewportSize.X, viewportSize.Y, 0, 0, -1);
+
+			unsafe
+			{
+				fixed (int* ptr = _viewPortValues)
+				{
+					Env.Gl.GetInteger(GLEnum.Viewport, 0, ptr);
+				}
+			}
+			GLUtility.CheckError();
+
+			var transform = Matrix4x4.CreateOrthographicOffCenter(0, _viewPortValues[2], _viewPortValues[3], 0, 0, -1);
 			_shader.SetUniform("transformMat", transform);
 
 			Env.Gl.BlendFunc(BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);

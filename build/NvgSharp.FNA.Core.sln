@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{578F4E7E-3DB4-4111-B6FD-831713726E4E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FNA.Core", "..\..\FNA\FNA.Core.csproj", "{F724B17F-09FB-46C2-A8E3-407FC7B0591F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.FNA.Core", "..\..\FontStashSharp\src\XNA\FontStashSharp.FNA.Core.csproj", "{30A915B3-D36B-42DE-8F1A-96808C5F9948}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvgSharp.FNA.Core", "..\src\XNA\NvgSharp.FNA.Core.csproj", "{267F26C4-E68A-443D-9794-689619F640AD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvgSharp.Text.FNA.Core", "..\src\NvgSharp.Text\NvgSharp.Text.FNA.Core.csproj", "{F81AF955-0126-4B2F-9120-D011B53B5F49}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvgSharp.Samples.Demo.FNA.Core", "..\samples\NvgSharp.Samples.Demo\NvgSharp.Samples.Demo.FNA.Core.csproj", "{A213D290-ED16-4E5F-9181-8B5DD453E558}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F724B17F-09FB-46C2-A8E3-407FC7B0591F}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{F724B17F-09FB-46C2-A8E3-407FC7B0591F}.Debug|Any CPU.Build.0 = Debug|x64
+		{F724B17F-09FB-46C2-A8E3-407FC7B0591F}.Release|Any CPU.ActiveCfg = Release|x64
+		{F724B17F-09FB-46C2-A8E3-407FC7B0591F}.Release|Any CPU.Build.0 = Release|x64
+		{30A915B3-D36B-42DE-8F1A-96808C5F9948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30A915B3-D36B-42DE-8F1A-96808C5F9948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30A915B3-D36B-42DE-8F1A-96808C5F9948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30A915B3-D36B-42DE-8F1A-96808C5F9948}.Release|Any CPU.Build.0 = Release|Any CPU
+		{267F26C4-E68A-443D-9794-689619F640AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{267F26C4-E68A-443D-9794-689619F640AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{267F26C4-E68A-443D-9794-689619F640AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{267F26C4-E68A-443D-9794-689619F640AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F81AF955-0126-4B2F-9120-D011B53B5F49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F81AF955-0126-4B2F-9120-D011B53B5F49}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F81AF955-0126-4B2F-9120-D011B53B5F49}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F81AF955-0126-4B2F-9120-D011B53B5F49}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A213D290-ED16-4E5F-9181-8B5DD453E558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A213D290-ED16-4E5F-9181-8B5DD453E558}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A213D290-ED16-4E5F-9181-8B5DD453E558}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A213D290-ED16-4E5F-9181-8B5DD453E558}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A213D290-ED16-4E5F-9181-8B5DD453E558} = {578F4E7E-3DB4-4111-B6FD-831713726E4E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A9C9D369-EE58-4E9D-B9FE-63023B644741}
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Myra.UIEditor\Myra.UIEditor.csproj
+	EndGlobalSection
+EndGlobal

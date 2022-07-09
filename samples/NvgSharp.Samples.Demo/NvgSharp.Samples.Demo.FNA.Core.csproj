@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net461</TargetFramework>
-    <OutputPath>bin\FNA\$(Configuration)</OutputPath>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
     <DefineConstants>$(DefineConstants);FNA</DefineConstants>
   </PropertyGroup>
     <ItemGroup>
@@ -63,7 +63,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\NvgSharp.Text\NvgSharp.Text.FNA.csproj" />
-      <ProjectReference Include="..\..\src\XNA\NvgSharp.FNA.csproj" />
+      <ProjectReference Include="..\..\src\NvgSharp.Text\NvgSharp.Text.FNA.Core.csproj" />
+      <ProjectReference Include="..\..\src\XNA\NvgSharp.FNA.Core.csproj" />
     </ItemGroup>
 </Project>

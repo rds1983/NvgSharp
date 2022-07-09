@@ -57,15 +57,23 @@ namespace NvgSharp
 
 				float px, py;
 				state.Transform.TransformPoint(out px, out py, topLeft.Position.X, topLeft.Position.Y);
+				px = (int)px;
+				py = (int)py;
 				var newTopLeft = new Vertex(px, py, topLeft.TextureCoordinate.X, topLeft.TextureCoordinate.Y);
 
 				state.Transform.TransformPoint(out px, out py, topRight.Position.X, topRight.Position.Y);
+				px = (int)px;
+				py = (int)py;
 				var newTopRight = new Vertex(px, py, topRight.TextureCoordinate.X, topRight.TextureCoordinate.Y);
 
 				state.Transform.TransformPoint(out px, out py, bottomRight.Position.X, bottomRight.Position.Y);
+				px = (int)px;
+				py = (int)py;
 				var newBottomRight = new Vertex(px, py, bottomRight.TextureCoordinate.X, bottomRight.TextureCoordinate.Y);
 
 				state.Transform.TransformPoint(out px, out py, bottomLeft.Position.X, bottomLeft.Position.Y);
+				px = (int)px;
+				py = (int)py;
 				var newBottomLeft = new Vertex(px, py, bottomLeft.TextureCoordinate.X, bottomLeft.TextureCoordinate.Y);
 
 				var renderCache = _context._renderCache;

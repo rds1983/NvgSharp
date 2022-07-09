@@ -114,7 +114,7 @@ namespace NvgSharp
 				_techniques[(int)param] = _effect.Techniques[param.ToString()];
 		}
 
-		public void Draw(Vector2 viewportSize, float devicePixelRatio, IEnumerable<CallInfo> calls, Vertex[] vertexes)
+		public void Draw(float devicePixelRatio, IEnumerable<CallInfo> calls, Vertex[] vertexes)
 		{
 			try
 			{
@@ -130,7 +130,7 @@ namespace NvgSharp
 
 				_vertexArray = vertexes;
 
-				var transform = Matrix.CreateOrthographicOffCenter(0, viewportSize.X, viewportSize.Y, 0, 0, -1);
+				var transform = Matrix.CreateOrthographicOffCenter(0, _device.Viewport.Width, _device.Viewport.Height, 0, 0, -1);
 				_transformMatParam.SetValue(transform);
 
 				foreach (var call in calls)

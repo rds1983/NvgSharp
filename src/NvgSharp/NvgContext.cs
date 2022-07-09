@@ -31,7 +31,6 @@ namespace NvgSharp
 
 		private float _commandX;
 		private float _commandY;
-		private float _devicePxRatio;
 		private float _distTol;
 		private readonly bool _edgeAntiAlias;
 		private readonly Stack<NvgContextState> _savedStates = new Stack<NvgContextState>();
@@ -48,6 +47,19 @@ namespace NvgSharp
 
 		public bool EdgeAntiAlias => _edgeAntiAlias;
 		public bool StencilStrokes => _renderCache.StencilStrokes;
+
+		public float DevicePixelRatio
+		{
+			get => _renderCache.DevicePixelRatio;
+
+			set
+			{
+				_tessTol = 0.25f / value;
+				_distTol = 0.01f / value;
+				_fringeWidth = 1.0f / value;
+				_renderCache.DevicePixelRatio = value;
+			}
+		}
 
 #if MONOGAME || FNA || STRIDE
 		public GraphicsDevice GraphicsDevice => _renderer.GraphicsDevice;
@@ -66,22 +78,13 @@ namespace NvgSharp
 
 			_renderCache = new RenderCache(stencilStrokes);
 			ResetState();
-			SetDevicePixelRatio(1.0f);
+			DevicePixelRatio = 1.0f;
 		}
 
-		public void BeginFrame(float windowWidth, float windowHeight, float devicePixelRatio)
+		public void Flush()
 		{
-			ResetState();
-			SetDevicePixelRatio(devicePixelRatio);
-
-			_renderCache.ViewportSize = new Vector2(windowWidth, windowHeight);
-			_renderCache.DevicePixelRatio = devicePixelRatio;
+			_renderer.Draw(_renderCache.DevicePixelRatio, _renderCache.Calls, _renderCache.VertexArray.Array);
 			_renderCache.Reset();
-		}
-
-		public void EndFrame()
-		{
-			_renderer.Draw(_renderCache.ViewportSize, _renderCache.DevicePixelRatio, _renderCache.Calls, _renderCache.VertexArray.Array);
 		}
 
 		public void SaveState()
@@ -624,14 +627,6 @@ namespace NvgSharp
 			else
 				__expandStroke(strokeWidth * 0.5f, 0.0f, state.LineCap, state.LineJoin, state.MiterLimit);
 			_renderCache.RenderStroke(ref strokePaint, ref state.Scissor, _fringeWidth, strokeWidth, _pathsCache);
-		}
-
-		private void SetDevicePixelRatio(float ratio)
-		{
-			_tessTol = 0.25f / ratio;
-			_distTol = 0.01f / ratio;
-			_fringeWidth = 1.0f / ratio;
-			_devicePxRatio = ratio;
 		}
 
 		private void AppendCommand(Command command)

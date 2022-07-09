@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>NvgSharp.FNA</PackageId>
     <AssemblyName>NvgSharp.FNA</AssemblyName>
-    <Description>NvgSharp for FNA</Description>
+    <Description>NvgSharp for FNA.Core</Description>
     <DefineConstants>$(DefineConstants);FNA</DefineConstants>
-    <OutputPath>bin\FNA\$(Configuration)</OutputPath>
+    <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
   </PropertyGroup>
   
   <ItemGroup>
@@ -22,8 +22,8 @@
     <EmbeddedResource Include="Resources\Effect.fxb" />
     <EmbeddedResource Include="Resources\Effect_AA.fxb" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <ProjectReference Include="..\..\..\FNA\FNA.csproj" />
+    <ProjectReference Include="..\..\..\FNA\FNA.Core.csproj" />
   </ItemGroup>
 </Project>

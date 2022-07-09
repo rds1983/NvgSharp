@@ -8,6 +8,7 @@ namespace NvgSharp.Samples
 {
 	internal class Window : GameWindow
 	{
+		private Renderer _renderer;
 		private NvgContext nvgContext;
 		private PerfGraph _perfGraph;
 		private Demo demo;
@@ -39,7 +40,9 @@ namespace NvgSharp.Samples
 
 			GL.ClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-			nvgContext.BeginFrame(Size.X, Size.Y, 1.0f);
+
+
+			nvgContext.ResetState();
 
 			long currentTicks = gameTimer.Elapsed.Ticks;
 
@@ -53,7 +56,7 @@ namespace NvgSharp.Samples
 			demo.renderDemo(nvgContext, MousePosition.X, MousePosition.Y, Size.X, Size.Y, totalElapsedTime, false);
 			_perfGraph.Render(nvgContext, 5, 5);
 
-			nvgContext.EndFrame();
+			nvgContext.Flush();
 
 			SwapBuffers();
 		}

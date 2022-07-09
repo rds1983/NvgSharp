@@ -96,7 +96,7 @@ namespace NvgSharp.Samples.XNA
 
 			var mouseState = Mouse.GetState();
 
-			_context.BeginFrame(_graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, 1.0f);
+			_context.ResetState();
 
 			var t = (float)gameTime.TotalGameTime.TotalSeconds;
 			_demo.renderDemo(_context, 
@@ -109,7 +109,7 @@ namespace NvgSharp.Samples.XNA
 
 			_perfGraph.Render(_context, 5, 5);
 
-			_context.EndFrame();
+			_context.Flush();
 
 /*			var texture = ((XNARenderer)_context._renderer)._textures[8];
 

@@ -58,7 +58,7 @@ namespace NvgSharp.Samples
 			Env.Gl.ClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 			Env.Gl.Clear((uint)(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit));
 
-			nvgContext.BeginFrame(window.Size.X, window.Size.Y, 1.0f);
+			nvgContext.ResetState();
 
 			long currentTicks = gameTimer.Elapsed.Ticks;
 
@@ -73,7 +73,7 @@ namespace NvgSharp.Samples
 			demo.renderDemo(nvgContext, mousePos.X, mousePos.Y, window.Size.X, window.Size.Y, totalElapsedTime, false);
 			_perfGraph.Render(nvgContext, 5, 5);
 
-			nvgContext.EndFrame();
+			nvgContext.Flush();
 		}
 
 		private static void OnClose()
