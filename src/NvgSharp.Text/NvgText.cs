@@ -11,6 +11,7 @@ using Stride.Core.Mathematics;
 using System.Numerics;
 using System.Drawing;
 using Texture2D = System.Object;
+using Color = FontStashSharp.FSColor;
 #endif
 
 namespace NvgSharp
