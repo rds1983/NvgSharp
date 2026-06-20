@@ -10,7 +10,7 @@
   </PropertyGroup>   
   
   <ItemGroup>
-    <PackageReference Include="FontStashSharp" Version="$(FontStashSharpVersion)" />
+    <PackageReference Include="FontStashSharp.PlatformAgnostic" Version="1.5.6" />
   </ItemGroup>   
   
   <ItemGroup>

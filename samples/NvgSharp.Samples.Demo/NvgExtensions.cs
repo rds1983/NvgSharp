@@ -1,6 +1,16 @@
 ﻿using FontStashSharp;
 using System.Text;
 
+#if MONOGAME || FNA
+using Vector2 = Microsoft.Xna.Framework.Vector2;
+
+#elif STRIDE
+using Stride.Core.Mathematics;
+
+#else 
+using Vector2 = System.Numerics.Vector2;
+#endif
+
 namespace NvgSharp
 {
 	public enum TextHorizontalAlignment
@@ -41,9 +51,10 @@ namespace NvgSharp
 
 	internal static class NvgExtensions
 	{
-		public static void TextAligned(this NvgContext context, SpriteFontBase font, string text, float x, float y,
+		public static void TextAligned(this NvgContext context, SpriteFontBase font, string text, float x, float y, Vector2 scale,
 			TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
-			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f)
+			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f, FontSystemEffect effect = FontSystemEffect.Stroked,
+            int effectAmount = 0)
 		{
 			if (string.IsNullOrEmpty(text))
 			{
@@ -72,12 +83,13 @@ namespace NvgSharp
 				y -= font.LineHeight;
 			}
 
-			context.Text(font, text, x, y, layerDepth, characterSpacing, lineSpacing);
+			context.Text(font, text, x, y, scale, layerDepth, characterSpacing, lineSpacing, effect, effectAmount);
 		}
 
-		public static void TextAligned(this NvgContext context, SpriteFontBase font, StringBuilder text, float x, float y,
-			TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
-			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f)
+		public static void TextAligned(this NvgContext context, SpriteFontBase font, StringBuilder text, float x, float y, Vector2 scale,
+            TextHorizontalAlignment horizontalAlignment = TextHorizontalAlignment.Left, TextVerticalAlignment verticalAlignment = TextVerticalAlignment.Top,
+			float layerDepth = 0.0f, float characterSpacing = 0.0f, float lineSpacing = 0.0f, FontSystemEffect effect = FontSystemEffect.Stroked,
+            int effectAmount = 0)
 		{
 			if (text == null || text.Length == 0)
 			{
@@ -106,7 +118,7 @@ namespace NvgSharp
 				y -= font.LineHeight;
 			}
 
-			context.Text(font, text, x, y, layerDepth, characterSpacing, lineSpacing);
+			context.Text(font, text, x, y, scale, layerDepth, characterSpacing, lineSpacing, effect, effectAmount);
 		}
 	}
 }

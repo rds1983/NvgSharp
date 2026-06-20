@@ -7,6 +7,7 @@ using Stride.Core.Mathematics;
 #else
 using System.Drawing;
 using Texture2D = System.Object;
+using Vector2 = System.Numerics.Vector2;
 #endif
 
 namespace NvgSharp.Samples
@@ -114,7 +115,7 @@ namespace NvgSharp.Samples
 			{
 				var font = _fontSystem.GetFont(14);
 				vg.FillColor(Utility.FromRGBA(240, 240, 240, 192));
-				vg.TextAligned(font, _name, x + 3, y + 1, TextHorizontalAlignment.Left, TextVerticalAlignment.Top);
+				vg.TextAligned(font, _name, x + 3, y + 1, Vector2.One, TextHorizontalAlignment.Left, TextVerticalAlignment.Top);
 			}
 
 			if (_style == Style.GRAPH_RENDER_FPS)
@@ -122,26 +123,26 @@ namespace NvgSharp.Samples
 				var font = _fontSystem.GetFont(18);
 				vg.FillColor(Utility.FromRGBA(240, 240, 240, 255));
 				str = string.Format("{0:0.00} FPS", 1.0f / avg);
-				vg.TextAligned(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
+				vg.TextAligned(font, str, x + w - 3, y + 1, Vector2.One, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 
 				font = _fontSystem.GetFont(15);
 				vg.FillColor(Utility.FromRGBA(240, 240, 240, 160));
 				str = string.Format("{0:0.00} ms", avg * 1000.0f);
-				vg.TextAligned(font, str, x + w - 3, y + h - 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Bottom);
+				vg.TextAligned(font, str, x + w - 3, y + h - 1, Vector2.One, TextHorizontalAlignment.Right, TextVerticalAlignment.Bottom);
 			}
 			else if (_style == Style.GRAPH_RENDER_PERCENT)
 			{
 				var font = _fontSystem.GetFont(18);
 				vg.FillColor(Utility.FromRGBA(240, 240, 240, 255));
 				str = string.Format("{0:0.00} %%", avg);
-				vg.TextAligned(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
+				vg.TextAligned(font, str, x + w - 3, y + 1, Vector2.One, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 			}
 			else
 			{
 				var font = _fontSystem.GetFont(18);
 				vg.FillColor(Utility.FromRGBA(240, 240, 240, 255));
 				str = string.Format("{0:0.00} ms", avg * 1000.0f);
-				vg.TextAligned(font, str, x + w - 3, y + 1, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
+				vg.TextAligned(font, str, x + w - 3, y + 1, Vector2.One, TextHorizontalAlignment.Right, TextVerticalAlignment.Top);
 			}
 		}
 
