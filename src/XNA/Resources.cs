@@ -23,8 +23,6 @@ namespace NvgSharp
 				return _effectWithAASource;
 			}
 
-			var assembly = typeof(Resources).Assembly;
-
 			var name = "Effect";
 			if (edgeAntiAlias)
 			{
@@ -49,12 +47,16 @@ namespace NvgSharp
 			}
 
 #elif FNA
-			var path = "NvgSharp.Resources." + name + ".fxb";
+			var path = "NvgSharp.Resources.FNA.bin." + name + ".efb";
 #endif
 
 			byte[] result;
 
+
+
 			var ms = new MemoryStream();
+
+			var assembly = typeof(Resources).Assembly;
 			using (var stream = assembly.GetManifestResourceStream(path))
 			{
 				stream.CopyTo(ms);

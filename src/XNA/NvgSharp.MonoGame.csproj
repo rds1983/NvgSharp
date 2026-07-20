@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(MonogameTargetFramework)</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>NvgSharp for MonoGame</Description>
     <DefineConstants>$(DefineConstants);MONOGAME</DefineConstants>
     <OutputPath>bin\MonoGame\$(Configuration)</OutputPath>

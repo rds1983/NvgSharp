@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '8.0.x'
-    - name: Setup efscriptgen
+    - name: Install efscriptgen
       run: dotnet tool install --global efscriptgen
     - name: Install mgfxc
       run: dotnet tool install --global dotnet-mgfxc --version 3.8.1.303
@@ -32,9 +32,7 @@ jobs:
       run: src/XNA/Resources/MonoGameOGL/compile_all.bat
     - name: Build NvgSharp.MonoGame
       run: dotnet build build\NvgSharp.MonoGame.sln --configuration Release
-    - name: Test
-      run: dotnet test build\NvgSharp.MonoGame.sln
     - name: Build NvgSharp.PlatformAgnostic
       run: dotnet build build\NvgSharp.PlatformAgnostic.sln --configuration Release
-    - name: Install NuGet
-      uses: NuGet/setup-nuget@v1
+    - name: Test
+      run: dotnet test build\NvgSharp.MonoGame.sln

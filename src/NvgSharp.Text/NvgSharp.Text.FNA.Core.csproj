@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>NvgSharp.Text.FNA</PackageId>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>NvgSharp.Text.FNA</AssemblyName>
-    <Description>NvgSharp.Text for FNA.Core</Description>
     <DefineConstants>$(DefineConstants);FNA</DefineConstants>
     <OutputPath>bin\FNA.Core\$(Configuration)</OutputPath>
   </PropertyGroup>

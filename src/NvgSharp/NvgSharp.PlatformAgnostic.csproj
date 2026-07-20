@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(PATargetFramework)</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Description>Platform-Agnostic Version of NvgSharp</Description>
     <DefineConstants>$(DefineConstants);PLATFORM_AGNOSTIC</DefineConstants>
   </PropertyGroup>

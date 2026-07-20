@@ -8,7 +8,6 @@ namespace NvgSharp.Samples
 {
 	internal class Window : GameWindow
 	{
-		private Renderer _renderer;
 		private NvgContext nvgContext;
 		private PerfGraph _perfGraph;
 		private Demo demo;
