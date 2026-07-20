@@ -1,17 +1,15 @@
-﻿using System.IO;
-using System.Linq;
-using System.Reflection;
-using Microsoft.Xna.Framework.Graphics;
+﻿using System;
+using System.IO;
+
+#if MONOGAME
+using MonoGame.Framework.Utilities;
+#endif
 
 namespace NvgSharp
 {
 	internal static class Resources
 	{
 		private static byte[] _effectSource = null, _effectWithAASource = null;
-
-#if MONOGAME
-		private static bool? _isOpenGL;
-#endif
 
 		public static byte[] GetNvgEffectSource(bool edgeAntiAlias)
 		{
@@ -30,11 +28,26 @@ namespace NvgSharp
 			var name = "Effect";
 			if (edgeAntiAlias)
 			{
-				name += "_AA";
+				name += "_EDGE_AA";
 			}
 
 #if MONOGAME
-			var path = IsOpenGL?"NvgSharp.Resources." + name + ".ogl.mgfxo":"NvgSharp.Resources." + name + ".dx11.mgfxo";
+			string path;
+
+			switch(PlatformInfo.GraphicsBackend)
+			{
+				case GraphicsBackend.OpenGL:
+					path = "NvgSharp.Resources.MonoGameOGL.bin." + name + ".efb";
+					break;
+
+				case GraphicsBackend.DirectX:
+					path = "NvgSharp.Resources.MonoGameDX11.bin." + name + ".efb";
+					break;
+
+				default:
+					throw new NotSupportedException($"Graphics backend {PlatformInfo.GraphicsBackend} is not supported.");
+			}
+
 #elif FNA
 			var path = "NvgSharp.Resources." + name + ".fxb";
 #endif
@@ -59,22 +72,5 @@ namespace NvgSharp
 
 			return result;
 		}
-
-#if MONOGAME		
-		public static bool IsOpenGL
-		{
-			get
-			{
-				if (_isOpenGL == null)
-				{
-					_isOpenGL = (from f in typeof(GraphicsDevice).GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
-								 where f.Name == "glFramebuffer"
-								 select f).FirstOrDefault() != null;
-				}
-
-				return _isOpenGL.Value;
-			}
-		}
-#endif
 	}
 }

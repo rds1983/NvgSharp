@@ -259,3 +259,8 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+# Compiled effects
+src/XNA/Resources/FNA/
+src/XNA/Resources/MonoGameDX11/
+src/XNA/Resources/MonoGameOGL/

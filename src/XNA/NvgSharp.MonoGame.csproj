@@ -16,10 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Effect.dx11.mgfxo" />
-    <EmbeddedResource Include="Resources\Effect.ogl.mgfxo" />
-    <EmbeddedResource Include="Resources\Effect_AA.dx11.mgfxo" />
-    <EmbeddedResource Include="Resources\Effect_AA.ogl.mgfxo" />
+    <EmbeddedResource Include="Resources\MonoGameDX11\bin\Effect.efb" />
+    <EmbeddedResource Include="Resources\MonoGameDX11\bin\Effect_EDGE_AA.efb" />
+    <EmbeddedResource Include="Resources\MonoGameOGL\bin\Effect.efb" />
+    <EmbeddedResource Include="Resources\MonoGameOGL\bin\Effect_EDGE_AA.efb" />
   </ItemGroup>
 
   <ItemGroup>
