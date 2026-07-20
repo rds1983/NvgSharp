@@ -19,9 +19,13 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: '8.0.x'
     - name: Build NvgSharp
-      run: dotnet build build\NvgSharp.sln --configuration Release
+      run: dotnet build build\NvgSharp.PlatformAgnostic.sln --configuration Release
+    - name: Install mgfxc
+      run: dotnet tool install --global dotnet-mgfxc --version 3.8.1.303
+    - name: Build effects
+      run: src/XNA/Resources/buildMonoGame.bat
     - name: Build NvgSharp.MonoGame
       run: dotnet build build\NvgSharp.MonoGame.sln --configuration Release
     - name: Test

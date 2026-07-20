@@ -34,7 +34,7 @@ namespace NvgSharp
 			}
 
 #if MONOGAME
-				var path = IsOpenGL?"NvgSharp.Resources." + name + ".ogl.mgfxo":"NvgSharp.Resources." + name + ".dx11.mgfxo";
+			var path = IsOpenGL?"NvgSharp.Resources." + name + ".ogl.mgfxo":"NvgSharp.Resources." + name + ".dx11.mgfxo";
 #elif FNA
 			var path = "NvgSharp.Resources." + name + ".fxb";
 #endif
@@ -67,8 +67,7 @@ namespace NvgSharp
 			{
 				if (_isOpenGL == null)
 				{
-					_isOpenGL = (from f in typeof(GraphicsDevice).GetFields(BindingFlags.NonPublic |
-						 BindingFlags.Instance)
+					_isOpenGL = (from f in typeof(GraphicsDevice).GetFields(BindingFlags.NonPublic | BindingFlags.Instance)
 								 where f.Name == "glFramebuffer"
 								 select f).FirstOrDefault() != null;
 				}

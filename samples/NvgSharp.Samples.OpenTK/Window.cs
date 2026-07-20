@@ -41,7 +41,6 @@ namespace NvgSharp.Samples
 			GL.ClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
-
 			nvgContext.ResetState();
 
 			long currentTicks = gameTimer.Elapsed.Ticks;
@@ -65,7 +64,7 @@ namespace NvgSharp.Samples
 		{
 			base.OnResize(e);
 
-			GL.Viewport(0, 0, Size.X, Size.Y);
+			GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
 		}
 	}
 }

@@ -247,7 +247,7 @@ namespace NvgSharp.Samples
 			// Setup required GL state
 			GL.Enable(EnableCap.CullFace);
 			GLUtility.CheckError();
-			GL.CullFace(CullFaceMode.Back);
+			GL.CullFace(TriangleFace.Back);
 			GLUtility.CheckError();
 			GL.FrontFace(FrontFaceDirection.Ccw);
 			GLUtility.CheckError();

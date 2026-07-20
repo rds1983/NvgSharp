@@ -12,12 +12,7 @@
     <Compile Include="..\NvgSharp\**\*.cs" LinkBase="NvgSharp" />
     <Compile Remove="..\NvgSharp\obj\**\*.cs" LinkBase="NvgSharp" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <None Remove="Resources\Effect.fxb" />
-    <None Remove="Resources\Effect_AA.fxb" />
-  </ItemGroup>
-  
+
   <ItemGroup>
     <EmbeddedResource Include="Resources\Effect.fxb" />
     <EmbeddedResource Include="Resources\Effect_AA.fxb" />

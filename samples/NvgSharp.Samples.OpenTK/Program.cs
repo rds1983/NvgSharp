@@ -10,7 +10,7 @@ namespace NvgSharp.Samples
 		{
 			var nativeWindowSettings = new NativeWindowSettings()
 			{
-				Size = new Vector2i(1200, 800),
+				ClientSize = new Vector2i(1200, 800),
 				Title = "NvgSharp.Samples.OpenTK",
 				// This is needed to run on macos
 				Flags = ContextFlags.ForwardCompatible,

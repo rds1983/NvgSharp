@@ -84,14 +84,6 @@ namespace NvgSharp.Samples.XNA
 		{
 			GraphicsDevice.Clear(new Color(0.3f, 0.3f, 0.3f));
 
-			if (_graphics.PreferredBackBufferWidth != Window.ClientBounds.Width ||
-				_graphics.PreferredBackBufferHeight != Window.ClientBounds.Height)
-			{
-				_graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
-				_graphics.PreferredBackBufferHeight = Window.ClientBounds.Height;
-				_graphics.ApplyChanges();
-			}
-
 			// TODO: Add your drawing code here
 
 			var mouseState = Mouse.GetState();
@@ -99,23 +91,25 @@ namespace NvgSharp.Samples.XNA
 			_context.ResetState();
 
 			var t = (float)gameTime.TotalGameTime.TotalSeconds;
-			_demo.renderDemo(_context, 
-				mouseState.X, 
-				mouseState.Y, 
-				_graphics.PreferredBackBufferWidth, 
-				_graphics.PreferredBackBufferHeight, 
-				t, 
+
+			var vp = GraphicsDevice.Viewport;
+			_demo.renderDemo(_context,
+				mouseState.X,
+				mouseState.Y,
+				vp.Width,
+				vp.Height,
+				t,
 				false);
 
 			_perfGraph.Render(_context, 5, 5);
 
 			_context.Flush();
 
-/*			var texture = ((XNARenderer)_context._renderer)._textures[8];
+			/*			var texture = ((XNARenderer)_context._renderer)._textures[8];
 
-			_spriteBatch.Begin();
-			_spriteBatch.Draw(texture, Vector2.Zero, Color.White);
-			_spriteBatch.End();*/
+						_spriteBatch.Begin();
+						_spriteBatch.Draw(texture, Vector2.Zero, Color.White);
+						_spriteBatch.End();*/
 
 			base.Draw(gameTime);
 		}

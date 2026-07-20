@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <OutputType>Exe</OutputType>
+      <TargetFramework>$(PATargetFramework)</TargetFramework>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>
@@ -71,12 +71,14 @@
     </ItemGroup>
 
     <ItemGroup>
-		<PackageReference Include="OpenTK" Version="4.7.2" />
+		<PackageReference Include="OpenTK" Version="4.9.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\NvgSharp.Text\NvgSharp.Text.PlatformAgnostic.csproj" />
     </ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\NvgSharp.Text\NvgSharp.Text.csproj" />
-		<ProjectReference Include="..\..\src\NvgSharp\NvgSharp.csproj" />
 		<None Update="Shader.frag">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

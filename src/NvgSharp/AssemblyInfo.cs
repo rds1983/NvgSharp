@@ -5,5 +5,5 @@ using System.Runtime.CompilerServices;
 #elif FNA
 [assembly: InternalsVisibleTo("NvgSharp.Text.FNA", AllInternalsVisible = true)]
 #else
-[assembly: InternalsVisibleTo("NvgSharp.Text", AllInternalsVisible = true)]
+[assembly: InternalsVisibleTo("NvgSharp.Text.PlatformAgnostic", AllInternalsVisible = true)]
 #endif

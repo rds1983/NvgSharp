@@ -109,9 +109,9 @@ namespace NvgSharp.Samples
 			SetUniform(ref call.UniformInfo);
 
 			// set bindpoint for solid loc
-			Env.Gl.StencilOpSeparate(StencilFaceDirection.Front, StencilOp.Keep, StencilOp.Keep, StencilOp.IncrWrap);
+			Env.Gl.StencilOpSeparate(GLEnum.Front, StencilOp.Keep, StencilOp.Keep, StencilOp.IncrWrap);
 			GLUtility.CheckError();
-			Env.Gl.StencilOpSeparate(StencilFaceDirection.Back, StencilOp.Keep, StencilOp.Keep, StencilOp.DecrWrap);
+			Env.Gl.StencilOpSeparate(GLEnum.Back, StencilOp.Keep, StencilOp.Keep, StencilOp.DecrWrap);
 			GLUtility.CheckError();
 
 			Env.Gl.Disable(EnableCap.CullFace);
@@ -247,7 +247,7 @@ namespace NvgSharp.Samples
 			// Setup required GL state
 			Env.Gl.Enable(EnableCap.CullFace);
 			GLUtility.CheckError();
-			Env.Gl.CullFace(CullFaceMode.Back);
+			Env.Gl.CullFace(GLEnum.Back);
 			GLUtility.CheckError();
 			Env.Gl.FrontFace(FrontFaceDirection.Ccw);
 			GLUtility.CheckError();
